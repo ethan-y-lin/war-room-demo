@@ -1,11 +1,7 @@
 import * as THREE from 'three';
-import { ThreeMFLoader } from 'three/examples/jsm/Addons.js';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
-import * as dat from 'dat.gui';
-import stars from '../img/stars.jpg';
-import nebula from '../img/nebula.jpg';
 import { GLTFLoader } from 'three/examples/jsm/Addons.js';
-
+import * as dat from 'dat.gui';
 const roomUrl = new URL('../assets/warroom.glb', import.meta.url);
 const cleanRoomURL = new URL('../assets/roommodemodel.glb', import.meta.url);
 const renderer = new THREE.WebGLRenderer();
