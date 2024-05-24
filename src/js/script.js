@@ -15,7 +15,7 @@ const scene = new THREE.Scene();
 
 const camera = new THREE.PerspectiveCamera(
     45, 
-    window.innerWidth / window.innerHeight, 
+    canvas.offsetWidth / canvas.offsetHeight, 
     0.1, 
     1000
 );
@@ -111,7 +111,7 @@ renderer.render(scene, camera);
 renderer.setAnimationLoop(animate);
 
 window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.aspect = canvas.offsetWidth / canvas.offsetHeight;
     camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
 });
