@@ -5,11 +5,11 @@ import * as dat from 'dat.gui';
 const roomUrl = new URL('../assets/warroom.glb', import.meta.url);
 const cleanRoomURL = new URL('../assets/roommodemodel.glb', import.meta.url);
 const renderer = new THREE.WebGLRenderer();
-
+const canvas = document.getElementById('scene-container');
 renderer.shadowMap.enabled = true;
-
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
+console.log(canvas);
+renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
+canvas.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
 
@@ -109,3 +109,9 @@ function animate(time) {
 
 renderer.render(scene, camera);
 renderer.setAnimationLoop(animate);
+
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
