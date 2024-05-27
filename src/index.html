@@ -6,12 +6,38 @@
     <title>War Room Demo</title>
     <link rel="stylesheet" href="./style.css">
 </head>
+
 <body>
-    <div class="center_text">
-    <h1>War Room Demo</h1>
+    <div class="centerText">
+        <h1>War Room Demo</h1>
     </div>
     
     <div class="mainSection">
+        <aside class="drawerMenu">
+            <div class="menuContainer">
+                <nav>
+                    <ul>
+                        <li class="level_1">
+                            <h3><a href="">Floor Plans</a></h3>
+                            <ul>
+                                <li><a href="">STUDIO</a></li>
+                                <li><a href="">SOMETHING ELSE</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </aside>
+
+        <main class="scene">
+            <div class="centerText"><h3>Viewport</h3></div>
+            <div class="viewButtons">
+                <button id="outside-view" class="button">Outside</button>
+                <button id="inside-view" class="button">Inside</button>
+            </div>
+            <div id="scene-container"></div>
+        </main>
+
         <aside class="drawerMenu">
             <div class="menuContainer">
                 <nav>
@@ -27,15 +53,6 @@
                 </nav>
             </div>
         </aside>
-
-        <main class="scene">
-            <div class="center_text"><h3>Viewport</h3></div>
-
-            <button id="outside-view"> Outside </button>
-    <button id="inside-view"> Inside </button>
-    <div id="scene-container">
-            </div>
-        </main>
 
     </div>
 
