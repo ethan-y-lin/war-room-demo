@@ -3,7 +3,7 @@ import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import { GLTFLoader } from 'three/examples/jsm/Addons.js';
 import * as dat from 'dat.gui';
 import { FirstPersonControls } from './FirstPersonControls.js';
-
+import { FirstPersonCamera } from './FirstPersonCamera.js';
 const roomUrl = new URL('../assets/warroom.glb', import.meta.url);
 const cleanRoomURL = new URL('../assets/roommodemodel.glb', import.meta.url);
 const renderer = new THREE.WebGLRenderer();
@@ -88,17 +88,21 @@ function feetToMeters(feetVector){
 }
 let inside = false;
 let roof = new THREE.Mesh();
+
 const insideCamera = new THREE.PerspectiveCamera(
     120, 
     canvas.offsetWidth / canvas.offsetHeight, 
     0.1, 
     1000
 );
-
 insideCamera.position.set(0, 1.71, 0);
-let controls = new FirstPersonControls(insideCamera, renderer.domElement);
-controls.lookSpeed = 0.1;
-controls.movementSpeed = 1;
+const fpsCamera = new FirstPersonCamera(insideCamera, canvas);
+
+
+// let controls = new FirstPersonControls(insideCamera, renderer.domElement);
+// controls.lookSpeed = 0.1;
+// controls.movementSpeed = 1;
+// controls.constrainVertical = true;
 function setInsideViewMode(){
     inside = true;
     const geometry = new THREE.BoxGeometry( modelSize.x, modelSize.y/20, modelSize.z ); 
@@ -108,16 +112,16 @@ function setInsideViewMode(){
     roof.position.set(0, modelSize.y, 0);
     renderer.render(scene, insideCamera);
     orbit.enabled = false;
-    controls.enabled = true;
+    // controls.enabled = true;
 }
 
 function animateInside(){
-    controls.update(0.02);
+    fpsCamera.update(0.02);
     renderer.render(scene, insideCamera);
 }
 
 function setOutsideViewMode(){
-    controls.enabled = false;
+    // controls.enabled = false;
     inside=false;
     scene.remove(roof);
     renderer.render(scene, camera);

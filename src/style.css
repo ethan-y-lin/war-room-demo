@@ -21,8 +21,16 @@ body {
     flex-direction: column;
     width: 500px;
     height: auto;
-
 }
+
+.no-cursor {
+    cursor: none;
+}
+
+.cursor {
+    cursor: pointer;
+}
+
 #scene-container {
     width: 500px;
     height: 500px;
