@@ -26,7 +26,7 @@ body {
 
 }
 .no-cursor {
-    cursor: pointer;
+    cursor: none;
 }
 
 .cursor {
