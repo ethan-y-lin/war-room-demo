@@ -156,11 +156,11 @@ class FirstPersonCamera {
     
         const forward = new THREE.Vector3(0, 0, -1);
         forward.applyQuaternion(qx);
-        forward.multiplyScalar(forwardVelocity * timeElapsedS * 10);
+        forward.multiplyScalar(forwardVelocity * timeElapsedS * 2);
     
         const left = new THREE.Vector3(-1, 0, 0);
         left.applyQuaternion(qx);
-        left.multiplyScalar(strafeVelocity * timeElapsedS * 10);
+        left.multiplyScalar(strafeVelocity * timeElapsedS * 2);
     
         this.translation.add(forward);
         this.translation.add(left);

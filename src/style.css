@@ -25,9 +25,8 @@ body {
     align-items: center;
 
 }
-
 .no-cursor {
-    cursor: none;
+    cursor: pointer;
 }
 
 .cursor {
