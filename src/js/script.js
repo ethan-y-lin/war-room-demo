@@ -25,6 +25,8 @@ const direction = new THREE.Vector3();
 let inside = false;
 let modelSize = new THREE.Vector3();
 let roof = new THREE.Mesh();
+const blocker = document.getElementById( 'blocker' );
+const instructions = document.getElementById( 'instructions' );
 
 const onKeyDown = function ( event ) {
 
@@ -172,32 +174,6 @@ function init() {
 
     // inside controls
     controls = new PointerLockControls(insideCamera, canvas);
-
-    const blocker = document.getElementById( 'blocker' );
-
-	const instructions = document.getElementById( 'instructions' );
-    instructions.addEventListener( 'click', function () {
-
-        controls.lock();
-
-    } );
-
-    controls.addEventListener( 'lock', function () {
-
-        instructions.style.display = 'none';
-        blocker.style.display = 'none';
-
-    } );
-
-    controls.addEventListener( 'unlock', function () {
-
-        blocker.style.display = 'block';
-        instructions.style.display = '';
-
-    } );
-
-    canvas.addEventListener('keydown', onKeyDown);
-    canvas.addEventListener('keyup',onKeyUp);
     raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
 
     // initialize geometries
@@ -220,15 +196,15 @@ function animateInside() {
     if ( controls.isLocked === true ) {
         const delta = ( time - prevTime ) / 1000;
 
-        velocity.x -= velocity.x * 10.0 * delta;
-        velocity.z -= velocity.z * 10.0 * delta;
+        velocity.x -= velocity.x * 20.0 * delta;
+        velocity.z -= velocity.z * 20.0 * delta;
 
         direction.z = Number( moveForward ) - Number( moveBackward );
         direction.x = Number( moveRight ) - Number( moveLeft );
         direction.normalize(); // this ensures consistent movements in all directions
 
-        if ( moveForward || moveBackward ) velocity.z -= direction.z * 400.0 * delta;
-        if ( moveLeft || moveRight ) velocity.x -= direction.x * 400.0 * delta;
+        if ( moveForward || moveBackward ) velocity.z -= direction.z * 50.0 * delta;
+        if ( moveLeft || moveRight ) velocity.x -= direction.x * 50.0 * delta;
         let temp = new THREE.Vector3(-velocity.x * delta + insideCamera.position.x, 
                                      insideCamera.position.y, 
                                      - velocity.z * delta + insideCamera.position.z);
@@ -236,6 +212,8 @@ function animateInside() {
             controls.moveRight( - velocity.x * delta );
             controls.moveForward( - velocity.z * delta );
         }
+        // controls.moveRight( - velocity.x * delta );
+        // controls.moveForward( - velocity.z * delta );
     }
     prevTime = time;
     renderer.render( scene, insideCamera );
@@ -249,6 +227,20 @@ function animate(time) {
     }
 }
 
+function lock () {
+    controls.lock();
+}
+
+function hideBlocker(){
+    instructions.style.display = 'none';
+    blocker.style.display = 'none';
+}
+
+function showBlocker(){
+    blocker.style.display = 'block';
+    instructions.style.display = '';
+}
+
 function setInsideViewMode(){
     inside = true;
     const geometry = new THREE.BoxGeometry( modelSize.x, modelSize.y/20, modelSize.z ); 
@@ -259,6 +251,12 @@ function setInsideViewMode(){
     renderer.render(scene, insideCamera);
     orbit.enabled = false;
     controls.enabled = true;
+    showBlocker();
+    instructions.addEventListener( 'click', lock);
+    controls.addEventListener( 'lock', hideBlocker);
+    controls.addEventListener( 'unlock', showBlocker);
+    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('keyup',onKeyUp);
 }
 
 function setOutsideViewMode(){
@@ -267,12 +265,18 @@ function setOutsideViewMode(){
     scene.remove(roof);
     renderer.render(scene, outsideCamera);
     orbit.enabled = true;
+    hideBlocker();
+    instructions.removeEventListener( 'click', lock);
+    controls.removeEventListener('lock', hideBlocker);
+    controls.removeEventListener('unlock', showBlocker);
+    document.removeEventListener('keydown', onKeyDown);
+    document.removeEventListener('keyup',onKeyUp);
 }
 
-function checkCollisions(camera, objects){
+function checkCollisions(point, objects){
     for (let i = 0; i < objects.length; i++) {
         const boundingBox = new THREE.Box3().setFromObject( objects[i] );
-        if (boundingBox.containsPoint( camera.position )) {
+        if (boundingBox.containsPoint( point)) {
             return true;
         }
     }
