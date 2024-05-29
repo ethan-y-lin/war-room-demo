@@ -2,107 +2,245 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import { GLTFLoader } from 'three/examples/jsm/Addons.js';
 import * as dat from 'dat.gui';
-import { FirstPersonControls } from './FirstPersonControls.js';
-import { FirstPersonCamera } from './FirstPersonCamera.js';
-const roomUrl = new URL('../assets/warroom.glb', import.meta.url);
+import { PointerLockControls } from 'three/examples/jsm/Addons.js';
+import { outputStruct } from 'three/examples/jsm/nodes/Nodes.js';
+
+
+let outsideCamera, insideCamera, insideCameraBB, scene, renderer, orbit, controls;
+const canvas = document.getElementById("scene-container");
 const cleanRoomURL = new URL('../assets/roommodemodel.glb', import.meta.url);
-const renderer = new THREE.WebGLRenderer();
-const canvas = document.getElementById('scene-container');
-renderer.shadowMap.enabled = true;
-console.log(canvas);
-renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
-canvas.appendChild(renderer.domElement);
+let objects = [];
 
-const scene = new THREE.Scene();
+let raycaster;
 
-const camera = new THREE.PerspectiveCamera(
-    45, 
-    canvas.offsetWidth / canvas.offsetHeight, 
-    0.1, 
-    1000
-);
+let moveForward = false;
+let moveBackward = false;
+let moveLeft = false;
+let moveRight = false;
 
-const orbit = new OrbitControls(camera, renderer.domElement);
-const axesHelper = new THREE.AxesHelper(5);
-scene.add(axesHelper);
+let prevTime = performance.now();
+const velocity = new THREE.Vector3();
+const direction = new THREE.Vector3();
 
-camera.position.set(-10, 30, 30);
-orbit.update();
-
-const planeGeometry = new THREE.PlaneGeometry(30, 30);
-const planeMaterial = new THREE.MeshStandardMaterial({ 
-    color: 0xFFFFFF,
-    side: THREE.DoubleSide
-});
-const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-plane.rotation.x = Math.PI / 2;
-plane.receiveShadow = true;
-scene.add(plane);
-
-const gridHelper = new THREE.GridHelper(30);
-scene.add(gridHelper);
-
-const ambientLight = new THREE.AmbientLight(0x333333);
-scene.add(ambientLight);
-
-const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 1);
-directionalLight.castShadow = true;
-scene.add(directionalLight);
-directionalLight.position.set(-30, 50, 0);
-directionalLight.shadow.camera.bottom = -12;
-const dLightHelper = new THREE.DirectionalLightHelper(directionalLight);
-scene.add(dLightHelper);
-
-const dLightShadowHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
-scene.add(dLightShadowHelper);
-
-const spotLight = new THREE.SpotLight(0xFFFFFF);
-scene.add(spotLight);
-spotLight.position.set(100, 100, 0);
-spotLight.castShadow = true;
-spotLight.angle = 0.2;
-
-const sLightHelper = new THREE.SpotLightHelper(spotLight);
-scene.add(sLightHelper);
-
-const assetLoader = new GLTFLoader();
-let modelSize = new THREE.Vector3();
-assetLoader.load(cleanRoomURL.href, (gltf) => {
-    model = gltf.scene;
-    let bbox = new THREE.Box3().setFromObject(model);
-    modelSize = bbox.getSize(new THREE.Vector3());
-    console.log(modelSize);
-    scene.add(model);
-    model.position.set(0, modelSize.y / 2, 0);
-});
-
-const gui = new dat.GUI();
-
-const options = {
-    angle: 0.2,
-    penumbra: 0,
-    intensity: 1,
-};
-function feetToMeters(feetVector){
-    return new THREE.Vector3(feetVector.x * 0.3048, feetVector.y * 0.3048, feetVector.z * 0.3048);
-}
 let inside = false;
+let modelSize = new THREE.Vector3();
 let roof = new THREE.Mesh();
+const blocker = document.getElementById( 'blocker' );
+const instructions = document.getElementById( 'instructions' );
 
-const insideCamera = new THREE.PerspectiveCamera(
-    120, 
-    canvas.offsetWidth / canvas.offsetHeight, 
-    0.1, 
-    1000
-);
-insideCamera.position.set(0, 1.71, 0);
-const fpsCamera = new FirstPersonCamera(insideCamera, canvas);
+const onKeyDown = function ( event ) {
+
+    switch ( event.code ) {
+
+        case 'ArrowUp':
+        case 'KeyW':
+            moveForward = true;
+            break;
+
+        case 'ArrowLeft':
+        case 'KeyA':
+            moveLeft = true;
+            break;
+
+        case 'ArrowDown':
+        case 'KeyS':
+            moveBackward = true;
+            break;
+
+        case 'ArrowRight':
+        case 'KeyD':
+            moveRight = true;
+            break;
+    }
+
+};
+
+const onKeyUp = function ( event ) {
+
+    switch ( event.code ) {
+
+        case 'ArrowUp':
+        case 'KeyW':
+            moveForward = false;
+            break;
+
+        case 'ArrowLeft':
+        case 'KeyA':
+            moveLeft = false;
+            break;
+
+        case 'ArrowDown':
+        case 'KeyS':
+            moveBackward = false;
+            break;
+
+        case 'ArrowRight':
+        case 'KeyD':
+            moveRight = false;
+            break;
+
+    }
+};
 
 
-// let controls = new FirstPersonControls(insideCamera, renderer.domElement);
-// controls.lookSpeed = 0.1;
-// controls.movementSpeed = 1;
-// controls.constrainVertical = true;
+function initGeometries(scene) {
+    const planeGeometry = new THREE.PlaneGeometry(30, 30);
+    const planeMaterial = new THREE.MeshStandardMaterial({ 
+        color: 0xFFFFFF,
+        side: THREE.DoubleSide
+    });
+    const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    plane.rotation.x = Math.PI / 2;
+    plane.receiveShadow = true;
+    scene.add(plane);
+
+    const gridHelper = new THREE.GridHelper(30);
+    scene.add(gridHelper);
+
+    const ambientLight = new THREE.AmbientLight(0x333333);
+    scene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 1);
+    directionalLight.castShadow = true;
+    scene.add(directionalLight);
+    directionalLight.position.set(-30, 50, 0);
+    directionalLight.shadow.camera.bottom = -12;
+    const dLightHelper = new THREE.DirectionalLightHelper(directionalLight);
+    scene.add(dLightHelper);
+
+    const dLightShadowHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
+    scene.add(dLightShadowHelper);
+
+    const spotLight = new THREE.SpotLight(0xFFFFFF);
+    scene.add(spotLight);
+    spotLight.position.set(100, 100, 0);
+    spotLight.castShadow = true;
+    spotLight.angle = 0.2;
+
+    const sLightHelper = new THREE.SpotLightHelper(spotLight);
+    scene.add(sLightHelper);
+
+    const assetLoader = new GLTFLoader();
+    let modelSize = new THREE.Vector3();
+    assetLoader.load(cleanRoomURL.href, (gltf) => {
+        model = gltf.scene;
+        objects = model.children;
+        console.log(model);
+        let bbox = new THREE.Box3().setFromObject(model);
+        modelSize = bbox.getSize(new THREE.Vector3());
+        console.log(modelSize);
+        scene.add(model);
+        model.position.set(0, modelSize.y / 2, 0);
+    });
+}
+
+function init() {
+    scene = new THREE.Scene();
+    // initialize renderer
+    renderer = new THREE.WebGLRenderer( { antialias: true } );
+    renderer.setPixelRatio( canvas.devicePixelRatio );
+    renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
+    canvas.appendChild( renderer.domElement );
+    canvas.addEventListener( 'resize', onWindowResize );
+    // outside camera
+    outsideCamera = new THREE.PerspectiveCamera(
+        45, 
+        canvas.offsetWidth / canvas.offsetHeight, 
+        0.1, 
+        1000
+    );
+    outsideCamera.position.set(-10, 30, 30);
+
+    // inside camera
+    insideCamera = new THREE.PerspectiveCamera(
+        120, 
+        canvas.offsetWidth / canvas.offsetHeight, 
+        0.1, 
+        1000
+    );
+    insideCamera.position.set(0, 1.71, 0);
+                                    // let minBox = new THREE.Vector3(insideCamera.position.x-0.5, 
+                                    //                                insideCamera.position.y-1.71,
+                                    //                                insideCamera.position.z-0.5);
+                                    // let maxBox = new THREE.Vector3(insideCamera.position.x+0.5, 
+                                    //                                 insideCamera.position.y,
+                                    //                                 insideCamera.position.z+0.5);                          
+                                    // insideCameraBB = new THREE.Box3(minBox, maxBox);
+    // outside controls
+    orbit = new OrbitControls(outsideCamera, renderer.domElement);
+    const axesHelper = new THREE.AxesHelper(5);
+    scene.add(axesHelper);
+    orbit.update();
+
+    // inside controls
+    controls = new PointerLockControls(insideCamera, canvas);
+    raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
+
+    // initialize geometries
+    initGeometries(scene);
+}
+
+function onWindowResize(){
+    camera.aspect = canvas.offsetWidth / canvas.offsetHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
+}
+
+
+
+function animateInside() {
+    requestAnimationFrame( animate );
+
+    const time = performance.now();
+
+    if ( controls.isLocked === true ) {
+        const delta = ( time - prevTime ) / 1000;
+
+        velocity.x -= velocity.x * 20.0 * delta;
+        velocity.z -= velocity.z * 20.0 * delta;
+
+        direction.z = Number( moveForward ) - Number( moveBackward );
+        direction.x = Number( moveRight ) - Number( moveLeft );
+        direction.normalize(); // this ensures consistent movements in all directions
+
+        if ( moveForward || moveBackward ) velocity.z -= direction.z * 50.0 * delta;
+        if ( moveLeft || moveRight ) velocity.x -= direction.x * 50.0 * delta;
+        let temp = new THREE.Vector3(-velocity.x * delta + insideCamera.position.x, 
+                                     insideCamera.position.y, 
+                                     - velocity.z * delta + insideCamera.position.z);
+        if (!checkCollisions(temp, objects)) {
+            controls.moveRight( - velocity.x * delta );
+            controls.moveForward( - velocity.z * delta );
+        }
+        // controls.moveRight( - velocity.x * delta );
+        // controls.moveForward( - velocity.z * delta );
+    }
+    prevTime = time;
+    renderer.render( scene, insideCamera );
+}
+
+function animate(time) {
+    if (inside){
+        animateInside();
+    } else {
+        renderer.render(scene, outsideCamera);
+    }
+}
+
+function lock () {
+    controls.lock();
+}
+
+function hideBlocker(){
+    instructions.style.display = 'none';
+    blocker.style.display = 'none';
+}
+
+function showBlocker(){
+    blocker.style.display = 'block';
+    instructions.style.display = '';
+}
+
 function setInsideViewMode(){
     inside = true;
     const geometry = new THREE.BoxGeometry( modelSize.x, modelSize.y/20, modelSize.z ); 
@@ -112,49 +250,45 @@ function setInsideViewMode(){
     roof.position.set(0, modelSize.y, 0);
     renderer.render(scene, insideCamera);
     orbit.enabled = false;
-    // controls.enabled = true;
-}
-
-function animateInside(){
-    fpsCamera.update(0.02);
-    renderer.render(scene, insideCamera);
+    controls.enabled = true;
+    showBlocker();
+    instructions.addEventListener( 'click', lock);
+    controls.addEventListener( 'lock', hideBlocker);
+    controls.addEventListener( 'unlock', showBlocker);
+    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('keyup',onKeyUp);
 }
 
 function setOutsideViewMode(){
-    // controls.enabled = false;
+    controls.enabled = false;
     inside=false;
     scene.remove(roof);
-    renderer.render(scene, camera);
+    renderer.render(scene, outsideCamera);
     orbit.enabled = true;
+    hideBlocker();
+    instructions.removeEventListener( 'click', lock);
+    controls.removeEventListener('lock', hideBlocker);
+    controls.removeEventListener('unlock', showBlocker);
+    document.removeEventListener('keydown', onKeyDown);
+    document.removeEventListener('keyup',onKeyUp);
 }
-gui.add(options, 'angle', 0, 1);
-gui.add(options, 'penumbra', 0, 1);
-gui.add(options, 'intensity', 0, 1);
 
-function animate(time) {
-    if (inside){
-        animateInside();
-    } else {
-        renderer.render(scene, camera);
-        spotLight.angle = options.angle;
-        spotLight.penumbra = options.penumbra;
-        spotLight.intensity = options.intensity;
-        sLightHelper.update();
+function checkCollisions(point, objects){
+    for (let i = 0; i < objects.length; i++) {
+        const boundingBox = new THREE.Box3().setFromObject( objects[i] );
+        if (boundingBox.containsPoint( point)) {
+            return true;
+        }
     }
+    return false;
 }
 
-
-renderer.render(scene, camera);
-renderer.setAnimationLoop(animate);
-
-window.addEventListener('resize', () => {
-    camera.aspect = canvas.offsetWidth / canvas.offsetHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
-});
 
 const insideViewButton = document.getElementById('inside-view');
 insideViewButton.addEventListener('click', setInsideViewMode);
 
 const outsideViewButton = document.getElementById('outside-view');
 outsideViewButton.addEventListener('click', setOutsideViewMode);
+
+init();
+renderer.setAnimationLoop(animate);

@@ -27,7 +27,7 @@ body {
 
 }
 .no-cursor {
-    cursor: pointer;
+    cursor: none;
 }
 
 .cursor {
@@ -140,3 +140,25 @@ nav a{
     width: 250px;
     padding: 10px 20px;
 } */
+
+#blocker {
+    display:none;
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    background-color: rgba(0,0,0,0.5);
+}
+
+#instructions {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    text-align: center;
+    font-size: 14px;
+    cursor: pointer;
+}

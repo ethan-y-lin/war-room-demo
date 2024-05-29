@@ -25,12 +25,12 @@ class InputController {
         this.previous = null;
         this.keys = {};
         this.previousKeys = {};
-        this.target.addEventListener('mousedown', (e) => this.onMouseDown(e), false);
-        this.target.addEventListener('mousemove', (e) => this.onMouseMove(e), false);
-        this.target.addEventListener('mouseup', (e) => this.onMouseUp(e), false);
-        this.target.addEventListener('click', (e) => this.onMouseClick(e),false)
-        document.addEventListener('keydown', (e) => this.onKeyDown(e), false);
-        document.addEventListener('keyup', (e) => this.onKeyUp(e), false);
+        // this.target.addEventListener('mousedown', (e) => this.onMouseDown(e), false);
+        // this.target.addEventListener('mousemove', (e) => this.onMouseMove(e), false);w
+        // this.target.addEventListener('mouseup', (e) => this.onMouseUp(e), false);
+        // this.target.addEventListener('click', (e) => this.onMouseClick(e),false)
+        // document.addEventListener('keydown', (e) => this.onKeyDown(e), false);
+        // document.addEventListener('keyup', (e) => this.onKeyUp(e), false);
     }
 
     onMouseDown(e) {
