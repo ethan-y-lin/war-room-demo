@@ -10,7 +10,8 @@ let outsideCamera, insideCamera, insideCameraBB, scene, renderer, orbit, control
 const canvas = document.getElementById("scene-container");
 const cleanRoomURL = new URL('../assets/roommodemodel.glb', import.meta.url);
 let objects = [];
-
+let boundingBoxes;
+let model;
 let raycaster;
 
 let moveForward = false;
@@ -125,13 +126,21 @@ function initGeometries(scene) {
     assetLoader.load(cleanRoomURL.href, (gltf) => {
         model = gltf.scene;
         objects = model.children;
-        console.log(model);
         let bbox = new THREE.Box3().setFromObject(model);
         modelSize = bbox.getSize(new THREE.Vector3());
-        console.log(modelSize);
         scene.add(model);
         model.position.set(0, modelSize.y / 2, 0);
     });
+}
+
+function setCameraBB (insideCamera, insideCameraBB) {
+    let minBox = new THREE.Vector3(insideCamera.position.x-0.5, 
+        insideCamera.position.y-0.5,
+        insideCamera.position.z-0.5);
+    let maxBox = new THREE.Vector3(insideCamera.position.x+0.5, 
+            insideCamera.position.y,
+            insideCamera.position.z+0.5);  
+    insideCameraBB.set(minBox, maxBox);
 }
 
 function init() {
@@ -158,14 +167,9 @@ function init() {
         0.1, 
         1000
     );
-    insideCamera.position.set(0, 1.71, 0);
-                                    // let minBox = new THREE.Vector3(insideCamera.position.x-0.5, 
-                                    //                                insideCamera.position.y-1.71,
-                                    //                                insideCamera.position.z-0.5);
-                                    // let maxBox = new THREE.Vector3(insideCamera.position.x+0.5, 
-                                    //                                 insideCamera.position.y,
-                                    //                                 insideCamera.position.z+0.5);                          
-                                    // insideCameraBB = new THREE.Box3(minBox, maxBox);
+    insideCamera.position.set(20, 1.71, 20);
+    insideCameraBB = new THREE.Box3();
+    setCameraBB(insideCamera, insideCameraBB);
     // outside controls
     orbit = new OrbitControls(outsideCamera, renderer.domElement);
     const axesHelper = new THREE.AxesHelper(5);
@@ -189,8 +193,6 @@ function onWindowResize(){
 
 
 function animateInside() {
-    requestAnimationFrame( animate );
-
     const time = performance.now();
 
     if ( controls.isLocked === true ) {
@@ -205,15 +207,17 @@ function animateInside() {
 
         if ( moveForward || moveBackward ) velocity.z -= direction.z * 50.0 * delta;
         if ( moveLeft || moveRight ) velocity.x -= direction.x * 50.0 * delta;
-        let temp = new THREE.Vector3(-velocity.x * delta + insideCamera.position.x, 
-                                     insideCamera.position.y, 
-                                     - velocity.z * delta + insideCamera.position.z);
-        if (!checkCollisions(temp, objects)) {
-            controls.moveRight( - velocity.x * delta );
-            controls.moveForward( - velocity.z * delta );
+        controls.moveRight( - velocity.x * delta );
+        controls.moveForward( - velocity.z * delta );
+        setCameraBB(insideCamera, insideCameraBB);
+        if (checkCollisions(insideCameraBB, boundingBoxes)) {
+            controls.moveRight(velocity.x * delta );
+            controls.moveForward(velocity.z * delta );
+            console.log("collision")
+            setCameraBB(insideCamera, insideCameraBB);
+            velocity.x = 0;
+            velocity.z = 0;
         }
-        // controls.moveRight( - velocity.x * delta );
-        // controls.moveForward( - velocity.z * delta );
     }
     prevTime = time;
     renderer.render( scene, insideCamera );
@@ -257,6 +261,7 @@ function setInsideViewMode(){
     controls.addEventListener( 'unlock', showBlocker);
     document.addEventListener('keydown', onKeyDown);
     document.addEventListener('keyup',onKeyUp);
+    boundingBoxes = getBoundingBoxes(objects);
 }
 
 function setOutsideViewMode(){
@@ -273,10 +278,46 @@ function setOutsideViewMode(){
     document.removeEventListener('keyup',onKeyUp);
 }
 
-function checkCollisions(point, objects){
+function hasDoor (object) {
+    if (object.name.includes("door")){
+        return true;
+    }
+    if (object.children.length == 0) {
+        return false;
+    }
+    let bool = false;
+    for (let i = 0; i < object.children.length; i++) {
+        bool = bool || hasDoor(object.children[i]);
+    }
+    return bool;
+} 
+
+function getBoundingBoxes (objects) {
+    console.log(objects);
+    boxes = [];
     for (let i = 0; i < objects.length; i++) {
-        const boundingBox = new THREE.Box3().setFromObject( objects[i] );
-        if (boundingBox.containsPoint( point)) {
+        if (hasDoor(objects[i])){
+             for (let j = 0; j < objects[i].children.length; j++){
+                if (!objects[i].children[j].name.includes("door")){
+                    const boundingBox = new THREE.Box3().setFromObject( objects[i].children[j] );
+                    boxes.push(boundingBox); 
+                }else{
+                    console.log("door")
+                }
+             }
+        }else {
+            const boundingBox = new THREE.Box3().setFromObject( objects[i] );
+            boxes.push(boundingBox);
+        }
+
+    }
+    console.log(boxes)
+    return boxes;
+}
+
+function checkCollisions(box, boundingBoxes){
+    for (let i = 0; i < boundingBoxes.length; i++) {
+        if (box.intersectsBox(boundingBoxes[i])) {
             return true;
         }
     }
