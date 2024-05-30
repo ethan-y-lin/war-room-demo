@@ -40,7 +40,7 @@ body {
     display: block;
 }
 
-.centerText{
+.title{
     text-align: center;
 }
 
@@ -100,7 +100,7 @@ nav a{
     text-align: center;
 }
 
-.layer2 li:hover > .menu-container{
+.menu-container{
     background-color:#ccd3de;
     color: black;
     display: inline-block;
@@ -124,6 +124,7 @@ nav a{
     border-radius: 10px;
     border: none;
 }
+
 .button-general:hover{
     background-color: #a4c3b2;
 }
@@ -131,15 +132,9 @@ nav a{
     background-color: #ccd3de;
 }
 
-/* 
-.active{
-    background-color:#ccd3de;
-    color: black;
-    display: inline-block;
-    height: 100px;
-    width: 250px;
-    padding: 10px 20px;
-} */
+.hidden{
+    display: none;
+}
 
 #blocker {
     display:none;
