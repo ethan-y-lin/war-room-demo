@@ -83,20 +83,16 @@ nav a{
     width: 250px;
     padding: 10px 20px;
     cursor: pointer;
-    text-align: center;
+    text-align:justify;
+}
+
+.menu-header:hover:before{
+    content:url(./img/chevron-down.png);
 }
 
 .layer2{
     display: none;
     position: block;
-    top: 60px;
-}
-
-.menu-container{
-    display: none;
-    /* opacity:0; */
-    /* transition: all .25s ease-in-out; */
-    text-align: center;
 }
 
 .menu-container{
@@ -106,6 +102,7 @@ nav a{
     height: 100px;
     width: 250px;
     padding: 10px 20px;
+    text-align: center;
 }
 
 .view-buttons{
