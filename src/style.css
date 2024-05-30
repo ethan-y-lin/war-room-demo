@@ -6,7 +6,7 @@ body {
 }
 .mainSection{
     display: flex;
-    /* justify-content:center; */
+    justify-content:center;
     flex-direction: row;
     margin-top: 50px;
 }
