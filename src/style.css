@@ -13,6 +13,7 @@ body {
     display: flex;
     margin-left: 5px;
     z-index: 3;
+    justify-content:center;
     flex-direction: row;
 }
 
