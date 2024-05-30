@@ -14,28 +14,62 @@
     
     <div class="mainSection">
         <aside class="menu">
-            <nav class="dropdown-menu">
-                <ul class="layer1">
-                    <li>
-                        <h3 class="test"><a href="">FLOOR PLANS</a></h3>
-                        <ul class="layer2">
-                            <li>
-                                <div class="menu-header button-general">Studio</div>
-                            </li>
-                            <li>
-                                <div class="menu-header button-general">1 Bedroom</div>
-                            </li>
-                            <li>
-                                <div class="menu-header button-general">1 Bedroom + Den</div>
-                            </li>
-      
-                        </ul>
-                    </li>
-                </ul>
-            </nav>
-        </aside>
+            <div>
+                <button id="menu-toggle"><img src="./img/menu-icon.png" alt="menu"></button>
+            </div>
 
-        <main class="scene">
+            <nav class="dropdown-menu hidden">
+                <ul class="layer1">
+                    <ul class="menu-unit" id="fp">
+                        <li>
+                            <h3><a>FLOOR PLANS</a></h3>
+                            <ul id="floor-plans" class="layer2">
+                                <li>
+                                    <div class="menu-header button-general">Studio</div>
+                                </li>
+                                <li>
+                                    <div class="menu-header button-general">1 Bedroom</div>
+                                </li>
+                                <li>
+                                    <div class="menu-header button-general">1 Bedroom + Den</div>
+                                </li>
+                            </ul>
+                        </li>  
+                    </ul>     
+
+                    <ul class="menu-unit" id="f">
+                        <li>
+                            <h3><a>FURNITURES</a></h3>
+                            <ul id="furnitures" class="layer2">
+                                <li class = "layer3">
+                                    <div class="menu-header menu-header-collapse button-general">Chairs</div>
+                                    <div class="menu-container hidden">PLACEHOLDER</div> 
+                                </li>
+                                <li class = "layer3">
+                                    <div class="menu-header menu-header-collapse button-general">Sofas</div>
+                                    <div class="menu-container hidden">PLACEHOLDER</div>
+                                </li>
+                                <li class = "layer3">
+                                    <div class="menu-header menu-header-collapse button-general">Tables</div>
+                                    <div class="menu-container hidden">PLACEHOLDER</div>
+                                </li>          
+                            </ul>
+                        </li>
+                    </ul>
+                    <ul class="menu-unit">
+                        <li><h3><a>PLACEHOLDER</a></li>
+                    </ul>
+                    <ul class="menu-unit">
+                        <li><h3><a>PLACEHOLDER</a></li>
+                    </ul>
+                    <ul class="menu-unit">
+                        <li><h3><a>PLACEHOLDER</a></li>
+                    </ul>
+                </ul>
+            </nav>         
+    </aside>
+
+        <main id="scene">
             <div><h3>Viewport</h3></div>
             <div class="view-buttons">
                 <button id="outside-view" class="button button-general">Outside</button>
@@ -56,30 +90,6 @@
             </div>
 
         </main>
-
-        <aside class="menu">
-                <nav class="dropdown-menu">
-                    <ul class="layer1">
-                        <li>
-                            <div class="menu-title"><h3><a href="">Furnitures</a></h3></div>
-                            <ul class="layer2">
-                                <li class = "layer3">
-                                    <div class="menu-header button-general">Chairs</div>
-                                    <div class="menu-container hidden">PLACEHOLDER</div> 
-                                </li>
-                                <li class = "layer3">
-                                    <div class="menu-header button-general">Sofas</div>
-                                    <div class="menu-container hidden">PLACEHOLDER</div>
-                                </li>
-                                <li class = "layer3">
-                                    <div class="menu-header button-general">Tables</div>
-                                    <div class="menu-container hidden">PLACEHOLDER</div>
-                                </li>          
-                            </ul>
-                        </li>
-                    </ul>
-                </nav>         
-        </aside>
 
     </div>
 

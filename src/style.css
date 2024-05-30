@@ -5,25 +5,25 @@ body {
     margin: 0;
 }
 .mainSection{
-    display: flex;
-    flex-direction: row;
-    margin-top: 50px;
+    margin-top: 20px;
 }
 
 .menu{
-    display: block;
-    width: 25%;
-    margin-left: 20px;
+    position: absolute;
+    display: flex;
+    margin-left: 5px;
+    z-index: 3;
+    flex-direction: row;
 }
 
-.scene{
+#scene{
     display: flex;
     flex-direction: column;
-    width: 50%;
+    width: auto;
     height: auto;
     justify-content:center;
     align-items: center;
-
+    z-index: 0;
 }
 .no-cursor {
     cursor: none;
@@ -49,30 +49,62 @@ nav a{
     text-decoration: none;
 }
 
-.dropdown-menu{
+.dropdown-menu, .layer1{
     background-color:#333;
+    width: 380px;
 }
 
 .dropdown-menu ul li{
     display: block;
     float: left;
-    margin-left: -40px;
+    margin-left:-40px;
     position: relative;
-    list-style-type: none;
+    
 }
 
 .dropdown-menu ul a{
     display: block;
     float: left;
-    width: 250px;
-    padding: 10px 20px;
+    width: 150px;
+    padding: 10px 10px;
 }
 .dropdown-menu ul a:hover{
     background: #a4c3b2;
 }
 
-.layer1 li:hover>.layer2{
-    display: block;
+/* .menu-unit{
+    display: flex;
+    flex-direction: row;
+    position: relative;
+} */
+
+.menu-unit{
+    transition: 0.5s ease-in-out;
+}
+
+.menu-unit li{
+    margin-top: -18px;
+    padding: 0px;
+}
+
+.layer1{
+    display: flex;
+    flex-direction: column;
+    margin: 0px;
+    padding: 0px;
+}
+
+
+.layer2{
+    /* display: flex;
+    flex-direction: column; */
+    margin-left: 180px;
+    position: absolute;
+
+}
+
+.layer2 li{
+    margin: 1px;
 }
 
 .menu-header{
@@ -80,27 +112,24 @@ nav a{
     color: white;
     background-color: #384c44;
     text-decoration: none;
-    width: 250px;
+    width: 150px;
     padding: 10px 20px;
     cursor: pointer;
     text-align:justify;
+    position: relative;
 }
 
-.menu-header:hover:before{
+.menu-header-collapse:hover:before{
     content:url(./img/chevron-down.png);
 }
 
-.layer2{
-    display: none;
-    position: block;
-}
 
 .menu-container{
     background-color:#ccd3de;
     color: black;
     display: inline-block;
     height: 100px;
-    width: 250px;
+    width: 150px;
     padding: 10px 20px;
     text-align: center;
 }
@@ -152,4 +181,9 @@ nav a{
     text-align: center;
     font-size: 14px;
     cursor: pointer;
+}
+
+#menu-toggle{
+    background-color:#384c44;
+    border: none;
 }
