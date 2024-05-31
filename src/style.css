@@ -55,7 +55,6 @@ nav a{
     display: flex;
     flex-direction: row;
     background-color: #333;
-    
 }
 
 
@@ -84,6 +83,7 @@ nav a{
 }
 .dropdown-menu ul a:hover{
     background: #a4c3b2;
+    cursor: pointer;
 }
 
 .dropdown-menu>ul{
@@ -104,8 +104,7 @@ nav a{
 .layerx{
     position: absolute;
     display: block;
-    top:0;
-    left:0;
+    opacity:1;
 }
 
 .menu-header{
@@ -147,18 +146,19 @@ nav a{
     margin: 5px;
     background-color: #384c44;
     color: white;
-    border-radius: 10px;
-    border: none;
+    border-radius: 5px;
 }
 
 .button-general:hover{
     background-color: #a4c3b2;
+    cursor: pointer;
 }
 .button-general:active{
     background-color: #ccd3de;
 }
 
 .hidden{
+    opacity:0;
     display: none;
 }
 
@@ -187,4 +187,9 @@ nav a{
 #menu-toggle{
     background-color:#384c44;
     border: none;
+    border-radius: 5px;
+}
+#menu-toggle:hover{
+    background-color:#a4c3b2;
+    cursor: pointer;
 }
