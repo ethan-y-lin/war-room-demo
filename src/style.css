@@ -4,6 +4,11 @@ body {
     background-color: #f6fff8;
     margin: 0;
 }
+.title{
+    font-size:32px;
+    color:rgb(30, 30, 30);
+}
+
 .mainSection{
     margin-top: 50px;
 }
@@ -12,7 +17,6 @@ body {
     position: absolute;
     display: flex;
     margin-left: 5px;
-    z-index: 3;
     justify-content:center;
     flex-direction: row;
 }
@@ -23,7 +27,6 @@ body {
     width: auto;
     height:auto;
     align-items: center;
-    z-index: 0;
     padding-left: 400px;
 }
 .no-cursor {
@@ -55,6 +58,17 @@ nav a{
     display: flex;
     flex-direction: row;
     background-color: #333;
+    z-index: 999;
+}
+
+.dropdown-menu h2{
+    color: rgb(70, 70, 70);
+    background-color:rgb(255, 205, 42);
+    margin: 0px;
+    padding: 10;
+    text-align: center;
+    font-weight:400;
+    border: 2px solid rgb(30, 30, 30);
 }
 
 
@@ -63,6 +77,7 @@ nav a{
     flex-direction: column;
     margin: 0px;
     padding: 0px;
+    text-align: center;
 }
 
 .layer1 ul{
@@ -73,6 +88,7 @@ nav a{
     display: block;
     float: left;
     position: relative;
+    border: 1px solid rgb(30, 30, 30);
 }
 
 .dropdown-menu ul a{
@@ -98,7 +114,7 @@ nav a{
     display: flex;
     flex-direction: column;
     padding:0px;
-    margin: 0px;
+    margin-top:52px;
 }
 
 .layerx{
@@ -188,6 +204,7 @@ nav a{
     background-color:#384c44;
     border: none;
     border-radius: 5px;
+    margin-left: 10px;
 }
 #menu-toggle:hover{
     background-color:#a4c3b2;
