@@ -8,7 +8,7 @@ import { outputStruct } from 'three/examples/jsm/nodes/Nodes.js';
 
 let outsideCamera, insideCamera, insideCameraBB, scene, renderer, orbit, controls;
 const canvas = document.getElementById("scene-container");
-const cleanRoomURL = new URL('../assets/roommodemodel.glb', import.meta.url);
+const cleanRoomURL = new URL('../assets/warroom1.glb', import.meta.url);
 let objects = [];
 let boundingBoxes;
 let model;

@@ -6,7 +6,7 @@ import { FirstPersonControls } from './FirstPersonControls.js';
 import { FirstPersonCamera } from './FirstPersonCamera.js';
 import { PointerLockControls } from 'three/examples/jsm/Addons.js';
 const roomUrl = new URL('../assets/warroom.glb', import.meta.url);
-const cleanRoomURL = new URL('../assets/roommodemodel.glb', import.meta.url);
+const cleanRoomURL = new URL('../assets/warroom1.glb', import.meta.url);
 const renderer = new THREE.WebGLRenderer();
 const canvas = document.getElementById('scene-container');
 renderer.shadowMap.enabled = true;
