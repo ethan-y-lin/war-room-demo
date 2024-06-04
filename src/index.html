@@ -8,15 +8,15 @@
 </head>
 
 <body>
-    <div class="title">
+    <!-- <div class="title">
         <h1>War Room Demo</h1>
-    </div>
+    </div> -->
     
     <div class="mainSection">
         <aside class="menu">
-            <div>
+            <!-- <div>
                 <button id="menu-toggle"><img src="./img/menu-icon.png" alt="menu"></button>
-            </div>
+            </div> -->
 
             <nav class="dropdown-menu">
                 <div class="horizontal1">
@@ -58,15 +58,20 @@
                     <ul id="furnitures" class="layer2 hidden">
                         <div class="layerx">
                             <li>
-                                <div class="menu-header menu-header-collapse button-general">Chairs</div>
-                                <div class="menu-container hidden">PLACEHOLDER</div> 
+                                <div class="menu-header collapse button-general">
+                                    Chairs
+                                </div>
+                                <div class="menu-container hidden">
+                                    <a id="object1">Object 1</a>
+                                    <a id="object2">Object 2</a>
+                                </div> 
                             </li>
                             <li>
-                                <div class="menu-header menu-header-collapse button-general">Sofas</div>
+                                <div class="menu-header collapse button-general">Sofas</div>
                                 <div class="menu-container hidden">PLACEHOLDER</div>
                             </li>
                             <li>
-                                <div class="menu-header menu-header-collapse button-general">Tables</div>
+                                <div class="menu-header collapse button-general">Tables</div>
                                 <div class="menu-container hidden">PLACEHOLDER</div>
                             </li> 
                         </div>         
@@ -139,6 +144,7 @@
                 </div>
             </div>
             <div class="view-buttons">
+                <button id="ortho-view" class="button butten-general">Orthographic</button>
                 <button id="outside-view" class="button button-general">Outside</button>
                 <button id="inside-view" class="button button-general">Inside</button>
             </div>

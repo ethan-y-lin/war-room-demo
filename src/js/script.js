@@ -6,7 +6,7 @@ import { PointerLockControls } from 'three/examples/jsm/Addons.js';
 import { outputStruct } from 'three/examples/jsm/nodes/Nodes.js';
 
 
-let outsideCamera, insideCamera, insideCameraBB, scene, renderer, orbit, controls;
+let outsideCamera, insideCamera, insideCameraBB, scene, renderer, orbit, controls, orthoCamera;
 const canvas = document.getElementById("scene-container");
 const cleanRoomURL = new URL('../assets/warroom1.glb', import.meta.url);
 let objects = [];
@@ -24,6 +24,7 @@ const velocity = new THREE.Vector3();
 const direction = new THREE.Vector3();
 
 let inside = false;
+let outside = false;
 let modelSize = new THREE.Vector3();
 let roof = new THREE.Mesh();
 const blocker = document.getElementById( 'blocker' );
@@ -182,6 +183,20 @@ function init() {
 
     // initialize geometries
     initGeometries(scene);
+
+    orthoCamera = new THREE.OrthographicCamera(
+        -canvas.offsetWidth/128,
+        canvas.offsetWidth/128,
+        canvas.offsetHeight/128,
+        -canvas.offsetHeight/128,
+        0.1,
+        1000
+    );
+    orthoCamera.position.set(0, 10, 0);
+    orthoCamera.up.set (0, 0, -1);
+    orthoCamera.lookAt(0, 0, 0);
+   
+    
 }
 
 function onWindowResize(){
@@ -226,10 +241,15 @@ function animateInside() {
 function animate(time) {
     if (inside){
         animateInside();
-    } else {
+    } else if (outside) {
         renderer.render(scene, outsideCamera);
+        console.log("outside");
+    } else {
+        renderer.render(scene, orthoCamera);
+        console.log("ortho");
     }
 }
+
 
 function lock () {
     controls.lock();
@@ -247,6 +267,7 @@ function showBlocker(){
 
 function setInsideViewMode(){
     inside = true;
+    outside = false;
     const geometry = new THREE.BoxGeometry( modelSize.x, modelSize.y/20, modelSize.z ); 
     const material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
     roof = new THREE.Mesh( geometry, material );
@@ -267,9 +288,25 @@ function setInsideViewMode(){
 function setOutsideViewMode(){
     controls.enabled = false;
     inside=false;
+    outside = true;
     scene.remove(roof);
     renderer.render(scene, outsideCamera);
     orbit.enabled = true;
+    hideBlocker();
+    instructions.removeEventListener( 'click', lock);
+    controls.removeEventListener('lock', hideBlocker);
+    controls.removeEventListener('unlock', showBlocker);
+    document.removeEventListener('keydown', onKeyDown);
+    document.removeEventListener('keyup',onKeyUp);
+}
+
+function setOrthoViewMode(){
+    controls.enabled = false;
+    inside = false;
+    outside = false;
+    scene.remove(roof);
+    renderer.render(scene, orthoCamera);
+    orbit.enabled = false;
     hideBlocker();
     instructions.removeEventListener( 'click', lock);
     controls.removeEventListener('lock', hideBlocker);
@@ -330,6 +367,9 @@ insideViewButton.addEventListener('click', setInsideViewMode);
 
 const outsideViewButton = document.getElementById('outside-view');
 outsideViewButton.addEventListener('click', setOutsideViewMode);
+
+const orthoViewButton = document.getElementById('ortho-view');
+orthoViewButton.addEventListener('click', setOrthoViewMode);
 
 init();
 renderer.setAnimationLoop(animate);

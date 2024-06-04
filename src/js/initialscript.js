@@ -23,6 +23,16 @@ const camera = new THREE.PerspectiveCamera(
     1000
 );
 
+const orthoCamera = new THREE.OrthographicCamera(
+    width / - 2,
+    width / 2,
+    height / 2,
+    height / - 2,
+    0.1,
+    1000
+);
+orthoCamera.position.set(0, 0, 50);
+
 const orbit = new OrbitControls(camera, renderer.domElement);
 const axesHelper = new THREE.AxesHelper(5);
 scene.add(axesHelper);
@@ -89,6 +99,7 @@ function feetToMeters(feetVector){
     return new THREE.Vector3(feetVector.x * 0.3048, feetVector.y * 0.3048, feetVector.z * 0.3048);
 }
 let inside = false;
+let outside = false;
 let roof = new THREE.Mesh();
 
 const insideCamera = new THREE.PerspectiveCamera(
@@ -115,6 +126,7 @@ controls.addEventListener( 'unlock', function () {
 
 function setInsideViewMode(){
     inside = true;
+    outside = false;
     const geometry = new THREE.BoxGeometry( modelSize.x, modelSize.y/20, modelSize.z ); 
     const material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
     roof = new THREE.Mesh( geometry, material );
@@ -133,10 +145,21 @@ function animateInside(){
 function setOutsideViewMode(){
     controls.enabled = false;
     inside=false;
+    outside = true;
     scene.remove(roof);
     renderer.render(scene, camera);
     orbit.enabled = true;
 }
+
+function setOrthoViewMode(){
+    controls.enabled = false;
+    inside=false;
+    outside = false;
+    scene.remove(roof);
+    renderer.render(scene, orthoCamera);
+    orbit.enabled = false;
+}
+
 gui.add(options, 'angle', 0, 1);
 gui.add(options, 'penumbra', 0, 1);
 gui.add(options, 'intensity', 0, 1);
@@ -144,12 +167,14 @@ gui.add(options, 'intensity', 0, 1);
 function animate(time) {
     if (inside){
         animateInside();
-    } else {
+    } else if (outside) {
         renderer.render(scene, camera);
         spotLight.angle = options.angle;
         spotLight.penumbra = options.penumbra;
         spotLight.intensity = options.intensity;
         sLightHelper.update();
+    } else{
+        renderer.render(scene, orthoCamera);
     }
 }
 
@@ -168,3 +193,6 @@ insideViewButton.addEventListener('click', setInsideViewMode);
 
 const outsideViewButton = document.getElementById('outside-view');
 outsideViewButton.addEventListener('click', setOutsideViewMode);
+
+const orthoViewButton = document.getElementById('ortho-view');
+orthoViewButton.addEventListener('click', setOrthoViewMode);
