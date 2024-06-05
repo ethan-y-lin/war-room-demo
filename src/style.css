@@ -191,7 +191,7 @@ nav a{
 }
 
 #blocker {
-    display:none;
+    display: none;
     position: absolute;
     width: 800px;
     height: 500px;
@@ -221,4 +221,26 @@ nav a{
 #menu-toggle:hover{
     background-color:#a4c3b2;
     cursor: pointer;
+}
+
+.full-screen{
+    display: flex;
+    justify-content: end;
+}
+
+#fullscreen-button{
+    position: absolute;
+    color: white;
+    background-color:#384c44;
+    font-size: 26px;
+    border: solid;
+    border-width: thin;
+    border-color: white;
+    height: 40px;
+    width: 40px;
+    cursor: pointer;
+}
+
+#fullscreen-button:hover{
+    background-color:#a4c3b2;
 }

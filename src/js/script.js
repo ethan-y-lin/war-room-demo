@@ -377,5 +377,16 @@ outsideViewButton.addEventListener('click', setOutsideViewMode);
 const orthoViewButton = document.getElementById('ortho-view');
 orthoViewButton.addEventListener('click', setOrthoViewMode);
 
+const fullscreenButton = document.getElementById('fullscreen-button');
+fullscreenButton.addEventListener('pointerup', ()=>{
+    if (renderer.domElement.requestFullscreen){
+        renderer.domElement.requestFullscreen();
+    } else if (renderer.domElement.webkitRequestFullscreen){
+        renderer.domElement.webkitRequestFullscreen();
+    } else if (renderer.domElement.msRequestFullscreen){
+        renderer.domElement.msRequestFullscreen();
+    }
+});
+
 init();
 renderer.setAnimationLoop(animate);
