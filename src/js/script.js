@@ -387,6 +387,12 @@ fullscreenButton.addEventListener('pointerup', ()=>{
     } else if (renderer.domElement.msRequestFullscreen){
         renderer.domElement.msRequestFullscreen();
     }
+    if (inside) {
+        hideBlocker();
+        controls.isLocked = true;
+        renderer.domElement.addEventListener( 'mousemove', lock);
+    }
+    console.log("set full screen")
 });
 
 init();
