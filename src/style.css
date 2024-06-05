@@ -4,10 +4,10 @@ body {
     background-color: #f6fff8;
     margin: 0;
 }
-/* .title{
+.title{
     font-size:32px;
     color:rgb(30, 30, 30);
-} */
+}
 
 .mainSection{
     display: flex;
@@ -32,7 +32,6 @@ body {
     height: auto;
     align-items: center;
     padding-left: 400px;
-    margin-top: 150px;
 }
 .no-cursor {
     cursor: none;

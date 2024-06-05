@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/examples/jsm/Addons.js';
 import * as dat from 'dat.gui';
 import { PointerLockControls } from 'three/examples/jsm/Addons.js';
 import { outputStruct } from 'three/examples/jsm/nodes/Nodes.js';
+import { DragControls } from 'three/examples/jsm/controls/DragControls'
 
 
 let outsideCamera, insideCamera, insideCameraBB, scene, renderer, orbit, controls, orthoCamera;
@@ -184,6 +185,7 @@ function init() {
     // initialize geometries
     initGeometries(scene);
 
+    // orthographic camera
     orthoCamera = new THREE.OrthographicCamera(
         -canvas.offsetWidth/128,
         canvas.offsetWidth/128,
@@ -192,11 +194,10 @@ function init() {
         0.1,
         1000
     );
+    // orthographic camera position (up and top-down)
     orthoCamera.position.set(0, 10, 0);
     orthoCamera.up.set (0, 0, -1);
     orthoCamera.lookAt(0, 0, 0);
-   
-    
 }
 
 function onWindowResize(){
@@ -301,6 +302,7 @@ function setOutsideViewMode(){
 }
 
 function setOrthoViewMode(){
+    const dragControls = new DragControls(objects, orthoCamera, renderer.domElement);
     controls.enabled = false;
     inside = false;
     outside = false;
@@ -308,12 +310,16 @@ function setOrthoViewMode(){
     renderer.render(scene, orthoCamera);
     orbit.enabled = false;
     hideBlocker();
-    instructions.removeEventListener( 'click', lock);
-    controls.removeEventListener('lock', hideBlocker);
-    controls.removeEventListener('unlock', showBlocker);
-    document.removeEventListener('keydown', onKeyDown);
-    document.removeEventListener('keyup',onKeyUp);
+   
+    //no materials yet so nothing happens...?
+    dragControls.addEventListener('dragstart', function(event){
+        event.object.material.opacity = 0.33;
+    });
+    dragControls.addEventListener('dragend', function(event){
+        event.object.material.opacity = 1;
+    });
 }
+
 
 function hasDoor (object) {
     if (object.name.includes("door")){
