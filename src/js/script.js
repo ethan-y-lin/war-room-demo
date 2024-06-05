@@ -302,6 +302,7 @@ function setOutsideViewMode(){
 }
 
 function setOrthoViewMode(){
+    console.log("ortho view")
     const dragControls = new DragControls(objects, orthoCamera, renderer.domElement);
     controls.enabled = false;
     inside = false;
