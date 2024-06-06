@@ -26,6 +26,7 @@ const direction = new THREE.Vector3();
 
 let inside = false;
 let outside = false;
+let ortho = true;
 let modelSize = new THREE.Vector3();
 let roof = new THREE.Mesh();
 const blocker = document.getElementById( 'blocker' );
@@ -245,8 +246,8 @@ function animate(time) {
     } else if (outside) {
         renderer.render(scene, outsideCamera);
         console.log("outside");
-    } else {
-        renderer.render(scene, orthoCamera);
+     } else if (ortho){
+        setOrthoViewMode();
         console.log("ortho");
     }
 }
@@ -269,6 +270,7 @@ function showBlocker(){
 function setInsideViewMode(){
     inside = true;
     outside = false;
+    ortho = false;
     const geometry = new THREE.BoxGeometry( modelSize.x, modelSize.y/20, modelSize.z ); 
     const material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
     roof = new THREE.Mesh( geometry, material );
@@ -288,8 +290,9 @@ function setInsideViewMode(){
 
 function setOutsideViewMode(){
     controls.enabled = false;
-    inside=false;
+    inside = false;
     outside = true;
+    ortho = false;
     scene.remove(roof);
     renderer.render(scene, outsideCamera);
     orbit.enabled = true;
@@ -302,17 +305,18 @@ function setOutsideViewMode(){
 }
 
 function setOrthoViewMode(){
-    console.log("ortho view")
-    const dragControls = new DragControls(objects, orthoCamera, renderer.domElement);
+    console.log("ortho view");
     controls.enabled = false;
     inside = false;
     outside = false;
+    ortho = true;
     scene.remove(roof);
     renderer.render(scene, orthoCamera);
     orbit.enabled = false;
     hideBlocker();
+    
+    const dragControls = new DragControls(objects, orthoCamera, renderer.domElement);
    
-    //no materials yet so nothing happens...?
     dragControls.addEventListener('dragstart', function(event){
         event.object.material.opacity = 0.33;
     });
