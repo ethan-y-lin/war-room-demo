@@ -227,7 +227,6 @@ nav a{
 
 .full-screen{
     display: flex;
-    flex-direction: row;
     justify-content: end;
 }
 
@@ -247,16 +246,3 @@ nav a{
 #fullscreen-button:hover{
     background-color:#a4c3b2;
 }
-
-/* #reset-button{
-    position: relative;
-    color: white;
-    background-color:#384c44;
-    font-size: 26px;
-    border: solid;
-    border-width: thin;
-    border-color: white;
-    height: 40px;
-    width: 40px;
-    cursor: pointer;
-} */
