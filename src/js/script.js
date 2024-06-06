@@ -9,7 +9,7 @@ import { DragControls } from 'three/examples/jsm/controls/DragControls'
 
 let outsideCamera, insideCamera, insideCameraBB, scene, renderer, orbit, controls, orthoCamera;
 const canvas = document.getElementById("scene-container");
-const cleanRoomURL = new URL('../assets/warroom1.glb', import.meta.url);
+const cleanRoomURL = new URL('../assets/warroom11.glb', import.meta.url);
 let objects = [];
 let boundingBoxes;
 let model;
@@ -312,9 +312,8 @@ function setOrthoViewMode(){
     orbit.enabled = false;
     hideBlocker();
    
-    //no materials yet so nothing happens...?
     dragControls.addEventListener('dragstart', function(event){
-        event.object.material.opacity = 0.33;
+        event.object.material.opacity = 0.3;
     });
     dragControls.addEventListener('dragend', function(event){
         event.object.material.opacity = 1;
