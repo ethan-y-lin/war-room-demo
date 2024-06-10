@@ -11,11 +11,8 @@
     
     <div class="mainSection">
         <aside id="menu">
-            <!-- <div>
-                <button id="menu-toggle"><img src="./img/menu-icon.png" alt="menu"></button>
-            </div> -->
             <nav class="dropdown-menu">
-                <div id="column1">
+                <div id="column1" class="hidden">
                     <div class="menu-title"><h2>Menu</h2></div>
                 <ul class="layer1">
                     <li>
@@ -39,6 +36,7 @@
 
                 <div id="column2">
                     <ul id="floor-plans" class="layer2 hidden">
+                        <div class="back-button1">&lt; back</div>
                         <div class="menu-title"><h2>FLOOR PLANS</h2></div>
                         <div class="layerx">    
                             <li>
@@ -53,71 +51,62 @@
                         </div>
                     </ul>
                     <ul id="furnitures" class="layer2 hidden">
+                        <div class="back-button1">&lt; back</div>
                         <div class="menu-title"><h2>FURNITURES</h2></div>
                         <div class="layerx">
                             <li>
-                                <a>Chairs</a>
-                                <div class="menu-container hidden">
-                                    <a id="object1">Object 1</a>
-                                    <a id="object2">Object 2</a>
-                                </div> 
+                                <div id = "chairs" class="menu-header"><a>Chairs</a></div>
                             </li>
                             <li>
-                                <a>Sofas</a>
-                                <div class="menu-container hidden">PLACEHOLDER</div>
+                                <div id = "sofas" class="menu-header"><a>Sofas</a></div>
                             </li>
                             <li>
-                                <a>Tables</a>
-                                <div class="menu-container hidden">PLACEHOLDER</div>
+                                <div id = "tables" class="menu-header"><a>Tables</a></div>
                             </li> 
                         </div>         
                     </ul>
-                    <!-- <ul id="placeholder1" class="layer2 hidden">
-                        <div class="layerx">    
-                            <li>
-                                <a>1</a>
-                            </li>
-                            <li>
-                                <a>2</a>
-                            </li>
-                            <li>
-                                <a>3</a>
-                            </li>
-                        </div>
-                    </ul> -->
                     <ul id="saved-plans" class="layer2 hidden">
+                        <div class="back-button1">&lt; back</div>
                         <div class="menu-title"><h2>SAVED PLANS</h2></div>
-                        <div class="layerx">    
+                        <div class="layerx">
                             <li>
-                                <a>1</a>
+                                <a>Plan 1</a>
                             </li>
                             <li>
-                                <a>2</a>
+                                <a>Plan 2</a>
                             </li>
                             <li>
-                                <a>3</a>
-                            </li>
-                        </div>
+                                <a>Plan 3</a>
+                            </li> 
+                        </div>  
                     </ul>
-                    <!-- <ul id="placeholder3" class="layer2 hidden">
-                        <div class="layerx">    
-                            <li>
-                                <div class="menu-header button-general">1</div>
-                            </li>
-                            <li>
-                                <div class="menu-header button-general">2</div>
-                            </li>
-                            <li>
-                                <div class="menu-header button-general">3</div>
-                            </li>
-                            <li>
-                                <div class="menu-header button-general">4</div>
-                            </li>
-                            <li>
-                                <div class="menu-header button-general">5</div>
-                            </li>
-                        </div>
-                    </ul> -->
+                </div>
+
+                <div id="column3" class = "hidden">
+                    <div id="chairs3" class="layer3 hidden">
+                        <div class="back-button2">&lt; back</div>
+                        <div class="menu-title"><h2>CHAIRS</h2></div>
+                        <ul>
+                            <li><a>Chair 1</a></li>
+                            <li><a>Chair 2</a></li>
+                        </ul>
+                    </div>
+                    <div id="sofas3" class="layer3 hidden">
+                        <div class="back-button2">&lt; back</div>
+                        <div class="menu-title"><h2>SOFAS</h2></div>
+                        <ul>
+                            <li><a>Sofa 1</a></li>
+                            <li><a>Sofa 2</a></li>
+                        </ul>
+                    </div>
+                    <div id="tables3" class="layer3 hidden">
+                        <div class="back-button2">&lt; back</div>
+                        <div class="menu-title"><h2>TABLES</h2></div>
+                        <ul>
+                            <li><a>Table 1</a></li>
+                            <li><a>Table 2</a></li>
+                        </ul>
+                    </div>
                 </div>
 
             </nav>         

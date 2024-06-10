@@ -6,7 +6,8 @@ body {
 }
 
 .title{
-    font-size:32px;
+    font-size: 28px;
+    font-weight:100;
     color:rgb(30, 30, 30);
 }
 
@@ -14,27 +15,21 @@ body {
     display: flex;
     flex-direction: row;
     height: auto;
+    align-items: center;
 }
 
 #menu{
-    position: absolute;
     display: flex;
-    /* justify-content:center; */
-    align-items: center;
-    flex-direction: row;
-    height: 700px;
-    /* background-color:#333; */
-    margin-left: 20px;
+    width: 10%;
+    margin-left: 50px;
 }
-
 
 #scene{
     display: flex;
     flex-direction: column;
-    width: auto;
+    width: 90%;
     height: auto;
     align-items: center;
-    padding-left: 400px;
 }
 .no-cursor {
     cursor: none;
@@ -63,8 +58,24 @@ nav a{
 
 .dropdown-menu{
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
+    justify-content: center;
     z-index: 999;
+}
+
+#column1, #column2, #column3{
+    position: absolute;
+}
+
+.back-button1, .back-button2{
+    color:rgb(180, 180, 180);
+    width: 50px;
+}
+
+.back-button1:hover, .back-button2:hover{
+    color:rgb(70, 70, 70);
+    background: linear-gradient(to right, #c1e5d100, #1892645a, #c1e5d100);
+    cursor: pointer;
 }
 
 .menu-title h2{
@@ -119,7 +130,6 @@ nav a{
 }
 
 .layer2{
-    position: relative;
     display: flex;
     flex-direction: column;
     padding:0px;
@@ -136,40 +146,16 @@ nav a{
     margin: 5px;
 }
 
-.menu-header{
-    float: none;
-    color: white;
-    background-color: #384c44;
-    text-decoration: none;
-    width: 200px;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    padding-left: 10px;
-    cursor: pointer;
-    text-align:justify;
-    position: relative;
-}
-
-/* .collapse:hover:before{
-    content:url(./img/chevron-down.png);
-} */
-
-
-.menu-container{
-    background-color:#ccd3de;
-    color: black;
-    display: inline-block;
-    height: 100px;
-    width: 210px;
-    text-align: center;
+.layer3 ul{
     display: flex;
     flex-direction: column;
-    
+    align-items: center;
+    padding: 0px;
+    margin: 0px;
 }
 
-.menu-container a{
-    width: 50px;
-    margin: auto;
+.layer3 ul li{
+    margin: 5px;
 }
 
 .view-buttons{
@@ -222,17 +208,6 @@ nav a{
     font-size: 14px;
     cursor: pointer;
 }
-
-/* #menu-toggle{
-    background-color:#384c44;
-    border: none;
-    border-radius: 5px;
-    margin-left: 10px;
-}
-#menu-toggle:hover{
-    background-color:#a4c3b2;
-    cursor: pointer;
-} */
 
 .full-screen{
     display: flex;

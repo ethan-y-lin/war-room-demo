@@ -1,3 +1,4 @@
+$("#column1").removeClass("hidden");
 //need to refresh the menu when hidden later
 $("#menu-toggle").on('click', function(){
     $(".dropdown-menu").toggleClass("hidden");
@@ -8,25 +9,49 @@ $("#menu-toggle").on('click', function(){
 $(".menu-unit").on('click', function(){
     if($(this).is("#fp")){
         $("#floor-plans").removeClass("hidden");
-        $("#furnitures, #saved-plans").addClass("hidden");
+        $("#column1, #furnitures, #saved-plans").addClass("hidden");
     };
     if($(this).is("#f")){
-        $("#furnitures").toggleClass("hidden");
-        $("#floor-plans, #saved-plans").addClass("hidden");
+        $("#furnitures").removeClass("hidden");
+        $("#column1, #floor-plans, #saved-plans").addClass("hidden");
     };
     if($(this).is("#m")){
         $("#floor-plans, #furnitures, #saved-plans").addClass("hidden");
     };
     if($(this).is("#sp")){
         $("#saved-plans").removeClass("hidden");
-        $("#floor-plans, #furnitures").addClass("hidden");
+        $("#column1, #floor-plans, #furnitures").addClass("hidden");
     };
     if($(this).is("#p3")){
         $("#floor-plans, #furnitures, #saved-plans").addClass("hidden");
     };
 });
 
-$(".menu-header").on('click', function(e){
-    $(this).next().toggleClass("hidden");
-    e.stopPropagation();
+$(".menu-header").on('click', function(){
+    $(".layer2").addClass("hidden");
+    $("#column3").removeClass("hidden");
+    
+    if($(this).is("#chairs")){
+        $("#chairs3").removeClass("hidden");
+        $("#sofas3, #tables3").addClass("hidden");
+    }
+    if($(this).is("#sofas")){
+        $("#sofas3").removeClass("hidden");
+        $("#chairs3, #tables3").addClass("hidden");
+    }
+    if($(this).is("#tables")){
+        $("#tables3").removeClass("hidden");
+        $("#chairs3, #sofas3").addClass("hidden");
+    }
+
 });
+
+$(".back-button1").on('click', function(){
+    $(".layer2").addClass("hidden");
+    $("#column1").removeClass("hidden");
+})
+//temporary solution
+$(".back-button2").on('click', function(){
+    $("#column3").addClass("hidden");
+    $("#furnitures").removeClass("hidden");
+})
