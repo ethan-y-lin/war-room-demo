@@ -148,12 +148,14 @@ function setCameraBB (insideCamera, insideCameraBB) {
 
 function init() {
     scene = new THREE.Scene();
+    
     // initialize renderer
     renderer = new THREE.WebGLRenderer( { antialias: true } );
     renderer.setPixelRatio( canvas.devicePixelRatio );
     renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
     canvas.appendChild( renderer.domElement );
     canvas.addEventListener( 'resize', onWindowResize );
+    
     // outside camera
     outsideCamera = new THREE.PerspectiveCamera(
         45, 
@@ -173,18 +175,6 @@ function init() {
     insideCamera.position.set(20, 1.71, 20);
     insideCameraBB = new THREE.Box3();
     setCameraBB(insideCamera, insideCameraBB);
-    // outside controls
-    orbit = new OrbitControls(outsideCamera, renderer.domElement);
-    const axesHelper = new THREE.AxesHelper(5);
-    scene.add(axesHelper);
-    orbit.update();
-
-    // inside controls
-    controls = new PointerLockControls(insideCamera, canvas);
-    raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
-
-    // initialize geometries
-    initGeometries(scene);
 
     // orthographic camera
     orthoCamera = new THREE.OrthographicCamera(
@@ -195,10 +185,25 @@ function init() {
         0.1,
         1000
     );
-    // orthographic camera position (up and top-down)
     orthoCamera.position.set(0, 10, 0);
     orthoCamera.up.set (0, 0, -1);
     orthoCamera.lookAt(0, 0, 0);
+
+    // outside controls
+    orbit = new OrbitControls(outsideCamera, renderer.domElement);
+    const axesHelper = new THREE.AxesHelper(5);
+    scene.add(axesHelper);
+    orbit.update();
+
+    // inside controls
+    controls = new PointerLockControls(insideCamera, canvas);
+    raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
+
+    //drag controls
+    // const dragControls = new DragControls(objects, orthoCamera, renderer.domElement);
+
+    // initialize geometries
+    initGeometries(scene);
 }
 
 function onWindowResize(){
@@ -207,6 +212,13 @@ function onWindowResize(){
     renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
 }
 
+function dragStartCallback(event){
+    startColor = event.object.material.color.getHex();
+    event.object.material.color.setHex(0xff0000);
+}
+function dragEndCallback(event){
+    event.object.material.color.setHex(startColor);
+}
 
 
 function animateInside() {
@@ -243,10 +255,10 @@ function animateInside() {
 function animate(time) {
     if (inside){
         animateInside();
-    } else if (outside) {
+    } else if (outside){
         renderer.render(scene, outsideCamera);
         console.log("outside");
-     } else if (ortho){
+    } else if (ortho){
         setOrthoViewMode();
         console.log("ortho");
     }
@@ -305,7 +317,12 @@ function setOutsideViewMode(){
 }
 
 function setOrthoViewMode(){
-    console.log("ortho view");
+    const dragControls = new DragControls(objects, orthoCamera, renderer.domElement);
+    dragControls.addEventListener('dragstart', dragStartCallback);
+    dragControls.addEventListener('dragstend', dragEndCallback);
+
+    //dragControls.enabled = true;
+    console.log(dragControls.enabled);
     controls.enabled = false;
     inside = false;
     outside = false;
@@ -314,15 +331,11 @@ function setOrthoViewMode(){
     renderer.render(scene, orthoCamera);
     orbit.enabled = false;
     hideBlocker();
-    
-    const dragControls = new DragControls(objects, orthoCamera, renderer.domElement);
-   
-    dragControls.addEventListener('dragstart', function(event){
-        event.object.material.opacity = 0.33;
-    });
-    dragControls.addEventListener('dragend', function(event){
-        event.object.material.opacity = 1;
-    });
+    instructions.removeEventListener( 'click', lock);
+    controls.removeEventListener('lock', hideBlocker);
+    controls.removeEventListener('unlock', showBlocker);
+    document.removeEventListener('keydown', onKeyDown);
+    document.removeEventListener('keyup',onKeyUp);
 }
 
 
@@ -372,18 +385,17 @@ function checkCollisions(box, boundingBoxes){
     return false;
 }
 
+$('#inside-view').on('click', function(){
+    setInsideViewMode();
+})
+$('#outside-view').on('click', function(){
+    setOutsideViewMode();
+})
+$('#ortho-view').on('click', function(){
+    setOrthoViewMode();
+})
 
-const insideViewButton = document.getElementById('inside-view');
-insideViewButton.addEventListener('click', setInsideViewMode);
-
-const outsideViewButton = document.getElementById('outside-view');
-outsideViewButton.addEventListener('click', setOutsideViewMode);
-
-const orthoViewButton = document.getElementById('ortho-view');
-orthoViewButton.addEventListener('click', setOrthoViewMode);
-
-const fullscreenButton = document.getElementById('fullscreen-button');
-fullscreenButton.addEventListener('pointerup', ()=>{
+$('#fullscreen-button').on('click', function(){
     if (renderer.domElement.requestFullscreen){
         renderer.domElement.requestFullscreen();
     } else if (renderer.domElement.webkitRequestFullscreen){

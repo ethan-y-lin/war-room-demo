@@ -10,14 +10,13 @@
 <body>
     
     <div class="mainSection">
-        <aside class="menu">
+        <aside id="menu">
             <!-- <div>
                 <button id="menu-toggle"><img src="./img/menu-icon.png" alt="menu"></button>
             </div> -->
-
             <nav class="dropdown-menu">
-                <div class="horizontal1">
-                    <div><h2>Menu</h2></div>
+                <div id="column1">
+                    <div class="menu-title"><h2>Menu</h2></div>
                 <ul class="layer1">
                     <li>
                         <a class="menu-unit" id="fp">FLOOR PLANS</a>
@@ -26,10 +25,10 @@
                         <a class="menu-unit" id="f">FURNITURES</a>
                     </li>
                     <li>
-                        <a class="menu-unit" id="p1">MEASUREMENTS</a>
+                        <a class="menu-unit" id="m">MEASUREMENTS</a>
                     </li>
                     <li>
-                        <a class="menu-unit" id="p2">SAVED PLANS</a>
+                        <a class="menu-unit" id="sp">SAVED PLANS</a>
                     </li>
                     <li>
                         <a class="menu-unit" id="p3">EXPORT</a>
@@ -38,71 +37,69 @@
                 </div>
                 
 
-                <div class="horizontal2">
+                <div id="column2">
                     <ul id="floor-plans" class="layer2 hidden">
+                        <div class="menu-title"><h2>FLOOR PLANS</h2></div>
                         <div class="layerx">    
                             <li>
-                                <div class="menu-header button-general">Studio</div>
+                                <a>Studio</a>
                             </li>
                             <li>
-                                <div class="menu-header button-general">1 Bedroom</div>
+                                <a>1 Bedroom</a>
                             </li>
                             <li>
-                                <div class="menu-header button-general">1 Bedroom + Den</div>
+                                <a>1 Bedroom + Den</a>
                             </li>
                         </div>
                     </ul>
                     <ul id="furnitures" class="layer2 hidden">
+                        <div class="menu-title"><h2>FURNITURES</h2></div>
                         <div class="layerx">
                             <li>
-                                <div class="menu-header collapse button-general">
-                                    Chairs
-                                </div>
+                                <a>Chairs</a>
                                 <div class="menu-container hidden">
                                     <a id="object1">Object 1</a>
                                     <a id="object2">Object 2</a>
                                 </div> 
                             </li>
                             <li>
-                                <div class="menu-header collapse button-general">Sofas</div>
+                                <a>Sofas</a>
                                 <div class="menu-container hidden">PLACEHOLDER</div>
                             </li>
                             <li>
-                                <div class="menu-header collapse button-general">Tables</div>
+                                <a>Tables</a>
                                 <div class="menu-container hidden">PLACEHOLDER</div>
                             </li> 
                         </div>         
                     </ul>
-                    <ul id="placeholder1" class="layer2 hidden">
+                    <!-- <ul id="placeholder1" class="layer2 hidden">
                         <div class="layerx">    
                             <li>
-                                <div class="menu-header button-general">1</div>
+                                <a>1</a>
                             </li>
                             <li>
-                                <div class="menu-header button-general">2</div>
+                                <a>2</a>
                             </li>
                             <li>
-                                <div class="menu-header button-general">3</div>
+                                <a>3</a>
+                            </li>
+                        </div>
+                    </ul> -->
+                    <ul id="saved-plans" class="layer2 hidden">
+                        <div class="menu-title"><h2>SAVED PLANS</h2></div>
+                        <div class="layerx">    
+                            <li>
+                                <a>1</a>
+                            </li>
+                            <li>
+                                <a>2</a>
+                            </li>
+                            <li>
+                                <a>3</a>
                             </li>
                         </div>
                     </ul>
-                    <ul id="placeholder2" class="layer2 hidden">
-                        <div class="layerx">    
-                            <li>
-                                <div class="menu-header button-general">1</div>
-                            </li>
-                            <li>
-                                <div class="menu-header button-general">2</div>
-                            </li>
-                            <li>
-                                <div class="menu-header button-general">3</div>
-                            </li>
-                            <li>
-                                <div class="menu-header button-general">4</div>
-                            </li>
-                        </div>
-                    </ul>
-                    <ul id="placeholder3" class="layer2 hidden">
+                    <!-- <ul id="placeholder3" class="layer2 hidden">
                         <div class="layerx">    
                             <li>
                                 <div class="menu-header button-general">1</div>
@@ -120,7 +117,7 @@
                                 <div class="menu-header button-general">5</div>
                             </li>
                         </div>
-                    </ul>
+                    </ul> -->
                 </div>
 
             </nav>         

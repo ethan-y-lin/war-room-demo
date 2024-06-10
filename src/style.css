@@ -13,18 +13,20 @@ body {
 .mainSection{
     display: flex;
     flex-direction: row;
+    height: auto;
 }
 
-.menu{
+#menu{
     position: absolute;
     display: flex;
-    margin-left: 5px;
-    justify-content:center;
+    /* justify-content:center; */
+    align-items: center;
     flex-direction: row;
     height: 700px;
-    background-color:#333;
-    margin: auto;
+    /* background-color:#333; */
+    margin-left: 20px;
 }
+
 
 #scene{
     display: flex;
@@ -53,28 +55,27 @@ body {
 }
 
 nav a{
-    color: white;
-    background-color: #384c44;
+    color: #333;
+    background-color: none;
     text-decoration: none;
+    margin-bottom: 5px;
 }
 
 .dropdown-menu{
     display: flex;
     flex-direction: row;
-    background-color: #333;
     z-index: 999;
 }
 
-.dropdown-menu h2{
+.menu-title h2{
     color: rgb(70, 70, 70);
-    background-color:rgb(255, 205, 42);
-    margin: 0px;
-    padding: 10;
+    background-color: none;
     text-align: center;
-    font-weight:400;
-    border: 2px solid rgb(30, 30, 30);
+    padding: 10px;
+    font-weight: 400px;
+    border-bottom: 2px solid rgb(30, 30, 30);
+    margin: 0px;
 }
-
 
 .layer1{
     display: flex;
@@ -88,11 +89,15 @@ nav a{
     position: relative;
 }
 
+.layer1 li{
+    margin: 5px;
+}
+
 .dropdown-menu ul li{
     display: block;
     float: left;
     position: relative;
-    border: 1px solid rgb(30, 30, 30);
+    border-bottom: 1px solid rgb(70, 70, 70);
 }
 
 .dropdown-menu ul a{
@@ -102,7 +107,7 @@ nav a{
     padding: 10px 10px;
 }
 .dropdown-menu ul a:hover{
-    background: #a4c3b2;
+    background: linear-gradient(to right, #c1e5d100, #1892645a, #c1e5d100);
     cursor: pointer;
 }
 
@@ -122,9 +127,13 @@ nav a{
 }
 
 .layerx{
-    position: absolute;
-    display: block;
-    opacity:1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.layerx li{
+    margin: 5px;
 }
 
 .menu-header{
@@ -141,9 +150,9 @@ nav a{
     position: relative;
 }
 
-.collapse:hover:before{
+/* .collapse:hover:before{
     content:url(./img/chevron-down.png);
-}
+} */
 
 
 .menu-container{
@@ -214,7 +223,7 @@ nav a{
     cursor: pointer;
 }
 
-#menu-toggle{
+/* #menu-toggle{
     background-color:#384c44;
     border: none;
     border-radius: 5px;
@@ -223,7 +232,7 @@ nav a{
 #menu-toggle:hover{
     background-color:#a4c3b2;
     cursor: pointer;
-}
+} */
 
 .full-screen{
     display: flex;
