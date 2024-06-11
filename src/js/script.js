@@ -32,6 +32,9 @@ let roof = new THREE.Mesh();
 const blocker = document.getElementById( 'blocker' );
 const instructions = document.getElementById( 'instructions' );
 
+let dragControls;
+let startColor;
+
 const onKeyDown = function ( event ) {
 
     switch ( event.code ) {
@@ -199,11 +202,10 @@ function init() {
     controls = new PointerLockControls(insideCamera, canvas);
     raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
 
-    //drag controls
-    // const dragControls = new DragControls(objects, orthoCamera, renderer.domElement);
-
-    // initialize geometries
     initGeometries(scene);
+    console.log(objects)
+    //drag controls
+    dragControls = new DragControls(objects, orthoCamera, canvas);
 }
 
 function onWindowResize(){
@@ -213,10 +215,12 @@ function onWindowResize(){
 }
 
 function dragStartCallback(event){
+    console.log("drag start");
     startColor = event.object.material.color.getHex();
     event.object.material.color.setHex(0xff0000);
 }
 function dragEndCallback(event){
+    console.log("drag end");
     event.object.material.color.setHex(startColor);
 }
 
@@ -259,7 +263,7 @@ function animate(time) {
         renderer.render(scene, outsideCamera);
         console.log("outside");
     } else if (ortho){
-        setOrthoViewMode();
+        renderer.render(scene, orthoCamera);
         console.log("ortho");
     }
 }
@@ -290,6 +294,7 @@ function setInsideViewMode(){
     roof.position.set(0, modelSize.y, 0);
     renderer.render(scene, insideCamera);
     orbit.enabled = false;
+    dragControls.enabled = false;
     controls.enabled = true;
     showBlocker();
     instructions.addEventListener( 'click', lock);
@@ -301,6 +306,8 @@ function setInsideViewMode(){
 }
 
 function setOutsideViewMode(){
+    dragControls.enabled = false;
+    console.log(dragControls.enabled);
     controls.enabled = false;
     inside = false;
     outside = true;
@@ -317,19 +324,20 @@ function setOutsideViewMode(){
 }
 
 function setOrthoViewMode(){
-    const dragControls = new DragControls(objects, orthoCamera, renderer.domElement);
+    dragControls.setObjects(objects);
     dragControls.addEventListener('dragstart', dragStartCallback);
-    dragControls.addEventListener('dragstend', dragEndCallback);
-
-    //dragControls.enabled = true;
+    dragControls.addEventListener('dragend', dragEndCallback);
+    console.log(dragControls);
+    console.log(dragControls.objects)
+    dragControls.enabled = true;
     console.log(dragControls.enabled);
     controls.enabled = false;
     inside = false;
     outside = false;
     ortho = true;
     scene.remove(roof);
-    renderer.render(scene, orthoCamera);
     orbit.enabled = false;
+    renderer.render(scene, orthoCamera);
     hideBlocker();
     instructions.removeEventListener( 'click', lock);
     controls.removeEventListener('lock', hideBlocker);

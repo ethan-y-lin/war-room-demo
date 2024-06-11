@@ -211,7 +211,6 @@ nav a{
 #instructions {
     width: 100%;
     height: 100%;
-
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -222,7 +221,7 @@ nav a{
     cursor: pointer;
 }
 
-.full-screen{
+#full-screen{
     display: flex;
     justify-content: end;
 }
@@ -243,3 +242,32 @@ nav a{
 #fullscreen-button:hover{
     background-color:#a4c3b2;
 }
+
+#fp-war{
+    display: flex;
+    justify-content: start;
+    flex-direction: column;
+    padding-left: 15px;
+    position: absolute;
+}
+
+#fp-war .up, #fp-war h2{
+    margin-top: -10px;
+    margin-bottom: -20px;
+    font-family: Georgia, 'Times New Roman', Times, serif
+}
+
+#fp-war h2{
+    border-bottom: 1px solid #333;
+}
+
+#scene-options{
+    display: flex;
+    justify-content: end;
+    
+}
+
+#scene-options p{
+    position: absolute;
+}
+
