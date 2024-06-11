@@ -3,12 +3,13 @@ body {
     height: 100%;
     background-color: white;
     margin: 0;
+    font-family:Georgia, 'Times New Roman', Times, serif;
 }
 
-.title{
-    font-size: 28px;
-    font-weight:100;
-    color:rgb(30, 30, 30);
+.title h1{
+    font-size: 56px;
+    font-weight: 400;
+    color:rgb(60, 60, 60);
 }
 
 .mainSection{
@@ -20,14 +21,14 @@ body {
 
 #menu{
     display: flex;
-    width: 10%;
+    width: 15%;
     margin-left: 50px;
 }
 
 #scene{
     display: flex;
     flex-direction: column;
-    width: 90%;
+    width: 85%;
     height: auto;
     align-items: center;
 }
@@ -51,7 +52,7 @@ body {
 
 nav a{
     color: #333;
-    background-color: none;
+    background-color: transparent;
     text-decoration: none;
     margin-bottom: 5px;
 }
@@ -70,20 +71,23 @@ nav a{
 .back-button1, .back-button2{
     color:rgb(180, 180, 180);
     width: 50px;
+    background: none;
+    transition: 0.2s ease-in-out;
+    margin-bottom: 10px;
 }
 
 .back-button1:hover, .back-button2:hover{
-    color:rgb(70, 70, 70);
+    color:#333;
     background: linear-gradient(to right, #c1e5d100, #1892645a, #c1e5d100);
     cursor: pointer;
 }
 
 .menu-title h2{
     color: rgb(70, 70, 70);
-    background-color: none;
+    background-color: transparent;
     text-align: center;
     padding: 10px;
-    font-weight: 400px;
+    font-weight:200;
     border-bottom: 2px solid rgb(30, 30, 30);
     margin: 0px;
 }
@@ -108,7 +112,7 @@ nav a{
     display: block;
     float: left;
     position: relative;
-    border-bottom: 1px solid rgb(70, 70, 70);
+    border-bottom: 1px solid #445c5290;
 }
 
 .dropdown-menu ul a{
@@ -116,10 +120,14 @@ nav a{
     float: left;
     width: 150px;
     padding: 10px 10px;
+    color:  #445c52;
+    background: transparent;
+    transition: 0.2s ease-in-out;
 }
 .dropdown-menu ul a:hover{
     background: linear-gradient(to right, #c1e5d100, #1892645a, #c1e5d100);
     cursor: pointer;
+    color: #333;
 }
 
 .dropdown-menu>ul{
