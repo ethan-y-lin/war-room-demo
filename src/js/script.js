@@ -136,12 +136,12 @@ function initGeometries(scene) {
 }
 
 function setCameraBB (insideCamera, insideCameraBB) {
-    let minBox = new THREE.Vector3(insideCamera.position.x-0.5, 
-        insideCamera.position.y-0.5,
-        insideCamera.position.z-0.5);
-    let maxBox = new THREE.Vector3(insideCamera.position.x+0.5, 
+    let minBox = new THREE.Vector3(insideCamera.position.x-0.01, 
+        insideCamera.position.y-0.01,
+        insideCamera.position.z-0.01);
+    let maxBox = new THREE.Vector3(insideCamera.position.x+0.01, 
             insideCamera.position.y,
-            insideCamera.position.z+0.5);  
+            insideCamera.position.z+0.01);  
     insideCameraBB.set(minBox, maxBox);
 }
 
@@ -169,7 +169,7 @@ function init() {
         0.1, 
         1000
     );
-    insideCamera.position.set(20, 1.71, 20);
+    insideCamera.position.set(5, 1.71, 5);
     insideCameraBB = new THREE.Box3();
     setCameraBB(insideCamera, insideCameraBB);
     // outside controls
@@ -226,7 +226,9 @@ function animateInside() {
         controls.moveRight( - velocity.x * delta );
         controls.moveForward( - velocity.z * delta );
         setCameraBB(insideCamera, insideCameraBB);
-        if (checkCollisions(insideCameraBB, boundingBoxes)) {
+        let collision = checkCollisions(insideCameraBB, boundingBoxes)
+        if (collision.hasCollision && collision.collidedObject.name != "wall_11") {
+            console.log(collision.collidedObject)
             controls.moveRight(velocity.x * delta );
             controls.moveForward(velocity.z * delta );
             console.log("collision")
@@ -323,6 +325,7 @@ function setOrthoViewMode(){
 
 
 function hasDoor (object) {
+    console.log(object)
     if (object.name.includes("door")){
         return true;
     }
@@ -344,14 +347,14 @@ function getBoundingBoxes (objects) {
              for (let j = 0; j < objects[i].children.length; j++){
                 if (!objects[i].children[j].name.includes("door")){
                     const boundingBox = new THREE.Box3().setFromObject( objects[i].children[j] );
-                    boxes.push(boundingBox); 
+                    boxes.push([boundingBox,i]); 
                 }else{
                     console.log("door")
                 }
              }
         }else {
             const boundingBox = new THREE.Box3().setFromObject( objects[i] );
-            boxes.push(boundingBox);
+            boxes.push([boundingBox, i]);
         }
 
     }
@@ -361,8 +364,8 @@ function getBoundingBoxes (objects) {
 
 function checkCollisions(box, boundingBoxes){
     for (let i = 0; i < boundingBoxes.length; i++) {
-        if (box.intersectsBox(boundingBoxes[i])) {
-            return true;
+        if (box.intersectsBox(boundingBoxes[i][0])) {
+            return {hasCollision: true, collidedObject: objects[boundingBoxes[i][1]]};
         }
     }
     return false;
