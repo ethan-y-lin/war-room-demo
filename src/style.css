@@ -3,36 +3,34 @@ body {
     height: 100%;
     background-color: white;
     margin: 0;
+    font-family: Georgia, 'Times New Roman', Times, serif;
 }
 
-.title{
-    font-size:32px;
-    color:rgb(30, 30, 30);
+.title h1{
+    font-size: 56px;
+    font-weight: 400;
+    color:rgb(60, 60, 60);
 }
 
 .mainSection{
     display: flex;
     flex-direction: row;
+    height: auto;
+    align-items: center;
 }
 
-.menu{
-    position: absolute;
+#menu{
     display: flex;
-    margin-left: 5px;
-    justify-content:center;
-    flex-direction: row;
-    height: 700px;
-    background-color:#333;
-    margin: auto;
+    width: 15%;
+    margin-left: 50px;
 }
 
 #scene{
     display: flex;
     flex-direction: column;
-    width: auto;
+    width: 85%;
     height: auto;
     align-items: center;
-    padding-left: 400px;
 }
 .no-cursor {
     cursor: none;
@@ -53,28 +51,46 @@ body {
 }
 
 nav a{
-    color: white;
-    background-color: #384c44;
+    color: #333;
+    background-color: transparent;
     text-decoration: none;
+    margin-bottom: 5px;
 }
 
 .dropdown-menu{
     display: flex;
-    flex-direction: row;
-    background-color: #333;
+    flex-direction: column;
+    justify-content: center;
     z-index: 999;
 }
 
-.dropdown-menu h2{
-    color: rgb(70, 70, 70);
-    background-color:rgb(255, 205, 42);
-    margin: 0px;
-    padding: 10;
-    text-align: center;
-    font-weight:400;
-    border: 2px solid rgb(30, 30, 30);
+#column1, #column2, #column3{
+    position: absolute;
 }
 
+.back-button1, .back-button2{
+    color:rgb(180, 180, 180);
+    width: 50px;
+    background: none;
+    transition: 0.2s ease-in-out;
+    margin-bottom: 10px;
+}
+
+.back-button1:hover, .back-button2:hover{
+    color:#333;
+    background: linear-gradient(to right, #c1e5d100, #1892645a, #c1e5d100);
+    cursor: pointer;
+}
+
+.menu-title h2{
+    color: rgb(70, 70, 70);
+    background-color: transparent;
+    text-align: center;
+    padding: 10px;
+    font-weight:200;
+    border-bottom: 2px solid rgb(30, 30, 30);
+    margin: 0px;
+}
 
 .layer1{
     display: flex;
@@ -88,11 +104,15 @@ nav a{
     position: relative;
 }
 
+.layer1 li{
+    margin: 5px;
+}
+
 .dropdown-menu ul li{
     display: block;
     float: left;
     position: relative;
-    border: 1px solid rgb(30, 30, 30);
+    border-bottom: 1px solid #445c5290;
 }
 
 .dropdown-menu ul a{
@@ -100,10 +120,14 @@ nav a{
     float: left;
     width: 150px;
     padding: 10px 10px;
+    color:  #445c52;
+    background: transparent;
+    transition: 0.2s ease-in-out;
 }
 .dropdown-menu ul a:hover{
-    background: #a4c3b2;
+    background: linear-gradient(to right, #c1e5d100, #1892645a, #c1e5d100);
     cursor: pointer;
+    color: #333;
 }
 
 .dropdown-menu>ul{
@@ -114,7 +138,6 @@ nav a{
 }
 
 .layer2{
-    position: relative;
     display: flex;
     flex-direction: column;
     padding:0px;
@@ -122,45 +145,25 @@ nav a{
 }
 
 .layerx{
-    position: absolute;
-    display: block;
-    opacity:1;
-}
-
-.menu-header{
-    float: none;
-    color: white;
-    background-color: #384c44;
-    text-decoration: none;
-    width: 200px;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    padding-left: 10px;
-    cursor: pointer;
-    text-align:justify;
     position: relative;
-}
-
-.collapse:hover:before{
-    content:url(./img/chevron-down.png);
-}
-
-
-.menu-container{
-    background-color:#ccd3de;
-    color: black;
-    display: inline-block;
-    height: 100px;
-    width: 210px;
-    text-align: center;
     display: flex;
     flex-direction: column;
-    
 }
 
-.menu-container a{
-    width: 50px;
-    margin: auto;
+.layerx li{
+    margin: 5px;
+}
+
+.layer3 ul{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0px;
+    margin: 0px;
+}
+
+.layer3 ul li{
+    margin: 5px;
 }
 
 .view-buttons{
@@ -170,21 +173,26 @@ nav a{
 }
 
 .button{
-    width: 80px;
-    height: 35px;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size: 14px;
+    width: 100px;
+    height: 30px;
     margin: 5px;
-    background-color: #384c44;
-    color: white;
-    border-radius: 5px;
+    background-color: transparent;
+    color: #384c44;
+    border: 1px solid #445c5260;
+    border-radius: 6px;
 }
 
-.button-general:hover{
-    background-color: #a4c3b2;
+.button:hover{
     cursor: pointer;
+    background: #c1e5d160;
+    color: #333;
 }
 
-.button-general:active{
-    background-color: #ccd3de;
+.button:active{
+    background: #445c52;
+    color: white;
 }
 
 .hidden{
@@ -203,7 +211,6 @@ nav a{
 #instructions {
     width: 100%;
     height: 100%;
-
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -214,18 +221,7 @@ nav a{
     cursor: pointer;
 }
 
-#menu-toggle{
-    background-color:#384c44;
-    border: none;
-    border-radius: 5px;
-    margin-left: 10px;
-}
-#menu-toggle:hover{
-    background-color:#a4c3b2;
-    cursor: pointer;
-}
-
-.full-screen{
+#full-screen{
     display: flex;
     justify-content: end;
 }
@@ -246,3 +242,32 @@ nav a{
 #fullscreen-button:hover{
     background-color:#a4c3b2;
 }
+
+#fp-war{
+    display: flex;
+    justify-content: start;
+    flex-direction: column;
+    padding-left: 15px;
+    position: absolute;
+}
+
+#fp-war .up, #fp-war h2{
+    margin-top: -10px;
+    margin-bottom: -20px;
+    font-family: Georgia, 'Times New Roman', Times, serif
+}
+
+#fp-war h2{
+    border-bottom: 1px solid #333;
+}
+
+#scene-options{
+    display: flex;
+    justify-content: end;
+    
+}
+
+#scene-options p{
+    position: absolute;
+}
+

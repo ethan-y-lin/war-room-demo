@@ -26,10 +26,14 @@ const direction = new THREE.Vector3();
 
 let inside = false;
 let outside = false;
+let ortho = true;
 let modelSize = new THREE.Vector3();
 let roof = new THREE.Mesh();
 const blocker = document.getElementById( 'blocker' );
 const instructions = document.getElementById( 'instructions' );
+
+let dragControls;
+let startColor;
 
 const onKeyDown = function ( event ) {
 
@@ -147,12 +151,14 @@ function setCameraBB (insideCamera, insideCameraBB) {
 
 function init() {
     scene = new THREE.Scene();
+    
     // initialize renderer
     renderer = new THREE.WebGLRenderer( { antialias: true } );
     renderer.setPixelRatio( canvas.devicePixelRatio );
     renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
     canvas.appendChild( renderer.domElement );
     canvas.addEventListener( 'resize', onWindowResize );
+    
     // outside camera
     outsideCamera = new THREE.PerspectiveCamera(
         45, 
@@ -172,18 +178,6 @@ function init() {
     insideCamera.position.set(5, 1.71, 5);
     insideCameraBB = new THREE.Box3();
     setCameraBB(insideCamera, insideCameraBB);
-    // outside controls
-    orbit = new OrbitControls(outsideCamera, renderer.domElement);
-    const axesHelper = new THREE.AxesHelper(5);
-    scene.add(axesHelper);
-    orbit.update();
-
-    // inside controls
-    controls = new PointerLockControls(insideCamera, canvas);
-    raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
-
-    // initialize geometries
-    initGeometries(scene);
 
     // orthographic camera
     orthoCamera = new THREE.OrthographicCamera(
@@ -194,10 +188,24 @@ function init() {
         0.1,
         1000
     );
-    // orthographic camera position (up and top-down)
     orthoCamera.position.set(0, 10, 0);
     orthoCamera.up.set (0, 0, -1);
     orthoCamera.lookAt(0, 0, 0);
+
+    // outside controls
+    orbit = new OrbitControls(outsideCamera, renderer.domElement);
+    const axesHelper = new THREE.AxesHelper(5);
+    scene.add(axesHelper);
+    orbit.update();
+
+    // inside controls
+    controls = new PointerLockControls(insideCamera, canvas);
+    raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
+
+    initGeometries(scene);
+    console.log(objects)
+    //drag controls
+    dragControls = new DragControls(objects, orthoCamera, canvas);
 }
 
 function onWindowResize(){
@@ -206,6 +214,15 @@ function onWindowResize(){
     renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
 }
 
+function dragStartCallback(event){
+    console.log("drag start");
+    startColor = event.object.material.color.getHex();
+    event.object.material.color.setHex(0xff0000);
+}
+function dragEndCallback(event){
+    console.log("drag end");
+    event.object.material.color.setHex(startColor);
+}
 
 
 function animateInside() {
@@ -244,10 +261,10 @@ function animateInside() {
 function animate(time) {
     if (inside){
         animateInside();
-    } else if (outside) {
+    } else if (outside){
         renderer.render(scene, outsideCamera);
         console.log("outside");
-    } else {
+    } else if (ortho){
         renderer.render(scene, orthoCamera);
         console.log("ortho");
     }
@@ -271,6 +288,7 @@ function showBlocker(){
 function setInsideViewMode(){
     inside = true;
     outside = false;
+    ortho = false;
     const geometry = new THREE.BoxGeometry( modelSize.x, modelSize.y/20, modelSize.z ); 
     const material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
     roof = new THREE.Mesh( geometry, material );
@@ -278,6 +296,7 @@ function setInsideViewMode(){
     roof.position.set(0, modelSize.y, 0);
     renderer.render(scene, insideCamera);
     orbit.enabled = false;
+    dragControls.enabled = false;
     controls.enabled = true;
     showBlocker();
     instructions.addEventListener( 'click', lock);
@@ -289,9 +308,12 @@ function setInsideViewMode(){
 }
 
 function setOutsideViewMode(){
+    dragControls.enabled = false;
+    console.log(dragControls.enabled);
     controls.enabled = false;
-    inside=false;
+    inside = false;
     outside = true;
+    ortho = false;
     scene.remove(roof);
     renderer.render(scene, outsideCamera);
     orbit.enabled = true;
@@ -304,23 +326,26 @@ function setOutsideViewMode(){
 }
 
 function setOrthoViewMode(){
-    console.log("ortho view")
-    const dragControls = new DragControls(objects, orthoCamera, renderer.domElement);
+    dragControls.setObjects(objects);
+    dragControls.addEventListener('dragstart', dragStartCallback);
+    dragControls.addEventListener('dragend', dragEndCallback);
+    console.log(dragControls);
+    console.log(dragControls.objects)
+    dragControls.enabled = true;
+    console.log(dragControls.enabled);
     controls.enabled = false;
     inside = false;
     outside = false;
+    ortho = true;
     scene.remove(roof);
-    renderer.render(scene, orthoCamera);
     orbit.enabled = false;
+    renderer.render(scene, orthoCamera);
     hideBlocker();
-   
-    //no materials yet so nothing happens...?
-    dragControls.addEventListener('dragstart', function(event){
-        event.object.material.opacity = 0.33;
-    });
-    dragControls.addEventListener('dragend', function(event){
-        event.object.material.opacity = 1;
-    });
+    instructions.removeEventListener( 'click', lock);
+    controls.removeEventListener('lock', hideBlocker);
+    controls.removeEventListener('unlock', showBlocker);
+    document.removeEventListener('keydown', onKeyDown);
+    document.removeEventListener('keyup',onKeyUp);
 }
 
 
@@ -371,18 +396,17 @@ function checkCollisions(box, boundingBoxes){
     return false;
 }
 
+$('#inside-view').on('click', function(){
+    setInsideViewMode();
+})
+$('#outside-view').on('click', function(){
+    setOutsideViewMode();
+})
+$('#ortho-view').on('click', function(){
+    setOrthoViewMode();
+})
 
-const insideViewButton = document.getElementById('inside-view');
-insideViewButton.addEventListener('click', setInsideViewMode);
-
-const outsideViewButton = document.getElementById('outside-view');
-outsideViewButton.addEventListener('click', setOutsideViewMode);
-
-const orthoViewButton = document.getElementById('ortho-view');
-orthoViewButton.addEventListener('click', setOrthoViewMode);
-
-const fullscreenButton = document.getElementById('fullscreen-button');
-fullscreenButton.addEventListener('pointerup', ()=>{
+$('#fullscreen-button').on('click', function(){
     if (renderer.domElement.requestFullscreen){
         renderer.domElement.requestFullscreen();
     } else if (renderer.domElement.webkitRequestFullscreen){

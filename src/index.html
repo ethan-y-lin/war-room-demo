@@ -10,14 +10,10 @@
 <body>
     
     <div class="mainSection">
-        <aside class="menu">
-            <!-- <div>
-                <button id="menu-toggle"><img src="./img/menu-icon.png" alt="menu"></button>
-            </div> -->
-
+        <aside id="menu">
             <nav class="dropdown-menu">
-                <div class="horizontal1">
-                    <div><h2>Menu</h2></div>
+                <div id="column1" class="hidden">
+                    <div class="menu-title"><h2>Menu</h2></div>
                 <ul class="layer1">
                     <li>
                         <a class="menu-unit" id="fp">FLOOR PLANS</a>
@@ -26,10 +22,10 @@
                         <a class="menu-unit" id="f">FURNITURES</a>
                     </li>
                     <li>
-                        <a class="menu-unit" id="p1">MEASUREMENTS</a>
+                        <a class="menu-unit" id="m">MEASUREMENTS</a>
                     </li>
                     <li>
-                        <a class="menu-unit" id="p2">SAVED PLANS</a>
+                        <a class="menu-unit" id="sp">SAVED PLANS</a>
                     </li>
                     <li>
                         <a class="menu-unit" id="p3">EXPORT</a>
@@ -38,89 +34,85 @@
                 </div>
                 
 
-                <div class="horizontal2">
+                <div id="column2">
                     <ul id="floor-plans" class="layer2 hidden">
+                        <div class="back-button1">&lt; back</div>
+                        <div class="menu-title"><h2>FLOOR PLANS</h2></div>
                         <div class="layerx">    
                             <li>
-                                <div class="menu-header button-general">Studio</div>
+                                <a>Studio</a>
                             </li>
                             <li>
-                                <div class="menu-header button-general">1 Bedroom</div>
+                                <a>1 Bedroom</a>
                             </li>
                             <li>
-                                <div class="menu-header button-general">1 Bedroom + Den</div>
+                                <a>1 Bedroom + Den</a>
+                            </li>
+                            <li>
+                                <a>2 Bedroom</a>
+                            </li>
+                            <li>
+                                <a>2 Bedroom + Den</a>
                             </li>
                         </div>
                     </ul>
                     <ul id="furnitures" class="layer2 hidden">
+                        <div class="back-button1">&lt; back</div>
+                        <div class="menu-title"><h2>FURNITURES</h2></div>
                         <div class="layerx">
                             <li>
-                                <div class="menu-header collapse button-general">
-                                    Chairs
-                                </div>
-                                <div class="menu-container hidden">
-                                    <a id="object1">Object 1</a>
-                                    <a id="object2">Object 2</a>
-                                </div> 
+                                <div id = "chairs" class="menu-header"><a>Chairs</a></div>
                             </li>
                             <li>
-                                <div class="menu-header collapse button-general">Sofas</div>
-                                <div class="menu-container hidden">PLACEHOLDER</div>
+                                <div id = "sofas" class="menu-header"><a>Sofas</a></div>
                             </li>
                             <li>
-                                <div class="menu-header collapse button-general">Tables</div>
-                                <div class="menu-container hidden">PLACEHOLDER</div>
+                                <div id = "tables" class="menu-header"><a>Tables</a></div>
                             </li> 
                         </div>         
                     </ul>
-                    <ul id="placeholder1" class="layer2 hidden">
-                        <div class="layerx">    
+                    <ul id="saved-plans" class="layer2 hidden">
+                        <div class="back-button1">&lt; back</div>
+                        <div class="menu-title"><h2>SAVED PLANS</h2></div>
+                        <div class="layerx">
                             <li>
-                                <div class="menu-header button-general">1</div>
+                                <a>Plan 1</a>
                             </li>
                             <li>
-                                <div class="menu-header button-general">2</div>
+                                <a>Plan 2</a>
                             </li>
                             <li>
-                                <div class="menu-header button-general">3</div>
-                            </li>
-                        </div>
+                                <a>Plan 3</a>
+                            </li> 
+                        </div>  
                     </ul>
-                    <ul id="placeholder2" class="layer2 hidden">
-                        <div class="layerx">    
-                            <li>
-                                <div class="menu-header button-general">1</div>
-                            </li>
-                            <li>
-                                <div class="menu-header button-general">2</div>
-                            </li>
-                            <li>
-                                <div class="menu-header button-general">3</div>
-                            </li>
-                            <li>
-                                <div class="menu-header button-general">4</div>
-                            </li>
-                        </div>
-                    </ul>
-                    <ul id="placeholder3" class="layer2 hidden">
-                        <div class="layerx">    
-                            <li>
-                                <div class="menu-header button-general">1</div>
-                            </li>
-                            <li>
-                                <div class="menu-header button-general">2</div>
-                            </li>
-                            <li>
-                                <div class="menu-header button-general">3</div>
-                            </li>
-                            <li>
-                                <div class="menu-header button-general">4</div>
-                            </li>
-                            <li>
-                                <div class="menu-header button-general">5</div>
-                            </li>
-                        </div>
-                    </ul>
+                </div>
+
+                <div id="column3" class = "hidden">
+                    <div id="chairs3" class="layer3 hidden">
+                        <div class="back-button2">&lt; back</div>
+                        <div class="menu-title"><h2>CHAIRS</h2></div>
+                        <ul>
+                            <li><a>Chair 1</a></li>
+                            <li><a>Chair 2</a></li>
+                        </ul>
+                    </div>
+                    <div id="sofas3" class="layer3 hidden">
+                        <div class="back-button2">&lt; back</div>
+                        <div class="menu-title"><h2>SOFAS</h2></div>
+                        <ul>
+                            <li><a>Sofa 1</a></li>
+                            <li><a>Sofa 2</a></li>
+                        </ul>
+                    </div>
+                    <div id="tables3" class="layer3 hidden">
+                        <div class="back-button2">&lt; back</div>
+                        <div class="menu-title"><h2>TABLES</h2></div>
+                        <ul>
+                            <li><a>Table 1</a></li>
+                            <li><a>Table 2</a></li>
+                        </ul>
+                    </div>
                 </div>
 
             </nav>         
@@ -142,8 +134,16 @@
                         </p>
                     </div>
                 </div>
-                <div class="full-screen">
+                <div id="fp-war">
+                    <p><h2>War Room</h2></p>
+                    <p class="up">Unsaved plan</p>
+                </div>
+                <div id="full-screen">
                     <button id="fullscreen-button">&#x26F6</button>
+                </div>
+                <div id="scene-options">
+                    <p>Reset</p>
+                    <p>Save</p>
                 </div>
             </div>
             <div class="view-buttons">

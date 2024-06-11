@@ -1,3 +1,4 @@
+$("#column1").removeClass("hidden");
 //need to refresh the menu when hidden later
 $("#menu-toggle").on('click', function(){
     $(".dropdown-menu").toggleClass("hidden");
@@ -5,36 +6,52 @@ $("#menu-toggle").on('click', function(){
 
 //ideally should use hover to determine hidden class but then it can't go to the next layer
 //will take a look at this later
-$(".menu-unit").on('mouseover', function(){
+$(".menu-unit").on('click', function(){
     if($(this).is("#fp")){
         $("#floor-plans").removeClass("hidden");
-        $("#furnitures, #placeholder1, #placeholder2, #placeholder3").addClass("hidden");
+        $("#column1, #furnitures, #saved-plans").addClass("hidden");
     };
     if($(this).is("#f")){
-        $("#furnitures").toggleClass("hidden");
-        $("#floor-plans, #placeholder1, #placeholder2, #placeholder3").addClass("hidden");
+        $("#furnitures").removeClass("hidden");
+        $("#column1, #floor-plans, #saved-plans").addClass("hidden");
     };
-    if($(this).is("#p1")){
-        $("#placeholder1").toggleClass("hidden");
-        $("#floor-plans, #furnitures, #placeholder2, #placeholder3").addClass("hidden");
+    if($(this).is("#m")){
+        $("#floor-plans, #furnitures, #saved-plans").addClass("hidden");
     };
-    if($(this).is("#p2")){
-        $("#placeholder2").toggleClass("hidden");
-        $("#floor-plans, #furnitures, #placeholder1, #placeholder3").addClass("hidden");
+    if($(this).is("#sp")){
+        $("#saved-plans").removeClass("hidden");
+        $("#column1, #floor-plans, #furnitures").addClass("hidden");
     };
     if($(this).is("#p3")){
-        $("#placeholder3").toggleClass("hidden");
-        $("#floor-plans, #furnitures, #placeholder1, #placeholder2").addClass("hidden");
+        $("#floor-plans, #furnitures, #saved-plans").addClass("hidden");
     };
 });
 
-//can't hide if mouseleave on layer1 now
-//don't wanna do that cuz then it can't go to the next layer
-$(".layer2").on('mouseleave', function(){
+$(".menu-header").on('click', function(){
     $(".layer2").addClass("hidden");
+    $("#column3").removeClass("hidden");
+    
+    if($(this).is("#chairs")){
+        $("#chairs3").removeClass("hidden");
+        $("#sofas3, #tables3").addClass("hidden");
+    }
+    if($(this).is("#sofas")){
+        $("#sofas3").removeClass("hidden");
+        $("#chairs3, #tables3").addClass("hidden");
+    }
+    if($(this).is("#tables")){
+        $("#tables3").removeClass("hidden");
+        $("#chairs3, #sofas3").addClass("hidden");
+    }
+
 });
 
-$(".menu-header").on('click', function(e){
-    $(this).next().toggleClass("hidden");
-    e.stopPropagation();
-});
+$(".back-button1").on('click', function(){
+    $(".layer2").addClass("hidden");
+    $("#column1").removeClass("hidden");
+})
+//temporary solution
+$(".back-button2").on('click', function(){
+    $("#column3").addClass("hidden");
+    $("#furnitures").removeClass("hidden");
+})
