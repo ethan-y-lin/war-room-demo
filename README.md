@@ -2,7 +2,7 @@
 
 # Demo of 3D Room Reconstruction GUI for Cornell PCG Summer Research 2024. 
 
-# How to initialize using npm
+# How to install dependencies using npm
 
 1. npm install parcel -g
 2. npm install three

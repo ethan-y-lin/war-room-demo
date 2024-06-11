@@ -1,0 +1,5 @@
+node_modules
+cloudinaryConfig.js 
+mongodbConfig.js 
+package-lock.json 
+package.json
