@@ -184,7 +184,7 @@ function init() {
     orthoCamera.lookAt(0, 0, 0);
 
     // outside controls
-    orbit = new THREE.OrbitControls(outsideCamera, renderer.domElement);
+    orbit = new THREE.OrbitControls(outsideCamera, canvas);
     const axesHelper = new THREE.AxesHelper(5);
     scene.add(axesHelper);
     orbit.update();
@@ -263,6 +263,7 @@ function animate(time) {
 
 
 function lock () {
+    console.log("hi")
     controls.lock();
 }
 
@@ -310,6 +311,7 @@ function setOutsideViewMode(){
     scene.remove(roof);
     renderer.render(scene, outsideCamera);
     orbit.enabled = true;
+    console.log(orbit)
     hideBlocker();
     instructions.removeEventListener( 'click', lock);
     controls.removeEventListener('lock', hideBlocker);
