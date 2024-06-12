@@ -1,17 +1,14 @@
 extends layout 
 
 block content
-    h1 Hello World
+    h1 #{obj_name}
     div.canvas2
     script(src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js")
     script(src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js")
     script.
         const canvas = document.querySelector(".canvas2");
-        console.log("hi");
         const objUrl = '#{obj_url}';
         if (objUrl !== '') {
-          
-          console.log(objUrl);
           const scene = new THREE.Scene();
           const camera = new THREE.PerspectiveCamera(75, canvas.offsetWidth / canvas.offsetHeight, 0.1, 1000);
           const renderer = new THREE.WebGLRenderer();
@@ -31,7 +28,24 @@ block content
           scene.add(planeMesh);
           const loader = new THREE.GLTFLoader();
           loader.load(objUrl, function (gltf) {
-            scene.add(gltf.scene);
+            const newScene = gltf.scene;
+            const targetSize = 1;
+            newScene.traverse( (obj) => {
+              if (obj instanceof THREE.Mesh) {
+                // Calculate the current size of the object's bounding box
+                const boundingBox = new THREE.Box3().setFromObject(obj);
+                const currentSize = boundingBox.getSize(new THREE.Vector3());
+
+                // Calculate the scale factor required to normalize the size
+                const scaleFactor = targetSize / Math.max(currentSize.x, currentSize.y, currentSize.z);
+                // Calculate the offset of the pivot point relative to the center of the object
+                const pivotOffset = boundingBox.getCenter(new THREE.Vector3()).negate();
+                // Scale the object uniformly to match the target size
+                obj.scale.set(scaleFactor, scaleFactor, scaleFactor);
+                obj.position.add(pivotOffset.multiplyScalar(scaleFactor));
+              }
+            });
+            scene.add(newScene);
             camera.position.z = 1;
 
             const animate = function () {
