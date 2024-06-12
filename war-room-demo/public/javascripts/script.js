@@ -1,9 +1,3 @@
-import * as THREE from "./three/build/three.module.js";
-import { OrbitControls } from "./three/examples/jsm/controls/OrbitControls.js";
-// import { DragControls } from "./three/examples/jsm/controls/DragControls.js";
-import { PointerLockControls } from "./three/examples/jsm/controls/PointerLockControls.js";
-import {GLTFLoader} from "https://cdn.jsdelivr.net/npm/three@0.127.0/examples/js/loaders/GLTFLoader.js";
-
 let outsideCamera, insideCamera, insideCameraBB, scene, renderer, orbit, controls, orthoCamera;
 const canvas = document.getElementById("scene-container");
 const cleanRoomURL = new URL('../assets/warroom1.glb', import.meta.url);
@@ -124,7 +118,7 @@ function initGeometries(scene) {
     const sLightHelper = new THREE.SpotLightHelper(spotLight);
     scene.add(sLightHelper);
 
-    const assetLoader = new GLTFLoader();
+    const assetLoader = new THREE.GLTFLoader();
     let modelSize = new THREE.Vector3();
     assetLoader.load(cleanRoomURL.href, (gltf) => {
         model = gltf.scene;
@@ -190,19 +184,19 @@ function init() {
     orthoCamera.lookAt(0, 0, 0);
 
     // outside controls
-    orbit = new OrbitControls(outsideCamera, renderer.domElement);
+    orbit = new THREE.OrbitControls(outsideCamera, renderer.domElement);
     const axesHelper = new THREE.AxesHelper(5);
     scene.add(axesHelper);
     orbit.update();
 
     // inside controls
-    controls = new PointerLockControls(insideCamera, canvas);
+    controls = new THREE.PointerLockControls(insideCamera, canvas);
     raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
 
     initGeometries(scene);
     console.log(objects)
     //drag controls
-    dragControls = new DragControls(objects, orthoCamera, canvas);
+    dragControls = new THREE.DragControls(objects, orthoCamera, canvas);
 }
 
 function onWindowResize(){
