@@ -19,6 +19,8 @@ block content
                             a.menu-unit#sp SAVED PLANS
                         li
                             a.menu-unit#p3 EXPORT
+                        li
+                            a(href="/upload") UPLOAD
                 div#column2
                     ul#floor-plans.layer2.hidden
                         div.back-button1 &lt; back
@@ -98,20 +100,25 @@ block content
                             h1 Click to play
                         p Move: WASD
                         p Look: MOUSE
-                div#fp-war
-                    p
-                        h2 War Room
-                    p.up Unsaved plan
-                div#full-screen
-                    button#fullscreen-button ⛶
-                div#scene-options
-                    p Reset
-                    p Save
+                div#hud
+                    div#fp-war
+                        p
+                            h2 War Room
+                        p.up Unsaved plan
+                    div#scene-right
+                        div#full-screen
+                            button#fullscreen-button ⛶
+                        div#scene-options
+                            ul
+                                li
+                                    a Reset
+                                li
+                                    a Save
             div.view-buttons
                 button#ortho-view.button.button-general Orthographic
                 button#outside-view.button.button-general Outside
                 button#inside-view.button.button-general Inside
-                a(href="/upload") Upload Object
+                //- a(href="/upload") Upload Object
                 a(href="/list") Upload List
 
     script(src="./javascripts/jquery-3.7.1.min.js")
