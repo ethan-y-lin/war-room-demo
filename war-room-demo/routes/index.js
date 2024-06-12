@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const multer = require('multer');
+const path = require('path');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
@@ -9,7 +10,8 @@ const object_controller = require("../controllers/objectController");
 
 // Routes
 router.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html')); // Assuming you have an index.html file for your frontend
+  console.log("fdas");
+  res.render("index", {title: "Test"}); // Assuming you have an index.html file for your frontend
 });
 
 // GET request for creating an Object. 
