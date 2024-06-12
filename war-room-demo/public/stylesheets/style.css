@@ -200,6 +200,8 @@ nav a{
   width: 800px;
   height: 500px;
   background-color: rgba(0,0,0,0.5);
+  z-index: 5;
+  margin-top: 140px;
 }
 
 #instructions {
@@ -240,6 +242,7 @@ nav a{
   flex-direction: column;
   position: relative;
   z-index: 999;
+  margin-left: 10px;
 }
 
 #fp-war .up, #fp-war h2{
