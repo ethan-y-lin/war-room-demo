@@ -40,12 +40,6 @@ body {
   cursor: pointer;
 }
 
-#scene-container {
-  width: 800px;
-  height: 500px;
-  display: block;
-}
-
 .title{
   text-align: center;
 }
@@ -221,13 +215,72 @@ nav a{
   cursor: pointer;
 }
 
+#scene-container {
+  width: 800px;
+  height: 500px;
+  /* display: block; */
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  justify-content: space-between;
+  z-index: 1;
+}
+
+#hud{
+  display: flex;
+  flex-direction: row;
+  width: 800px;
+  justify-content: space-between;
+  position: absolute;
+  z-index: 999;
+}
+
+#fp-war{
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 999;
+}
+
+#fp-war .up, #fp-war h2{
+  margin-top: -10px;
+  margin-bottom: -20px;
+  font-family: Georgia, 'Times New Roman', Times, serif
+}
+
+#fp-war h2{
+  border-bottom: 1px solid #333;
+}
+
+#scene-right{
+  display: flex;
+  flex-direction: column;
+  height: 500px;
+  justify-content: space-between;
+  position: relative;
+}
+
+#scene-options{
+  display: block;
+  position: relative;
+  margin-right: 10px;
+}
+
+#scene-options li{
+  border-bottom: 1px solid #445c5290;
+}
+
+#scene-options ul{
+  list-style: none;
+}
+
 #full-screen{
   display: flex;
   justify-content: end;
+  position: relative;
 }
 
 #fullscreen-button{
-  position: absolute;
   color: white;
   background-color:#384c44;
   font-size: 26px;
@@ -241,32 +294,4 @@ nav a{
 
 #fullscreen-button:hover{
   background-color:#a4c3b2;
-}
-
-#fp-war{
-  display: flex;
-  justify-content: start;
-  flex-direction: column;
-  padding-left: 15px;
-  position: absolute;
-}
-
-#fp-war .up, #fp-war h2{
-  margin-top: -10px;
-  margin-bottom: -20px;
-  font-family: Georgia, 'Times New Roman', Times, serif
-}
-
-#fp-war h2{
-  border-bottom: 1px solid #333;
-}
-
-#scene-options{
-  display: flex;
-  justify-content: end;
-  
-}
-
-#scene-options p{
-  position: absolute;
 }
