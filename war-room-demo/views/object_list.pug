@@ -1,0 +1,15 @@
+extends layout 
+
+block content 
+    h1= title 
+    if object_list.length 
+        ul 
+            each object in object_list 
+                li 
+                    a(href=object.url) #{object.name} 
+                    
+    else 
+        p There are no objects.
+    
+    p
+        a(href='/home/upload') Create Object

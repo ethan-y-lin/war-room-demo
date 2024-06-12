@@ -1,6 +1,7 @@
 extends layout
 
 block content
+    div.object-data(data-objects=objects)
     div.mainSection
         aside#menu
             nav.dropdown-menu
@@ -110,6 +111,8 @@ block content
                 button#ortho-view.button.button-general Orthographic
                 button#outside-view.button.button-general Outside
                 button#inside-view.button.button-general Inside
+                a(href="/upload") Upload Object
+                a(href="/list") Upload List
 
     script(src="./javascripts/jquery-3.7.1.min.js")
     script(src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js")

@@ -320,7 +320,23 @@ function setOutsideViewMode(){
     dragControls.removeEventListener('dragend', dragEndCallback);
 }
 
+function updateObjects() {
+    const addedObjects = JSON.parse(document.querySelector('.object-data').dataset.objects);
+    console.log(addedObjects)
+    console.log(typeof(addedObjects))
+    addedObjects.forEach((object) => {
+        if (object.obj_url != '') {        
+            const loader = new THREE.GLTFLoader();
+            loader.load(object.obj_url, function (gltf) {
+                scene.add(gltf.scene);
+                console.log(gltf.scene)
+                objects.push(gltf.scene);
+            });
+        }
+    });
+}
 function setOrthoViewMode(){
+    updateObjects();
     dragControls = new THREE.DragControls(objects, orthoCamera, canvas);
     dragControls.addEventListener('dragstart', dragStartCallback);
     dragControls.addEventListener('dragend', dragEndCallback);
