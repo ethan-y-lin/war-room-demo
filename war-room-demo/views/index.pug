@@ -1,124 +1,115 @@
 extends layout
 
 block content
-  div.mainSection
-      aside#menu
-          nav.dropdown-menu
-              #column1.hidden
-                  .menu-title
-                  h2 Menu
-                  ul.layer1
-                      li
-                          a.menu-unit#fp FLOOR PLANS
-                      li
-                          a.menu-unit#f FURNITURES
-                      li
-                          a.menu-unit#m MEASUREMENTS
-                      li
-                          a.menu-unit#sp SAVED PLANS
-                      li
-                          a.menu-unit#p3 EXPORT
-              div#column2
-                  ul#floor-plans.layer2.hidden
-                  .back-button1 &lt; back
-                  .menu-title
-                      h2 FLOOR PLANS
-                  .layerx
-                      li
-                          a Studio
-                      li
-                          a 1 Bedroom
-                      li
-                          a 1 Bedroom + Den
-                      li
-                          a 2 Bedroom
-                      li
-                          a 2 Bedroom + Den
-                  ul#furnitures.layer2.hidden
-                  .back-button1 &lt; back
-                  .menu-title
-                      h2 FURNITURES
-                  .layerx
-                      li
-                      #chairs.menu-header
-                          a Chairs
-                      li
-                      #sofas.menu-header
-                          a Sofas
-                      li
-                      #tables.menu-header
-                          a Tables
-                  ul#saved-plans.layer2.hidden
-                  .back-button1 back
-                  .menu-title
-                      h2 SAVED PLANS
-                  .layerx
-                      li
-                          a Plan 1
-                      li
-                          a Plan 2
-                      li
-                          a Plan 3
-              #column3.hidden
-                  #chairs3.layer3.hidden
-                  .back-button2 back
-                  .menu-title
-                      h2 CHAIRS
-                  ul
-                      li
-                          a Chair 1
-                      li
-                          a Chair 2
-                  #sofas3.layer3.hidden
-                  .back-button2 back
-                  .menu-title
-                      h2 SOFAS
-                  ul
-                      li
-                          a Sofa 1
-                      li
-                          a Sofa 2
-                  #tables3.layer3.hidden
-                  .back-button2 < back
-                  .menu-title
-                      h2 TABLES
-                  ul
-                      li
-                          a Table 1
-                      li
-                          a Table 2
-      main#scene
-          .title
-          h1 War Room Demo
-          div#scene-container
-          div#blocker
-              div#instructions
-              p.
-                  
-                  
-              h1 Click to play
-              p
-              p
-                  | 
-      Move: WASD
-                  br
-                  | 
-      Look: MOUSE
-
-          #fp-war
-              p
-              h2 War Room
-              p
-              p.up Unsaved plan
-          #full-screen
-              button#fullscreen-button ⛶
-          #scene-options
-              p Reset
-              p Save
-          .view-buttons
-          button#ortho-view.button.button-general Orthographic
-          button#outside-view.button.button-general Outside
-          button#inside-view.button.button-general Inside
+    div.mainSection
+        aside#menu
+            nav.dropdown-menu
+                div#column1.hidden
+                    div.menu-title
+                        h2 Menu
+                    ul.layer1
+                        li
+                            a.menu-unit#fp FLOOR PLANS
+                        li
+                            a.menu-unit#f FURNITURES
+                        li
+                            a.menu-unit#m MEASUREMENTS
+                        li
+                            a.menu-unit#sp SAVED PLANS
+                        li
+                            a.menu-unit#p3 EXPORT
+                div#column2
+                    ul#floor-plans.layer2.hidden
+                        div.back-button1 &lt; back
+                        div.menu-title
+                            h2 FLOOR PLANS
+                        div.layerx
+                            li
+                                a Studio
+                            li
+                                a 1 Bedroom
+                            li
+                                a 1 Bedroom + Den
+                            li
+                                a 2 Bedroom
+                            li
+                                a 2 Bedroom + Den
+                    ul#furnitures.layer2.hidden
+                        div.back-button1 &lt; back
+                        div.menu-title
+                            h2 FURNITURES
+                        div.layerx
+                            li
+                                div#chairs.menu-header
+                                    a Chairs
+                            li
+                                div#sofas.menu-header
+                                    a Sofas
+                            li
+                                div#tables.menu-header
+                                    a Tables
+                    ul#saved-plans.layer2.hidden
+                        div.back-button1 back
+                        div.menu-title
+                            h2 SAVED PLANS
+                        div.layerx
+                            li
+                                a Plan 1
+                            li
+                                a Plan 2
+                            li
+                                a Plan 3
+                div#column3.hidden
+                    div#chairs3.layer3.hidden
+                        div.back-button2 &lt; back
+                        div.menu-title
+                            h2 CHAIRS
+                        ul
+                            li
+                                a Chair 1
+                            li
+                                a Chair 2
+                    div#sofas3.layer3.hidden
+                        div.back-button2 &lt; back
+                        div.menu-title
+                            h2 SOFAS
+                        ul
+                            li
+                                a Sofa 1
+                            li
+                                a Sofa 2
+                    div#tables3.layer3.hidden
+                        div.back-button2 &lt; back
+                        div.menu-title
+                            h2 TABLES
+                        ul
+                            li
+                                a Table 1
+                            li
+                                a Table 2
+        main#scene
+            div.title
+                h1 War Room Demo
+            div#scene-container
+                div#blocker
+                    div#instructions
+                        p
+                            h1 Click to play
+                        p Move: WASD
+                        p Look: MOUSE
+                div#fp-war
+                    p
+                        h2 War Room
+                    p.up Unsaved plan
+                div#full-screen
+                    button#fullscreen-button ⛶
+                div#scene-options
+                    p Reset
+                    p Save
+            div.view-buttons
+                button#ortho-view.button.button-general Orthographic
+                button#outside-view.button.button-general Outside
+                button#inside-view.button.button-general Inside
   script(src="./javascripts/jquery-3.7.1.min.js")
   script(src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js")
   script(src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js")
