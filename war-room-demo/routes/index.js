@@ -7,17 +7,20 @@ const upload = multer({ storage: storage });
 
 // Require our controllers.
 const object_controller = require("../controllers/objectController");
-
+const app_controller = require("../controllers/appController");
 // Routes
-router.get('/', (req, res) => {
-  console.log("fdas");
-  res.render("index", {title: "Test"}); // Assuming you have an index.html file for your frontend
-});
+router.get('/', app_controller.index);
 
 // GET request for creating an Object. 
 router.get("/upload", object_controller.object_upload_get);
 
 // POST request for creating Item.
 router.post("/upload", upload.single('object'), object_controller.object_upload_post);
+
+// GET request for dispalying list. 
+router.get("/list", object_controller.object_list);
+
+// GET request for one Object.
+router.get("/:id", object_controller.object_detail);
 
 module.exports = router;

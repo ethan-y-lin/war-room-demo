@@ -1,0 +1,37 @@
+extends layout 
+
+block content
+    h1 Hello World
+    div.canvas
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js")
+    script(src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js")
+    script.
+        const canvas = document.querySelector(".canvas");
+        console.log("hi");
+        const objUrl = '#{obj_url}';
+        console.log(objUrl);
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, canvas.offsetWidth / canvas.offsetHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
+        canvas.appendChild(renderer.domElement);
+        
+        // Add ambient light
+        const ambientLight = new THREE.AmbientLight(0x404040); // soft white light
+        scene.add(ambientLight);
+
+        const loader = new THREE.GLTFLoader();
+        loader.load(objUrl, function (gltf) {
+          scene.add(gltf.scene);
+          camera.position.z = 5;
+
+          const animate = function () {
+            requestAnimationFrame(animate);
+            gltf.scene.rotation.y += 0.01;
+            renderer.render(scene, camera);
+          };
+
+          animate();
+        }, undefined, function (error) {
+          console.log(error);
+        });
