@@ -270,3 +270,9 @@ nav a{
 #scene-options p{
   position: absolute;
 }
+
+.canvas2 {
+  height: 500px;
+  width: 500px;
+  background-color: black;
+}

@@ -32,7 +32,7 @@ exports.object_upload_get = asyncHandler (async (req, res, next) => {
       err.status = 404;
       return next(err);
     }
-  
+    console.log(object)
     res.render("object_detail", {
       title: "Object Detail",
       obj_url: object.obj_url,
