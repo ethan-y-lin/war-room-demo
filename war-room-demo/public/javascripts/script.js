@@ -295,6 +295,8 @@ function setInsideViewMode(){
     controls.addEventListener( 'unlock', showBlocker);
     document.addEventListener('keydown', onKeyDown);
     document.addEventListener('keyup',onKeyUp);
+    dragControls.removeEventListener('dragstart', dragStartCallback);
+    dragControls.removeEventListener('dragend', dragEndCallback);
     boundingBoxes = getBoundingBoxes(objects);
 }
 
@@ -314,16 +316,15 @@ function setOutsideViewMode(){
     controls.removeEventListener('unlock', showBlocker);
     document.removeEventListener('keydown', onKeyDown);
     document.removeEventListener('keyup',onKeyUp);
+    dragControls.removeEventListener('dragstart', dragStartCallback);
+    dragControls.removeEventListener('dragend', dragEndCallback);
 }
 
 function setOrthoViewMode(){
-    dragControls.setObjects(objects);
+    dragControls = new THREE.DragControls(objects, orthoCamera, canvas);
     dragControls.addEventListener('dragstart', dragStartCallback);
     dragControls.addEventListener('dragend', dragEndCallback);
-    console.log(dragControls);
-    console.log(dragControls.objects)
     dragControls.enabled = true;
-    console.log(dragControls.enabled);
     controls.enabled = false;
     inside = false;
     outside = false;
@@ -357,7 +358,7 @@ function hasDoor (object) {
 
 function getBoundingBoxes (objects) {
     console.log(objects);
-    boxes = [];
+    let boxes = [];
     for (let i = 0; i < objects.length; i++) {
         if (hasDoor(objects[i])){
              for (let j = 0; j < objects[i].children.length; j++){
