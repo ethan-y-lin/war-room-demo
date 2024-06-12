@@ -93,13 +93,13 @@ block content
         main#scene
             div.title
                 h1 War Room Demo
+            div#blocker
+                div#instructions
+                    p
+                        h1 Click to play
+                    p Move: WASD
+                    p Look: MOUSE
             div#scene-container
-                div#blocker
-                    div#instructions
-                        p
-                            h1 Click to play
-                        p Move: WASD
-                        p Look: MOUSE
                 div#hud
                     div#fp-war
                         p
@@ -115,10 +115,10 @@ block content
                                 li
                                     a Save
             div.view-buttons
-                button#ortho-view.button.button-general Orthographic
-                button#outside-view.button.button-general Outside
-                button#inside-view.button.button-general Inside
-                //- a(href="/upload") Upload Object
+                button#ortho-view.button Orthographic
+                button#outside-view.button Outside
+                button#inside-view.button Inside
+                
                 a(href="/list") Upload List
 
     script(src="./javascripts/jquery-3.7.1.min.js")
