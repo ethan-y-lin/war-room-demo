@@ -2,6 +2,7 @@ import { DynamicCamera } from "./dynamicCamera.js";
 import { DemoControls } from "./demoControls.js";
 
 class DemoScene {
+    
     constructor() {
         this.initialize();
     }

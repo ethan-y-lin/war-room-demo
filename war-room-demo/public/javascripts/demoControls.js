@@ -43,38 +43,40 @@ class DemoControls {
         this.objects = objects;
     }
 
+    clearEventListeners() {
+        const instructions = document.getElementById( 'instructions' );
+        instructions.removeEventListener( 'click', this.lock);
+        this.pointerLock.removeEventListener('lock', this.hideBlocker);
+        this.pointerLock.removeEventListener('unlock', this.showBlocker);
+        document.removeEventListener('keydown', this.onKeyDown);
+        document.removeEventListener('keyup',this.onKeyUp);
+        this.drag.removeEventListener('dragstart', this.dragStartCallback);
+        this.drag.removeEventListener('dragend', this.dragEndCallback);
+    }
     switchControls(newControl, objects, camera, canvas) {
         this.view = newControl;
         if (newControl == "ortho") {
             this.drag = new THREE.DragControls(objects, camera, canvas);
+            this.clearEventListeners();
+            console.log(this.drag);
             this.drag.addEventListener('dragstart', this.dragStartCallback);
             this.drag.addEventListener('dragend', this.dragEndCallback);
+            console.log(this.drag._listeners);
             this.drag.enabled = true;
             this.pointerLock.enabled = false;
             this.orbit.enabled = false;
-            const instructions = document.getElementById( 'instructions' );
-            instructions.removeEventListener( 'click', this.lock);
-            this.pointerLock.removeEventListener('lock', this.hideBlocker);
-            this.pointerLock.removeEventListener('unlock', this.showBlocker);
-            document.removeEventListener('keydown', this.onKeyDown);
-            document.removeEventListener('keyup',this.onKeyUp);
+            this.hideBlocker();
         } else if (newControl == "outside") {
             this.orbit = new THREE.OrbitControls(camera, canvas);
+            this.clearEventListeners();
             this.orbit.enabled = true;
             this.drag.enabled = false;
             this.pointerLock.enabled = false;
             this.hideBlocker();
-            const instructions = document.getElementById( 'instructions' );
-            instructions.removeEventListener( 'click', this.lock);
-            this.pointerLock.removeEventListener('lock', this.hideBlocker);
-            this.pointerLock.removeEventListener('unlock', this.showBlocker);
-            document.removeEventListener('keydown', this.onKeyDown);
-            document.removeEventListener('keyup',this.onKeyUp);
-            this.drag.removeEventListener('dragstart', this.dragStartCallback);
-            this.drag.removeEventListener('dragend', this.dragEndCallback);
         } else {
             this.boundingBoxes = this.getBoundingBoxes(objects);
             this.pointerLock = new THREE.PointerLockControls(camera, canvas);
+            this.clearEventListeners();
             this.pointerLock.enabled = true;
             this.orbit.enabled = false;
             this.drag.enabled = false;
@@ -85,8 +87,6 @@ class DemoControls {
             this.pointerLock.addEventListener( 'unlock', this.showBlocker);
             document.addEventListener('keydown', this.onKeyDown);
             document.addEventListener('keyup',this.onKeyUp);
-            this.drag.removeEventListener('dragstart', this.dragStartCallback);
-            this.drag.removeEventListener('dragend', this.dragEndCallback);
         }
     }
 
@@ -128,11 +128,13 @@ class DemoControls {
     dragStartCallback(event){
         console.log("drag start");
         this.startColor = event.object.material.color.getHex();
+        console.log("startColor before dragStart" + this.startColor);
         event.object.material.color.setHex(0xff0000);
     }
 
     dragEndCallback(event){
         console.log("drag end");
+        console.log("startColor after dragStart" + this.startColor);
         event.object.material.color.setHex(this.startColor);
     }
 
