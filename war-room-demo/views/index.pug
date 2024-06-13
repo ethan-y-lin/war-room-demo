@@ -18,9 +18,9 @@ block content
                         li
                             a.menu-unit#sp SAVED PLANS
                         li
-                            a.menu-unit#p3 EXPORT
-                        li
                             a#upload UPLOAD
+                        li
+                            a.menu-unit#p3 EXPORT
                 div#column2
                     ul#floor-plans.layer2.hidden
                         div.back-button1 &lt; back
@@ -42,6 +42,8 @@ block content
                         div.menu-title
                             h2 FURNITURES
                         div.layerx
+                            li 
+                                a(href="/list") Upload List
                             li
                                 div#chairs.menu-header
                                     a Chairs
@@ -118,8 +120,6 @@ block content
                 button#ortho-view.button Orthographic
                 button#outside-view.button Outside
                 button#inside-view.button Inside
-                
-                a(href="/list") Upload List
 
     div#object-upload-modal.hidden 
         div#modal-content
