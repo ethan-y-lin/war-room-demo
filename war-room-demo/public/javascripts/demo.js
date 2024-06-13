@@ -12,7 +12,6 @@ class DemoScene {
         this.uploaded_objects = [];
         this.scene = new THREE.Scene();
         this.roomURL = new URL('../assets/warroom1.glb', import.meta.url);
-
         // initialize renderer
         this.renderer = new THREE.WebGLRenderer( { antialias: true } );
         this.renderer.setPixelRatio( this.canvas.devicePixelRatio );

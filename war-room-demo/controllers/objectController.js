@@ -17,27 +17,25 @@ exports.object_list = asyncHandler(async (req, res, next) => {
 
   // Display Item upload form on GET.
 exports.object_upload_get = asyncHandler (async (req, res, next) => {
-    console.log("hi");
   // Get all object, which we can use for adding to our item.
   res.render("object_form", { title: "Upload Object"});
 });
 
   // Display detail page for a specific Object.
   exports.object_detail = asyncHandler(async (req, res, next) => {
-    // Get details of object and all their books (in parallel)
-    const object = await Object.findById(req.params.id).exec();
-    if (object === null) {
-      // No results.
-      const err = new Error("Object not found");
-      err.status = 404;
-      return next(err);
-    }
-    console.log(object)
-    res.render("object_detail", {
-      title: "Object Detail",
-      obj_name: object.name,
-      obj_url: object.obj_url,
-    });
+    // // Get details of object and all their books (in parallel)
+      const object = await Object.findById(req.params.id).exec();
+      if (object === null) {
+        // No results.
+        const err = new Error("Object not found");
+        err.status = 404;
+        return next(err);
+      }
+      res.render("object_detail", {
+        title: "Object Detail",
+        obj_name: object.name,
+        obj_url: object.obj_url,
+      });
   });
 
 // Handle Object create on POST.
