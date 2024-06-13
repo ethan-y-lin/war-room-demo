@@ -320,7 +320,7 @@ nav a{
   padding: 20px;
   border: 1px solid #888;
   width: 30%;
-  height: 40%;
+  height: 35%;
   color: #333;
   display: flex;
   flex-direction: column;
@@ -329,6 +329,7 @@ nav a{
 #modal-content h1{
   margin-bottom: 20px;
   padding-left: 30px;
+  text-align: center;
 }
 
 #modal-content .form-group{
@@ -343,7 +344,7 @@ nav a{
 
 #modal-content button{
   margin-top: 30px;
-  margin-left: 30px;
+  margin-left: 75%;
 }
 
 .close{
