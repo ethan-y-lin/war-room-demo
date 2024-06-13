@@ -20,7 +20,7 @@ block content
                         li
                             a.menu-unit#p3 EXPORT
                         li
-                            a(href="/upload") UPLOAD
+                            a#upload UPLOAD
                 div#column2
                     ul#floor-plans.layer2.hidden
                         div.back-button1 &lt; back
@@ -52,7 +52,7 @@ block content
                                 div#tables.menu-header
                                     a Tables
                     ul#saved-plans.layer2.hidden
-                        div.back-button1 back
+                        div.back-button1 &lt; back
                         div.menu-title
                             h2 SAVED PLANS
                         div.layerx
@@ -121,6 +121,25 @@ block content
                 
                 a(href="/list") Upload List
 
+    div#object-upload-modal.hidden 
+        div#modal-content
+            span.close &times; 
+
+            h1 Upload Objects
+            form(method='POST' enctype='multipart/form-data' action = "/upload")
+                div.form-group
+                    label(for='name') Name: 
+                    input#name.form-control(type='text', placeholder='Name' name='name' required value=(undefined===object ? '' : object.name) )
+                div.form-group 
+                    label(for='object') Upload Object:  
+                    input(type='file' name='object' accept="object/glb, object/obj")
+                
+                button.button(type='submit') Submit
+            if errors
+                ul
+                    for error in errors
+                        li!= error.msg
+
     script(src="./javascripts/jquery-3.7.1.min.js")
     script(src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js")
     script(src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js")
@@ -131,3 +150,4 @@ block content
     script(src="./javascripts/demoControls.js" type="module")
     script(src="./javascripts/demo.js" type="module")
     script(src="./javascripts/dropdown.js", type="module")
+    script(src="./javascripts/modal.js", type="module")
