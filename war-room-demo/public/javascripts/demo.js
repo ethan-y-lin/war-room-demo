@@ -4,32 +4,40 @@ import { DemoControls } from "./demoControls.js";
 class DemoScene {
     
     constructor() {
-        this.initialize();
+        this.initialize().then(() => {
+            this.animate();
+        });
     }
 
-    initialize() {
+    async initialize() {
         this.canvas = document.getElementById("scene-container");
         this.objects = [];
         this.uploaded_objects = [];
         this.scene = new THREE.Scene();
         this.roomURL = new URL('../assets/warroom1.glb', import.meta.url);
+
+        // initialize geometries
+        this.model;
+        this.modelSize;
+        this.gridSize;
+        this.gridScale = 0.1; // meter
+        await this.initGeometries(this.scene);
+
+        // initialize camera
+        this.camera = new DynamicCamera(this.canvas, this.modelSize); // initializes to orthoCamera
+        this.currentCamera = this.camera.ortho;
+
         // initialize renderer
         this.renderer = new THREE.WebGLRenderer( { antialias: true } );
         this.renderer.setPixelRatio( this.canvas.devicePixelRatio );
         this.renderer.setSize(this.canvas.offsetWidth, this.canvas.offsetHeight);
         this.canvas.appendChild( this.renderer.domElement );
 
-        // initialize geometries
-        this.model;
-        this.modelSize;
-        this.initGeometries(this.scene);
 
-        // initialize camera
-        this.camera = new DynamicCamera(this.canvas); // initializes to orthoCamera
-        this.currentCamera = this.camera.ortho;
-
+        console.log(this.gridSize)
+        console.log(this.gridScale)
         // initialize controls 
-        this.controls = new DemoControls(this.camera, this.canvas, this.objects); // initializes to orthoControls
+        this.controls = new DemoControls(this.camera, this.canvas, this.objects, this.gridSize, this.gridScale); // initializes to orthoControls
 
         this.canvas.addEventListener( 'resize', this.onWindowResize(this.camera.ortho) );
     }
@@ -48,21 +56,9 @@ class DemoScene {
         });
     }
 
-    initGeometries(scene) {
-        const planeGeometry = new THREE.PlaneGeometry(30, 30);
-        const planeMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0xFFFFFF,
-            side: THREE.DoubleSide
-        });
-        const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-        plane.rotation.x = Math.PI / 2;
-        plane.receiveShadow = true;
-        scene.add(plane);
-    
-        const gridHelper = new THREE.GridHelper(30);
-        scene.add(gridHelper);
-    
-        const ambientLight = new THREE.AmbientLight(0x333333);
+    async initGeometries(scene) {
+
+        const ambientLight = new THREE.AmbientLight(0xFFFFFF);
         scene.add(ambientLight);
     
         const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 1);
@@ -70,31 +66,46 @@ class DemoScene {
         scene.add(directionalLight);
         directionalLight.position.set(-30, 50, 0);
         directionalLight.shadow.camera.bottom = -12;
-        const dLightHelper = new THREE.DirectionalLightHelper(directionalLight);
-        scene.add(dLightHelper);
+        // const dLightHelper = new THREE.DirectionalLightHelper(directionalLight);
+        // scene.add(dLightHelper);
     
-        const dLightShadowHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
-        scene.add(dLightShadowHelper);
-    
+        // const dLightShadowHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
+        // scene.add(dLightShadowHelper);
+        const cubeGeo = new THREE.BoxGeometry();
+        const cubeMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        const cube = new THREE.Mesh(cubeGeo, cubeMat);
+        scene.add(cube);
+
         const spotLight = new THREE.SpotLight(0xFFFFFF);
         scene.add(spotLight);
         spotLight.position.set(100, 100, 0);
         spotLight.castShadow = true;
         spotLight.angle = 0.2;
     
-        const sLightHelper = new THREE.SpotLightHelper(spotLight);
-        scene.add(sLightHelper);
-    
+        // const sLightHelper = new THREE.SpotLightHelper(spotLight);
+        // scene.add(sLightHelper);
+        const axesHelper = new THREE.AxesHelper( 5 );
+        scene.add( axesHelper );
         const assetLoader = new THREE.GLTFLoader();
 
-        assetLoader.load(this.roomURL.href, (gltf) => {
-            console.log("loading model")
-            this.model = gltf.scene;
-            this.objects = this.model.children;
-            let bbox = new THREE.Box3().setFromObject(this.model);
-            this.modelSize = bbox.getSize(new THREE.Vector3());
-            this.scene.add(this.model);
-            this.model.position.set(0, this.modelSize.y / 2, 0);
+        return new Promise((resolve, reject) => {
+            assetLoader.load(this.roomURL.href, (gltf) => {
+                console.log("loading model");
+                this.model = gltf.scene;
+                this.objects = this.model.children;
+                let bbox = new THREE.Box3().setFromObject(this.model);
+                this.modelSize = bbox.getSize(new THREE.Vector3());
+                console.log(this.modelSize);
+                this.scene.add(this.model);
+                this.model.position.set(0, this.modelSize.y / 2, 0);
+                const size = Math.max(this.modelSize.x, this.modelSize.z);
+                this.gridSize = size;
+                const gridHelper = new THREE.GridHelper(size, size / this.gridScale, 0x000000, 0x00ff00);
+                scene.add(gridHelper);
+                resolve();
+            }, undefined, (error) => {
+                reject(error);
+            });
         });
     }
 
@@ -132,7 +143,8 @@ class DemoScene {
 
     setOrthoViewMode() {
         this.updateObjects();
-        this.camera.setOrthoCamera(this.canvas);
+        console.log(this.modelSize)
+        this.camera.setOrthoCamera(this.canvas, this.modelSize, 2);
         this.currentCamera = this.camera.ortho;
         this.controls.switchControls("ortho", this.objects, this.camera.ortho, this.canvas);
         this.canvas.removeEventListener( 'resize', this.onWindowResize(this.camera.outside) );
@@ -168,5 +180,3 @@ $('#fullscreen-button').on('click', function(){
     }
     console.log("set full screen")
 });
-
-APP.animate();

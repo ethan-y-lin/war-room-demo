@@ -1,14 +1,16 @@
+import { DragControls} from "./DragControls.js";
+
 class DemoControls {
-    constructor (camera, canvas, objects) {
-        this.initialize(camera, canvas, objects);
+    constructor (camera, canvas, objects, gridSize, gridScale) {
+        this.initialize(camera, canvas, objects, gridSize, gridScale);
     }
 
-    initialize(camera, canvas, objects){
+    initialize(camera, canvas, objects, gridSize, gridScale){
         this.canvas = canvas;
         this.camera = camera;
         this.objects = objects;
-
-        this.controls;
+        this.gridSize = gridSize;
+        this.gridScale = gridScale;
 
         this.orbit = new THREE.OrbitControls(camera.outside, canvas);
         this.orbit.update();
@@ -24,7 +26,7 @@ class DemoControls {
         this.insideCameraBB = new THREE.Box3();
         this.boundingBoxes = this.getBoundingBoxes(objects);
 
-        this.drag = new THREE.DragControls(objects, camera.ortho, canvas);
+        this.drag = new DragControls(objects, camera.ortho, canvas, this.gridSize, this.gridScale);
         this.startColor;
         this.switchControls("ortho", objects, camera.ortho, canvas);
     }
@@ -44,6 +46,9 @@ class DemoControls {
     }
 
     clearEventListeners() {
+        this.drag.dispose();
+        this.pointerLock.dispose();
+        this.orbit.dispose();
         const instructions = document.getElementById( 'instructions' );
         instructions.removeEventListener( 'click', this.lock);
         this.pointerLock.removeEventListener('lock', this.hideBlocker);
@@ -57,7 +62,9 @@ class DemoControls {
         this.view = newControl;
         if (newControl == "ortho") {
             this.clearEventListeners();
-            this.drag = new THREE.DragControls(objects, camera, canvas);
+            console.log(this.gridScale);
+            console.log(this.gridSize);
+            this.drag = new DragControls(objects, camera, canvas, this.gridSize, this.gridScale);
             console.log(this.drag);
             this.drag.addEventListener('dragstart', this.dragStartCallback);
             this.drag.addEventListener('dragend', this.dragEndCallback);
@@ -129,6 +136,7 @@ class DemoControls {
         console.log("drag start");
         this.startColor = event.object.material.color.getHex();
         console.log("startColor before dragStart" + this.startColor);
+        console.log(event.object);
         event.object.material.color.setHex(0xff0000);
     }
 
@@ -256,4 +264,5 @@ class DemoControls {
         }
     };
 }
+
 export {DemoControls};
