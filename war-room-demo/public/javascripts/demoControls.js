@@ -24,7 +24,7 @@ class DemoControls {
         this.insideCameraBB = new THREE.Box3();
         this.boundingBoxes = this.getBoundingBoxes(objects);
 
-        this.drag;
+        this.drag = new THREE.DragControls(objects, camera.ortho, canvas);
         this.startColor;
         this.switchControls("ortho", objects, camera.ortho, canvas);
     }
@@ -56,8 +56,8 @@ class DemoControls {
     switchControls(newControl, objects, camera, canvas) {
         this.view = newControl;
         if (newControl == "ortho") {
-            this.drag = new THREE.DragControls(objects, camera, canvas);
             this.clearEventListeners();
+            this.drag = new THREE.DragControls(objects, camera, canvas);
             console.log(this.drag);
             this.drag.addEventListener('dragstart', this.dragStartCallback);
             this.drag.addEventListener('dragend', this.dragEndCallback);
@@ -67,16 +67,16 @@ class DemoControls {
             this.orbit.enabled = false;
             this.hideBlocker();
         } else if (newControl == "outside") {
-            this.orbit = new THREE.OrbitControls(camera, canvas);
             this.clearEventListeners();
+            this.orbit = new THREE.OrbitControls(camera, canvas);
             this.orbit.enabled = true;
             this.drag.enabled = false;
             this.pointerLock.enabled = false;
             this.hideBlocker();
         } else {
+            this.clearEventListeners();
             this.boundingBoxes = this.getBoundingBoxes(objects);
             this.pointerLock = new THREE.PointerLockControls(camera, canvas);
-            this.clearEventListeners();
             this.pointerLock.enabled = true;
             this.orbit.enabled = false;
             this.drag.enabled = false;
