@@ -137,7 +137,7 @@ class DemoControls {
         this.startColor = event.object.material.color.getHex();
         console.log("startColor before dragStart" + this.startColor);
         console.log(event.object);
-        event.object.material.color.setHex(0xff0000);
+        event.object.material.color.setHex(0xffffff);
     }
 
     dragEndCallback(event){

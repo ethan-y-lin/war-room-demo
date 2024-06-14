@@ -58,10 +58,10 @@ class DemoScene {
 
     async initGeometries(scene) {
 
-        const ambientLight = new THREE.AmbientLight(0xFFFFFF);
+        const ambientLight = new THREE.AmbientLight(0x909090);
         scene.add(ambientLight);
     
-        const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 1);
+        const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 0.3);
         directionalLight.castShadow = true;
         scene.add(directionalLight);
         directionalLight.position.set(-30, 50, 0);
@@ -72,7 +72,7 @@ class DemoScene {
         // const dLightShadowHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
         // scene.add(dLightShadowHelper);
         const cubeGeo = new THREE.BoxGeometry();
-        const cubeMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        const cubeMat = new THREE.MeshBasicMaterial({ color: 0x00ff00});
         const cube = new THREE.Mesh(cubeGeo, cubeMat);
         scene.add(cube);
 
@@ -100,7 +100,7 @@ class DemoScene {
                 this.model.position.set(0, this.modelSize.y / 2, 0);
                 const size = Math.max(this.modelSize.x, this.modelSize.z);
                 this.gridSize = size;
-                const gridHelper = new THREE.GridHelper(size, size / this.gridScale, 0x000000, 0x00ff00);
+                const gridHelper = new THREE.GridHelper(size, size / this.gridScale, 0x000000, 0x00ffaa);
                 scene.add(gridHelper);
                 resolve();
             }, undefined, (error) => {

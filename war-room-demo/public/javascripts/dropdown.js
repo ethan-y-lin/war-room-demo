@@ -55,3 +55,8 @@ $(".back-button2").on('click', function(){
     $("#column3").addClass("hidden");
     $("#furnitures").removeClass("hidden");
 })
+
+//temporary refresh the whole page
+$("#reset").on('click', function(){
+    history.go(0);
+})

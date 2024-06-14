@@ -227,16 +227,19 @@ nav a{
   flex-direction: column;
   position: relative;
   margin-left: 10px;
+  color: white;
 }
 
 #fp-war .up, #fp-war h2{
   margin-top: -10px;
   margin-bottom: -20px;
-  font-family: Georgia, 'Times New Roman', Times, serif
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  background: linear-gradient(to right, #171717d5, #58585800);
+  padding: 5px 25px 5px 10px;
 }
 
 #fp-war h2{
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid #ffffff;
 }
 
 #scene-right{
@@ -248,17 +251,32 @@ nav a{
 }
 
 #scene-options{
-  display: block;
-  position: relative;
   margin-right: 10px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  margin: 3px;
 }
 
-#scene-options li{
-  border-bottom: 1px solid #445c5290;
+#scene-options button{
+  color: white;
+  /* background-color:transparent; */
+  background-color:#384c44;
+  border: solid;
+  border-width: thin;
+  border-color: white;
+  margin: 5px;
+  padding: 1px;
+  cursor: pointer;
+  height: 30px;
+  width: 50px;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-size: 14px;
+  border-radius: 3px;
 }
 
-#scene-options ul{
-  list-style: none;
+#scene-options button:hover{
+  background-color:#a4c3b2;
 }
 
 #full-screen{

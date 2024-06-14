@@ -20,13 +20,12 @@ class DynamicCamera {
         let orthoCamera = new THREE.OrthographicCamera(
             -modelSize.x/2-padding,
             modelSize.x/2+padding,
-            -modelSize.z/2-padding,
             modelSize.z/2+padding,
+            -modelSize.z/2-padding,
             0.1,
             1000
         );
-        orthoCamera.position.set(0, 10, 0);
-        orthoCamera.up.set (0, 0, -1);
+        orthoCamera.position.set(0, 30, 0);
         orthoCamera.lookAt(0, 0, 0);
         this.name = "ortho";
         this.ortho = orthoCamera;
