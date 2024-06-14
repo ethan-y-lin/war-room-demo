@@ -3,6 +3,7 @@ extends layout
 block content
     div.object-data(data-objects=objects)
     div.mainSection
+        a(href="/list") Upload List
         aside#menu
             nav.dropdown-menu
                 div#column1.hidden
@@ -18,7 +19,7 @@ block content
                         li
                             a.menu-unit#sp SAVED PLANS
                         li
-                            a#upload UPLOAD
+                            a#upload(href="/upload") UPLOAD
                         li
                             a.menu-unit#p3 EXPORT
                 
@@ -42,10 +43,15 @@ block content
                         div.back-button1 &lt; back
                         div.menu-title
                             h2 FURNITURES
-                        each categoryName in Object.keys(categories || {})
-                            li 
-                                div.menu-header
-                                    a= categoryName
+                            each category in categories 
+                                li
+                                    div.menu-header 
+                                        a= category.name
+
+                        //- each categoryName in Object.keys(categories || {})
+                        //-     li 
+                        //-         div.menu-header
+                        //-             a= categoryName
                         
                                 
                         //- each categoryName in Object.keys(categories || {})
@@ -119,7 +125,7 @@ block content
                             //-         a Tables
         main#scene
             div.title
-                h1 War Room Demo
+                h1 #{title}
             div#blocker
                 div#instructions
                     p
@@ -142,36 +148,37 @@ block content
                 button#ortho-view.button Orthographic
                 button#outside-view.button Outside
                 button#inside-view.button Inside
+    if modal
+        div#object-upload-modal
+                div#modal-content
+                    a(href="/") &times; 
 
-    div#object-upload-modal.hidden 
-        div#modal-content
-            span.close &times; 
-
-            h1=modaltitle
-            form(method='POST' enctype='multipart/form-data' action = "/upload")
-                div.form-group
-                    label(for='name') Name: 
-                    input#name.form-control(type='text', placeholder='Name' name='name' required value=(undefined===object ? '' : object.name) )
-                div.form-group 
-                    label(for='object') Upload Object:  
-                    input(type='file' name='object' accept="object/glb, object/obj")
-                div.form-group 
-                    label(for='category') Category: 
-                    select#category.form-control(name='category')
-                        //- option(value='chairs') Chairs 
-                        //- option(value='sofas') Sofas
-                        //- option(value='tables') Tables
-                        if defaultCategories
-                            each categoryKey in defaultCategories
-                                option(value=categoryKey)= categoryKey
-                        else 
-                            option No categories available
-                
-                button.button(type='submit') Submit
-            if errors
-                ul
-                    for error in errors
-                        li!= error.msg
+                    h1= modal_title
+                    form(method='POST' enctype='multipart/form-data' action = "/upload")
+                        div.form-group
+                            label(for='name') Name: 
+                            input#name.form-control(type='text', placeholder='Name' name='name' required value=(undefined===object ? '' : object.name) )
+                        div.form-group 
+                            label(for='object') Upload Object:  
+                            input(type='file' name='object' accept="object/glb, object/obj")
+                        div.form-group 
+                            label(for='category') Category: 
+                            select#category.form-control(name='category')
+                                option(value='chairs') Chairs 
+                                option(value='sofas') Sofas
+                                option(value='tables') Tables
+                                //- if defaultCategories
+                                //-     p hello dsa
+                                //-     each categoryKey in defaultCategories
+                                //-         option(value=categoryKey)= categoryKey
+                                //- else 
+                                //-     option No categories available
+                        
+                        button.button(type='submit') Submit
+                    if errors
+                        ul
+                            for error in errors
+                                li!= error.msg
 
     script(src="./javascripts/jquery-3.7.1.min.js")
     script(src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js")
