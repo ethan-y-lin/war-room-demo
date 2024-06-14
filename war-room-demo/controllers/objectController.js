@@ -6,19 +6,21 @@ const {body, validationResult} = require("express-validator");
 
 const Object = require("../models/object");
 
+
 // Display list of all Objects.
-exports.object_list = asyncHandler(async (req, res, next) => {
-    const allObjects = await Object.find().sort({ name: 1 }).exec();
-    res.render("object_list", {
-      title: "Object List",
-      object_list: allObjects,
-    });
-  });
+// exports.object_list = asyncHandler(async (req, res, next) => {
+//     const allObjects = await Object.find().sort({ name: 1 }).exec();
+//     res.render("object_list", {
+//       title: "Object List",
+//       object_list: allObjects,
+//     });
+//   });
 
   // Display Item upload form on GET.
 exports.object_upload_get = asyncHandler (async (req, res, next) => {
   // Get all object, which we can use for adding to our item.
-  res.render("object_form", { title: "Upload Object"});
+  console.log("object_upload")
+  res.render("index", { modaltitle: "Upload Object"});
 });
 
   // Display detail page for a specific Object.
@@ -45,19 +47,26 @@ exports.object_upload_post = [
     .trim()
     .isLength({ min: 3 })
     .escape(),
+  body("category", "Category must not be empty")
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
 
   // Process request after validation and sanitization.
   asyncHandler(async (req, res, next) => {
     // Extract the validation errors from a request.
     const errors = validationResult(req);
-
+    
     if (!errors.isEmpty()) {
+      //default categories for form dropdown and layer 2 menu
+      const defaultCategories = ['chairs', 'sofas', 'tables'];
       // There are errors. Render the form again with sanitized values/error messages.
       // Get all categories, which we can use for adding to our item.
-      res.render("object_form", {
-        title: "Upload Object",
+      res.render("index", {
+        modaltitle: "Upload Object",
         object: req.body, // Use req.body instead of item object since it doesn't exist yet
         errors: errors.array(),
+        defaultCategories: defaultCategories,
       });
       return;
     }
@@ -107,6 +116,29 @@ exports.object_upload_post = [
     }
   }),
 ];
+
+exports.object_list_post = asyncHandler(async(req, res, next) =>{
+  try{
+    const allObjects = await Object.find().sort({name: 1}).exex();
+    const categories = {};
+    defaultCategories.forEach(category => {
+      categories[category] = [];
+    });
+ 
+    allObjects.forEach(obj => {
+      if(!categories[obj.category]){
+        categories[obj.category] = [];
+      }
+      categories[obj.category].push(obj);
+    });
+    console.log('Categories:', categories);
+  
+    res.render("index", {title: 'Furniture', categories: categories})
+} catch(err){
+    console.error('Error feching objects:', err);
+    next(err);
+}
+});
 
 // // Display Item delete form on GET.
 // exports.item_delete_get = asyncHandler (async (req, res, next) => {

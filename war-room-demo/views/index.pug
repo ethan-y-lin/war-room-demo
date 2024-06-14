@@ -21,6 +21,7 @@ block content
                             a#upload UPLOAD
                         li
                             a.menu-unit#p3 EXPORT
+                
                 div#column2
                     ul#floor-plans.layer2.hidden
                         div.back-button1 &lt; back
@@ -41,18 +42,21 @@ block content
                         div.back-button1 &lt; back
                         div.menu-title
                             h2 FURNITURES
-                        div.layerx
+                        each categoryName in Object.keys(categories || {})
                             li 
-                                a(href="/list") Upload List
-                            li
-                                div#chairs.menu-header
-                                    a Chairs
-                            li
-                                div#sofas.menu-header
-                                    a Sofas
-                            li
-                                div#tables.menu-header
-                                    a Tables
+                                div.menu-header
+                                    a= categoryName
+                        
+                                
+                        //- each categoryName in Object.keys(categories || {})
+                        //-     li 
+                        //-         span= categoryName 
+                                        //- ul  
+                                        //-     if categories[categoryName] && categories[categoryName].length > 0
+                                        //-         each item in categories[categoryName]  
+                                        //-             li= item.name 
+                                        //-     else    
+                                        //-         li No item available
                     ul#saved-plans.layer2.hidden
                         div.back-button1 &lt; back
                         div.menu-title
@@ -64,34 +68,55 @@ block content
                                 a Plan 2
                             li
                                 a Plan 3
-                div#column3.hidden
-                    div#chairs3.layer3.hidden
-                        div.back-button2 &lt; back
-                        div.menu-title
-                            h2 CHAIRS
-                        ul
-                            li
-                                a Chair 1
-                            li
-                                a Chair 2
-                    div#sofas3.layer3.hidden
-                        div.back-button2 &lt; back
-                        div.menu-title
-                            h2 SOFAS
-                        ul
-                            li
-                                a Sofa 1
-                            li
-                                a Sofa 2
-                    div#tables3.layer3.hidden
-                        div.back-button2 &lt; back
-                        div.menu-title
-                            h2 TABLES
-                        ul
-                            li
-                                a Table 1
-                            li
-                                a Table 2
+                //- div#column3.hidden
+                //-     div#chairs3.layer3.hidden
+                //-         div.back-button2 &lt; back
+                //-         div.menu-title
+                //-             h2 CHAIRS
+                //-         ul
+                //-             li
+                //-                 a Chair 1
+                //-             li
+                //-                 a Chair 2
+                //-     div#sofas3.layer3.hidden
+                //-         div.back-button2 &lt; back
+                //-         div.menu-title
+                //-             h2 SOFAS
+                //-         ul
+                //-             li
+                //-                 a Sofa 1
+                //-             li
+                //-                 a Sofa 2
+                //-     div#tables3.layer3.hidden
+                //-         div.back-button2 &lt; back
+                //-         div.menu-title
+                //-             h2 TABLES
+                //-         ul
+                //-             li
+                //-                 a Table 1
+                //-             li
+                //-                 a Table 2
+                //- if categories[categoryName] && categories[categoryName].length > 0
+                //-             each item in categories[categoryName]  
+                //-                 li= item.name 
+                //-         else    
+                //-             li No item available
+                
+                //- div.back-button1 &lt; back
+                        //- div.menu-title
+                        //-     h2 FURNITURES
+                        //- div.layerx
+                            //- li 
+                            //-     a(href="/list") Upload List
+                            //- li
+                            //-     div#chairs.menu-header
+                            //-         a Chairs
+                            //- li
+                            //-     div#sofas.menu-header
+                            //-         a Sofas
+                            //- li
+                            //-     div#tables.menu-header
+                            //-         a Tables
         main#scene
             div.title
                 h1 War Room Demo
@@ -125,7 +150,7 @@ block content
         div#modal-content
             span.close &times; 
 
-            h1 Upload Objects
+            h1=modaltitle
             form(method='POST' enctype='multipart/form-data' action = "/upload")
                 div.form-group
                     label(for='name') Name: 
@@ -133,6 +158,17 @@ block content
                 div.form-group 
                     label(for='object') Upload Object:  
                     input(type='file' name='object' accept="object/glb, object/obj")
+                div.form-group 
+                    label(for='category') Category: 
+                    select#category.form-control(name='category')
+                        //- option(value='chairs') Chairs 
+                        //- option(value='sofas') Sofas
+                        //- option(value='tables') Tables
+                        if defaultCategories
+                            each categoryKey in defaultCategories
+                                option(value=categoryKey)= categoryKey
+                        else 
+                            option No categories available
                 
                 button.button(type='submit') Submit
             if errors

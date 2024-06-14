@@ -12,13 +12,14 @@ const app_controller = require("../controllers/appController");
 router.get('/', app_controller.index);
 
 // GET request for creating an Object. 
-//router.get("/upload", object_controller.object_upload_get);
+router.get('/', object_controller.object_upload_get);
 
 // POST request for creating Item.
-router.post("/upload", upload.single('object'), object_controller.object_upload_post);
+router.post('/', upload.single('object'), object_controller.object_upload_post);
 
 // GET request for dispalying list. 
-router.get("/list", object_controller.object_list);
+// router.get("/list", object_controller.object_list);
+router.post('/list', object_controller.object_list_post);
 
 // GET request for one Object.
 router.get("/:id", object_controller.object_detail);
