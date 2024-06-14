@@ -1,0 +1,18 @@
+extends layout 
+
+block content 
+    h1= title 
+    if modal 
+        p modal 
+    else 
+        p no modal 
+    h2= modal_title 
+
+    if objects.length 
+        ul 
+            each object in objects
+                li 
+                    a(href=object.url) #{object.name} 
+                    
+    else 
+        p There are no objects.

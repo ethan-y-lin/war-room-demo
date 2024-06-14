@@ -8,19 +8,34 @@ const Object = require("../models/object");
 
 
 // Display list of all Objects.
-// exports.object_list = asyncHandler(async (req, res, next) => {
-//     const allObjects = await Object.find().sort({ name: 1 }).exec();
-//     res.render("object_list", {
-//       title: "Object List",
-//       object_list: allObjects,
-//     });
-//   });
+exports.object_list = asyncHandler(async (req, res, next) => {
+    const allObjects = await Object.find().sort({ name: 1 }).exec();
+    res.render("object_list", {
+      title: "Object List",
+      object_list: allObjects,
+    });
+  });
 
   // Display Item upload form on GET.
 exports.object_upload_get = asyncHandler (async (req, res, next) => {
   // Get all object, which we can use for adding to our item.
-  console.log("object_upload")
-  res.render("index", { modaltitle: "Upload Object"});
+  console.log("render modal")
+  res.render("index", {
+    title: "War Room Demo",
+    modal: true,
+    modal_title: "Upload Object",
+    objects: [],
+    categories: {},
+  }, function(err, html) {
+    if (err) {
+        // Handle the error, for example, log it and send a 500 response
+        console.error('Rendering error:', err);
+        return res.status(500).send('An error occurred while rendering the page.');
+    }
+    // Send the rendered HTML to the client
+    res.send(html);
+
+  });
 });
 
   // Display detail page for a specific Object.
@@ -62,8 +77,9 @@ exports.object_upload_post = [
       const defaultCategories = ['chairs', 'sofas', 'tables'];
       // There are errors. Render the form again with sanitized values/error messages.
       // Get all categories, which we can use for adding to our item.
+      console.log("render modal")
       res.render("index", {
-        modaltitle: "Upload Object",
+        modal_title: "Upload Object",
         object: req.body, // Use req.body instead of item object since it doesn't exist yet
         errors: errors.array(),
         defaultCategories: defaultCategories,
@@ -76,7 +92,7 @@ exports.object_upload_post = [
       let objectUrl = '';
 
       if (req.file) {
-        // Upload image to Cloudinary
+        // Upload model to Cloudinary
         const result = await new Promise((resolve, reject) => {
           cloudinary.uploader.upload_stream({ 
             resource_type: 'raw',
@@ -94,7 +110,8 @@ exports.object_upload_post = [
       // Create a category object with escaped and trimmed data.
       const object = new Object({ 
         name: req.body.name,
-        obj_url: objectUrl
+        obj_url: objectUrl,
+        category: req.body.category
       });
 
       // Check if Item with same name already exists.

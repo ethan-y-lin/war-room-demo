@@ -89,15 +89,11 @@ class DragControls extends THREE.EventDispatcher {
 			_raycaster.setFromCamera( _pointer, _camera );
 
 			if ( _selected ) {
-
+				console.log(_selected)
 				if ( scope.mode === 'translate' ) {
 
 					if ( _raycaster.ray.intersectPlane( _plane, _intersection ) ) {
 						_selected.position.copy( _intersection.sub( _offset ).applyMatrix4( _inverseMatrix ) );
-						console.log("Offset")
-						console.log(_offset);
-						console.log("Before");
-						console.log(_selected.position)
                         const gridSize = 10.040862083435059;
                         const gridScale = 0.1;
                         const gridCellDim = gridScale;
@@ -108,7 +104,6 @@ class DragControls extends THREE.EventDispatcher {
                         if(_selected.position.x + _offset.x > gridSize / 2) _selected.position.x = gridSize / 2 - _offset.x;
                         if(_selected.position.z + _offset.z < -gridSize / 2) _selected.position.z = -gridSize / 2 - _offset.z;
                         if(_selected.position.z + _offset.z > gridSize / 2) _selected.position.z = gridSize / 2 - _offset.z;
-                        console.log("After");
 						console.log(_selected.position)
 					}
 
