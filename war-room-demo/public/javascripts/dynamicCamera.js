@@ -1,25 +1,27 @@
 class DynamicCamera {
-    constructor(canvas) {
-        this.intialize(canvas);
+
+    constructor(canvas, modelSize) {
+        this.intialize(canvas, modelSize);
     }
 
-    intialize(canvas) {
+    intialize(canvas, modelSize) {
+        console.log("camera initialized")
         this.inside = null;
         this.outside = null;
         this.ortho = null;
-        this.setOrthoCamera(canvas);
+        this.setOrthoCamera(canvas, modelSize, 2);
         this.setInsideCamera(canvas);
         this.setOutsideCamera(canvas);
         this.name = "ortho";
     }
 
-    setOrthoCamera(canvas) {
+    setOrthoCamera(canvas, modelSize, padding) {
         // orthographic camera
         let orthoCamera = new THREE.OrthographicCamera(
-            -canvas.offsetWidth/128,
-            canvas.offsetWidth/128,
-            canvas.offsetHeight/128,
-            -canvas.offsetHeight/128,
+            -modelSize.x/2-padding,
+            modelSize.x/2+padding,
+            -modelSize.z/2-padding,
+            modelSize.z/2+padding,
             0.1,
             1000
         );
