@@ -148,8 +148,8 @@ exports.object_list_post = asyncHandler(async(req, res, next) =>{
       }
       categories[obj.category].push(obj);
     });
-    console.log('Categories:', categories);
-  
+
+
     res.render("index", {title: 'Furniture', categories: categories})
 } catch(err){
     console.error('Error feching objects:', err);
