@@ -1,16 +1,19 @@
 import { DragControls} from "./DragControls.js";
 
 class DemoControls {
-    constructor (camera, canvas, objects, gridSize, gridScale) {
-        this.initialize(camera, canvas, objects, gridSize, gridScale);
+    constructor (camera, canvas, scene, objects, gridSize, gridScale, modelSize) {
+        this.initialize(camera, canvas, scene, objects, gridSize, gridScale, modelSize);
     }
 
-    initialize(camera, canvas, objects, gridSize, gridScale){
+    initialize(camera, canvas, scene, objects, gridSize, gridScale, modelSize){
         this.canvas = canvas;
         this.camera = camera;
-        this.objects = objects;
+        this.scene = scene;
+        this.objects = objects.furniture.concat(objects.walls).concat(objects.uploaded_objects);
+        this.draggableObjects = objects.furniture.concat(objects.uploaded_objects);
         this.gridSize = gridSize;
         this.gridScale = gridScale;
+        this.modelSize = modelSize;
 
         this.orbit = new THREE.OrbitControls(camera.outside, canvas);
         this.orbit.update();
@@ -26,9 +29,14 @@ class DemoControls {
         this.insideCameraBB = new THREE.Box3();
         this.boundingBoxes = this.getBoundingBoxes(objects);
 
-        this.drag = new DragControls(objects, camera.ortho, canvas, this.gridSize, this.gridScale);
+        this.drag = new DragControls(this.draggableObjects, camera.ortho, canvas, this.gridSize, this.gridScale);
+        this.mouse = new THREE.Vector2();
+        this.raycaster = new THREE.Raycaster();
+        this.enableSelection;
         this.startColor;
-        this.switchControls("ortho", objects, camera.ortho, canvas);
+        this.selectedGroup = new THREE.Group();
+        this.scene.add(this.selectedGroup);
+        this.switchControls("ortho", camera.ortho, canvas);
     }
 
     setCameraBB (insideCameraBB, insideCamera) {
@@ -41,10 +49,6 @@ class DemoControls {
         insideCameraBB.set(minBox, maxBox);
     }
 
-    setObjects(objects) {
-        this.objects = objects;
-    }
-
     clearEventListeners() {
         this.drag.dispose();
         this.pointerLock.dispose();
@@ -53,22 +57,36 @@ class DemoControls {
         instructions.removeEventListener( 'click', this.lock);
         this.pointerLock.removeEventListener('lock', this.hideBlocker);
         this.pointerLock.removeEventListener('unlock', this.showBlocker);
-        document.removeEventListener('keydown', this.onKeyDown);
-        document.removeEventListener('keyup',this.onKeyUp);
-        this.drag.removeEventListener('dragstart', this.dragStartCallback);
-        this.drag.removeEventListener('dragend', this.dragEndCallback);
+        document.removeEventListener('keydown', this.insideOnKeyDown);
+        document.removeEventListener('keyup',this.insideOnKeyUp);
+        document.removeEventListener('keyup', this.orthoOnKeyUp);
+        document.removeEventListener('keydown', this.orthoOnKeyDown);
+        document.removeEventListener('click', this.orthoOnClick);
+        // this.drag.removeEventListener('dragstart', this.dragStartCallback);
+        // this.drag.removeEventListener('dragend', this.dragEndCallback);
     }
-    switchControls(newControl, objects, camera, canvas) {
+
+    updateObjects(objects) {
+        this.objects = objects.furniture.concat(objects.walls).concat(objects.uploaded_objects);
+        this.draggableObjects = objects.furniture.concat(objects.uploaded_objects);
+    }
+
+    /**
+     * Assumes that this.objects and this.draggableObjects are up to date.
+     * @param {*} newControl The control type to switch to. Requires either: "ortho", "inside", or "outside"
+     * @param {*} camera The camera that the new view uses. Type should be THREE.Camera
+     * @param {*} canvas The canvas for the view. Type: DOM element.
+     */
+    switchControls(newControl, camera, canvas) {
         this.view = newControl;
         if (newControl == "ortho") {
             this.clearEventListeners();
-            console.log(this.gridScale);
-            console.log(this.gridSize);
-            this.drag = new DragControls(objects, camera, canvas, this.gridSize, this.gridScale);
-            console.log(this.drag);
-            this.drag.addEventListener('dragstart', this.dragStartCallback);
-            this.drag.addEventListener('dragend', this.dragEndCallback);
-            console.log(this.drag._listeners);
+            this.drag = new DragControls([...this.draggableObjects], camera, canvas, this.gridSize, this.gridScale);
+            // this.drag.addEventListener('dragstart', this.dragStartCallback);
+            // this.drag.addEventListener('dragend', this.dragEndCallback);
+            document.addEventListener('keyup', this.orthoOnKeyUp);
+            document.addEventListener('keydown', this.orthoOnKeyDown);
+            this.canvas.addEventListener('click', this.orthoOnClick);
             this.drag.enabled = true;
             this.pointerLock.enabled = false;
             this.orbit.enabled = false;
@@ -82,7 +100,7 @@ class DemoControls {
             this.hideBlocker();
         } else {
             this.clearEventListeners();
-            this.boundingBoxes = this.getBoundingBoxes(objects);
+            this.boundingBoxes = this.getBoundingBoxes(this.objects);
             this.pointerLock = new THREE.PointerLockControls(camera, canvas);
             this.pointerLock.enabled = true;
             this.orbit.enabled = false;
@@ -92,8 +110,8 @@ class DemoControls {
             this.showBlocker();
             this.pointerLock.addEventListener( 'lock', this.hideBlocker);
             this.pointerLock.addEventListener( 'unlock', this.showBlocker);
-            document.addEventListener('keydown', this.onKeyDown);
-            document.addEventListener('keyup',this.onKeyUp);
+            document.addEventListener('keydown', this.insideOnKeyDown);
+            document.addEventListener('keyup',this.insideOnKeyUp);
         }
     }
 
@@ -136,7 +154,6 @@ class DemoControls {
         console.log("drag start");
         this.startColor = event.object.material.color.getHex();
         console.log("startColor before dragStart" + this.startColor);
-        console.log(event.object);
         event.object.material.color.setHex(0xff5733);
     }
 
@@ -180,7 +197,6 @@ class DemoControls {
     } 
 
     getBoundingBoxes(objects) {
-        this.objects = objects; // updates objects as well
         let boxes = [];
         for (let i = 0; i < objects.length; i++) {
             if (this.hasDoor(objects[i])){
@@ -210,7 +226,7 @@ class DemoControls {
         return false;
     }
 
-    onKeyDown = ( event ) => {
+    insideOnKeyDown = ( event ) => {
 
         switch ( event.code ) {
     
@@ -237,7 +253,7 @@ class DemoControls {
     
     };
     
-    onKeyUp = ( event ) => {
+    insideOnKeyUp = ( event ) => {
     
         switch ( event.code ) {
     
@@ -263,6 +279,85 @@ class DemoControls {
     
         }
     };
+
+    orthoOnKeyDown = ( event ) => {
+
+        this.enableSelection = ( event.keyCode === 16 ) ? true : false;
+        
+        if ( event.keyCode === 77 ) {
+
+            this.drag.mode = ( this.drag.mode === 'translate' ) ? 'rotate' : 'translate';
+    
+        }
+
+    }
+
+    orthoOnKeyUp = () => {
+
+        this.enableSelection = false;
+
+    }
+
+    orthoOnClick = (event) => {
+        event.preventDefault();
+
+				if ( this.enableSelection === true ) {
+					const draggableObjects = this.drag.getObjects();
+					draggableObjects.length = 0;
+                    const rect = this.canvas.getBoundingClientRect();
+
+                    this.mouse.x = ( event.clientX - rect.left ) / rect.width * 2 - 1;
+                    this.mouse.y = - ( event.clientY - rect.top ) / rect.height * 2 + 1;
+                    
+					this.raycaster.setFromCamera( this.mouse, this.camera.ortho );
+                    
+					const intersections = this.raycaster.intersectObjects( this.draggableObjects, true );
+					if ( intersections.length > 0 ) {
+
+						const bounding_box = intersections[ 0 ].object; // should be the bounding box
+                        const object = bounding_box.parent;
+                        
+						if ( this.selectedGroup.children.includes( object ) === true ) {
+                            if (object.type == "Mesh") {
+                                object.material.emissive.set( 0x000000 );
+                            } else if (object.type == "Group"){
+                                object.children.forEach((obj) => {
+                                    if (obj.name != "bounding_box" || obj.type != "Mesh"){
+                                        obj.material.emissive.set(0x000000);
+                                    }
+                                });
+                            }
+
+							this.scene.attach( object );
+                            this.selectedGroup.remove(object);
+						} else {
+                            if (object.type == "Mesh") {
+                                object.material.emissive.set( 0xff0000 );
+                            } else if (object.type == "Group"){
+                                object.children.forEach((obj) => {
+                                    if (obj.name != "bounding_box" || obj.type != "Mesh"){
+                                        obj.material.emissive.set(0xff0000);
+                                    }
+                                });
+                            }
+							
+							this.selectedGroup.attach( object );
+                            this.scene.remove(object);
+						}
+
+						this.drag.transformGroup = true;
+						draggableObjects.push( this.selectedGroup );
+
+					}
+					if ( this.selectedGroup.children.length === 0 ) {
+
+						this.drag.transformGroup = false;
+						draggableObjects.push( ...this.draggableObjects );
+
+					}
+
+				}
+    }
 }
 
 export {DemoControls};

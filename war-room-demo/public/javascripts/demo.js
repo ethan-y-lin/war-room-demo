@@ -11,8 +11,10 @@ class DemoScene {
 
     async initialize() {
         this.canvas = document.getElementById("scene-container");
-        this.objects = [];
-        this.uploaded_objects = [];
+        this.objects = {walls: [], 
+                        furniture: [],
+                        uploaded_objects: []};
+        this.uploaded_objects_url = [];
         this.scene = new THREE.Scene();
         this.roomURL = new URL('../assets/warroom1.glb', import.meta.url);
 
@@ -34,23 +36,52 @@ class DemoScene {
         this.canvas.appendChild( this.renderer.domElement );
 
 
-        console.log(this.gridSize)
-        console.log(this.gridScale)
+        console.log(this.objects)
         // initialize controls 
-        this.controls = new DemoControls(this.camera, this.canvas, this.objects, this.gridSize, this.gridScale); // initializes to orthoControls
+        this.controls = new DemoControls(this.camera, this.canvas, this.scene, this.objects, this.gridSize, this.gridScale, this.modelSize); // initializes to orthoControls
 
         this.canvas.addEventListener( 'resize', this.onWindowResize(this.camera.ortho) );
+    }
+
+    // shifted up
+    openPosition = (obj) => {
+        let bbox = new THREE.Box3().setFromObject(obj);
+        const shift = bbox.min.y;
+        return new THREE.Vector3(0, -shift, 0);
     }
 
     updateObjects () {
         const addedObjects = JSON.parse(document.querySelector('.object-data').dataset.objects);
         addedObjects.forEach((object) => {
-            if (! (object.obj_url == '' || this.uploaded_objects.includes(object.obj_url))) {      
+            if (! (object.obj_url == '' || this.uploaded_objects_url.includes(object.obj_url))) {      
                 const loader = new THREE.GLTFLoader();
                 loader.load(object.obj_url, (gltf) => {
-                    this.scene.add(gltf.scene);
-                    this.objects.push(gltf.scene);
-                    this.uploaded_objects.push(object.obj_url);
+                    const newObject = gltf.scene;
+                    newObject.name = object.name;
+                    this.scene.add(newObject);
+
+                    // Compute the bounding box of the object
+                    const box = new THREE.Box3().setFromObject(newObject, true);
+
+                    // Create a box helper
+                    const boxGeometry = new THREE.BoxGeometry(box.max.x - box.min.x, box.max.y - box.min.y, box.max.z - box.min.z);
+                    const boxMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.5 });
+                    const boundingBox = new THREE.Mesh(boxGeometry, boxMaterial);
+
+                    // const axesHelper = new THREE.AxesHelper(20);
+                    // newObject.add(axesHelper);
+                    boundingBox.position.set((box.max.x + box.min.x) / 2, (box.max.y + box.min.y) / 2, (box.max.z + box.min.z) / 2)
+                    boundingBox.name = "bounding_box";
+                    newObject.add(boundingBox);
+
+                    const openPos = this.openPosition(newObject); // find an open position to display the box
+                    console.log(openPos);
+                    newObject.position.set(openPos.x, openPos.y, openPos.z);
+                    console.log(newObject)
+
+                    this.objects.uploaded_objects.push(newObject);
+                    this.uploaded_objects_url.push(object.obj_url);
+                    this.controls.updateObjects(this.objects);
                 });
             }
         });
@@ -71,10 +102,6 @@ class DemoScene {
     
         // const dLightShadowHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
         // scene.add(dLightShadowHelper);
-        const cubeGeo = new THREE.BoxGeometry();
-        const cubeMat = new THREE.MeshBasicMaterial({ color: 0x00ff00});
-        const cube = new THREE.Mesh(cubeGeo, cubeMat);
-        scene.add(cube);
 
         const spotLight = new THREE.SpotLight(0xFFFFFF);
         scene.add(spotLight);
@@ -84,20 +111,37 @@ class DemoScene {
     
         // const sLightHelper = new THREE.SpotLightHelper(spotLight);
         // scene.add(sLightHelper);
-        const axesHelper = new THREE.AxesHelper( 5 );
+        const axesHelper = new THREE.AxesHelper( 100 );
         scene.add( axesHelper );
         const assetLoader = new THREE.GLTFLoader();
 
         return new Promise((resolve, reject) => {
             assetLoader.load(this.roomURL.href, (gltf) => {
                 console.log("loading model");
-                this.model = gltf.scene;
-                this.objects = this.model.children;
+                this.model = gltf.scene; // model
+                console.log(this.model)
+                // get model dimensions
                 let bbox = new THREE.Box3().setFromObject(this.model);
                 this.modelSize = bbox.getSize(new THREE.Vector3());
-                console.log(this.modelSize);
+
+                // add model to scene
                 this.scene.add(this.model);
-                this.model.position.set(0, this.modelSize.y / 2, 0);
+                this.model.position.set(0, this.modelSize.y / 2, 0); // makes the ground at y = 0;
+
+                // initialize objects
+                const objects = [...this.model.children]; // must be copy because removing direclty will cause some to be skipped.
+                
+                objects.forEach((obj) =>  {
+                    if (obj.name.includes("wall") || obj.name.includes("floor")) {
+                        this.objects.walls.push(obj);
+                    } else {
+                        this.model.remove(obj);
+                    }
+                });
+
+
+
+                // initializes grid
                 const size = Math.max(this.modelSize.x, this.modelSize.z);
                 this.gridSize = size;
                 const gridHelper = new THREE.GridHelper(size, size / this.gridScale, 0x000000, 0x00ffaa);
@@ -124,9 +168,10 @@ class DemoScene {
     }
 
     setInsideViewMode() {
+        this.updateObjects();
         this.camera.setInsideCamera(this.canvas);
         this.currentCamera = this.camera.inside;
-        this.controls.switchControls("inside" , this.objects, this.camera.inside, this.canvas);
+        this.controls.switchControls("inside", this.camera.inside, this.canvas);
         this.canvas.removeEventListener( 'resize', this.onWindowResize(this.camera.ortho) );
         this.canvas.removeEventListener( 'resize', this.onWindowResize(this.camera.outside) );
         this.canvas.addEventListener( 'resize', this.onWindowResize(this.camera.inside) );
@@ -135,7 +180,7 @@ class DemoScene {
     setOutsideViewMode() {
         this.camera.setOutsideCamera(this.canvas);
         this.currentCamera = this.camera.outside;
-        this.controls.switchControls("outside", this.objects,this.camera.outside, this.canvas);
+        this.controls.switchControls("outside", this.camera.outside, this.canvas);
         this.canvas.removeEventListener( 'resize', this.onWindowResize(this.camera.ortho) );
         this.canvas.removeEventListener( 'resize', this.onWindowResize(this.camera.inside) );
         this.canvas.addEventListener( 'resize', this.onWindowResize(this.camera.outside) );
@@ -146,7 +191,7 @@ class DemoScene {
         console.log(this.modelSize)
         this.camera.setOrthoCamera(this.canvas, this.modelSize, 2);
         this.currentCamera = this.camera.ortho;
-        this.controls.switchControls("ortho", this.objects, this.camera.ortho, this.canvas);
+        this.controls.switchControls("ortho", this.camera.ortho, this.canvas);
         this.canvas.removeEventListener( 'resize', this.onWindowResize(this.camera.outside) );
         this.canvas.removeEventListener( 'resize', this.onWindowResize(this.camera.inside) );
         this.canvas.addEventListener( 'resize', this.onWindowResize(this.camera.ortho) );
@@ -177,6 +222,8 @@ $('#fullscreen-button').on('click', function(){
         APP.controls.hideBlocker();
         APP.controls.pointerLock.isLocked = true;
         APP.renderer.domElement.addEventListener( 'mousemove', APP.controls.lock);
+    } else if (APP.camera.name == "ortho") {
+
     }
     console.log("set full screen")
 });
