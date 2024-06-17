@@ -38,7 +38,7 @@ class DynamicCamera {
     setInsideCamera(canvas) {
         // inside camera
         let insideCamera = new THREE.PerspectiveCamera(
-            120, 
+            45, 
             canvas.offsetWidth / canvas.offsetHeight, 
             0.1, 
             1000
