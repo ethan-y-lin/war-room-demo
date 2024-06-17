@@ -43,8 +43,10 @@ class DemoScene {
         this.canvas.addEventListener( 'resize', this.onWindowResize(this.camera.ortho) );
     }
 
-    openPosition = () => {
-        return new THREE.Vector3(0, this.modelSize.y /2, 0);
+    openPosition = (obj) => {
+        let bbox = new THREE.Box3().setFromObject(obj);
+        const size = bbox.getSize(new THREE.Vector3());
+        return new THREE.Vector3(0, size.y / 2, 0);
     }
 
     updateObjects () {
@@ -56,10 +58,22 @@ class DemoScene {
                     const newObject = gltf.scene;
                     newObject.name = object.name;
                     this.scene.add(newObject);
-                    const openPos = this.openPosition();
+                    const openPos = this.openPosition(newObject); // find an open position to display the box
                     console.log(openPos);
                     newObject.position.set(openPos.x, openPos.y, openPos.z);
                     console.log(newObject)
+
+                    // Compute the bounding box of the object
+                    const box = new THREE.Box3().setFromObject(newObject);
+
+                    // Create a box helper
+                    const boxGeometry = new THREE.BoxGeometry(box.max.x - box.min.x, box.max.y - box.min.y, box.max.z - box.min.z);
+                    const boxMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.5 });
+                    const boundingBox = new THREE.Mesh(boxGeometry, boxMaterial);
+                    boundingBox.parent = newObject;
+                    boundingBox.name = "bounding_box";
+                    newObject.children.push(boundingBox);
+                    console.log(newObject);
                     this.objects.uploaded_objects.push(newObject);
                     this.uploaded_objects_url.push(object.obj_url);
                     this.controls.updateObjects(this.objects);
@@ -114,16 +128,12 @@ class DemoScene {
                 this.model.position.set(0, this.modelSize.y / 2, 0); // makes the ground at y = 0;
 
                 // initialize objects
-                const objects = this.model.children;
-                console.log(objects);
-                let count = 0;
+                const objects = [...this.model.children]; // must be copy because removing direclty will cause some to be skipped.
+                
                 objects.forEach((obj) =>  {
-                    console.log(count);
-                    count++;
                     if (obj.name.includes("wall") || obj.name.includes("floor")) {
                         this.objects.walls.push(obj);
                     } else {
-                        this.objects.furniture.push(obj);
                         this.model.remove(obj);
                     }
                 });

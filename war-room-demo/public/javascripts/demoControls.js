@@ -86,7 +86,7 @@ class DemoControls {
             // this.drag.addEventListener('dragend', this.dragEndCallback);
             document.addEventListener('keyup', this.orthoOnKeyUp);
             document.addEventListener('keydown', this.orthoOnKeyDown);
-            document.addEventListener('click', this.orthoOnClick);
+            this.canvas.addEventListener('click', this.orthoOnClick);
             this.drag.enabled = true;
             this.pointerLock.enabled = false;
             this.orbit.enabled = false;
@@ -154,7 +154,6 @@ class DemoControls {
         console.log("drag start");
         this.startColor = event.object.material.color.getHex();
         console.log("startColor before dragStart" + this.startColor);
-        console.log(event.object);
         event.object.material.color.setHex(0xffffff);
     }
 
@@ -303,8 +302,6 @@ class DemoControls {
         event.preventDefault();
 
 				if ( this.enableSelection === true ) {
-                    
-                    console.log(this.drag);
 					const draggableObjects = this.drag.getObjects();
 					draggableObjects.length = 0;
                     const rect = this.canvas.getBoundingClientRect();
@@ -313,25 +310,37 @@ class DemoControls {
                     this.mouse.y = - ( event.clientY - rect.top ) / rect.height * 2 + 1;
                     
 					this.raycaster.setFromCamera( this.mouse, this.camera.ortho );
-
+                    
 					const intersections = this.raycaster.intersectObjects( this.draggableObjects, true );
 					if ( intersections.length > 0 ) {
 
-						const object = intersections[ 0 ].object;
-                        console.log(object);
+						const bounding_box = intersections[ 0 ].object; // should be the bounding box
+                        const object = bounding_box.parent;
+                        
 						if ( this.selectedGroup.children.includes( object ) === true ) {
+                            if (object.type == "Mesh") {
+                                object.material.emissive.set( 0x000000 );
+                            } else if (object.type == "Group"){
+                                object.children.forEach((obj) => {
+                                    if (obj.name != "bounding_box" || obj.type != "Mesh"){
+                                        obj.material.emissive.set(0x000000);
+                                    }
+                                });
+                            }
 
-							object.material.emissive.set( 0x000000 );
-
-							this.scene.add( object );
-                            // console.log(object.position);
-                            // console.log(this.modelSize);
-                            // object.position.y = object.position.y + this.modelSize.y / 2;
-                            // console.log(object.position);
+							this.scene.attach( object );
                             this.selectedGroup.remove(object);
 						} else {
-
-							object.material.emissive.set( 0xff0000 );
+                            if (object.type == "Mesh") {
+                                object.material.emissive.set( 0xff0000 );
+                            } else if (object.type == "Group"){
+                                object.children.forEach((obj) => {
+                                    if (obj.name != "bounding_box" || obj.type != "Mesh"){
+                                        obj.material.emissive.set(0xff0000);
+                                    }
+                                });
+                            }
+							
 							this.selectedGroup.attach( object );
                             this.scene.remove(object);
 						}
@@ -340,7 +349,6 @@ class DemoControls {
 						draggableObjects.push( this.selectedGroup );
 
 					}
-                    console.log(this.selectedGroup);
 					if ( this.selectedGroup.children.length === 0 ) {
 
 						this.drag.transformGroup = false;

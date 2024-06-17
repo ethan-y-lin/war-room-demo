@@ -87,7 +87,6 @@ class DragControls extends THREE.EventDispatcher {
 			_raycaster.setFromCamera( _pointer, _camera );
 
 			if ( _selected ) {
-				console.log(_selected)
 				if ( scope.mode === 'translate' ) {
 
 					if ( _raycaster.ray.intersectPlane( _plane, _intersection ) ) {
@@ -102,7 +101,6 @@ class DragControls extends THREE.EventDispatcher {
                         if(_selected.position.x + _offset.x > gridSize / 2) _selected.position.x = gridSize / 2 - _offset.x;
                         if(_selected.position.z + _offset.z < -gridSize / 2) _selected.position.z = -gridSize / 2 - _offset.z;
                         if(_selected.position.z + _offset.z > gridSize / 2) _selected.position.z = gridSize / 2 - _offset.z;
-						console.log(_selected.position)
 					}
 
 				} else if ( scope.mode === 'rotate' ) {
@@ -193,9 +191,13 @@ class DragControls extends THREE.EventDispatcher {
 					_selected = findGroup( _intersections[ 0 ].object );
 
 				} else {
-
-					_selected = _intersections[ 0 ].object;
-
+					if (_intersections[0].object.parent != null && _intersections[0].object.parent.type == "Group") {
+						_selected = findGroup(_intersections[0].object.parent);
+					} else {
+						_selected = _intersections[ 0 ].object;
+					}
+					
+					console.log("Not transform Group")
 				}
 
 				_plane.setFromNormalAndCoplanarPoint( _camera.getWorldDirection( _plane.normal ), _worldPosition.setFromMatrixPosition( _selected.matrixWorld ) );
