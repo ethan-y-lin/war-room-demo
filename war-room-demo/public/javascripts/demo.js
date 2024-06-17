@@ -43,14 +43,24 @@ class DemoScene {
         this.canvas.addEventListener( 'resize', this.onWindowResize(this.camera.ortho) );
     }
 
+    openPosition = () => {
+        return new THREE.Vector3(0, this.modelSize.y /2, 0);
+    }
+
     updateObjects () {
         const addedObjects = JSON.parse(document.querySelector('.object-data').dataset.objects);
         addedObjects.forEach((object) => {
             if (! (object.obj_url == '' || this.uploaded_objects_url.includes(object.obj_url))) {      
                 const loader = new THREE.GLTFLoader();
                 loader.load(object.obj_url, (gltf) => {
-                    this.scene.add(gltf.scene);
-                    this.objects.uploaded_objects.push(gltf.scene);
+                    const newObject = gltf.scene;
+                    newObject.name = object.name;
+                    this.scene.add(newObject);
+                    const openPos = this.openPosition();
+                    console.log(openPos);
+                    newObject.position.set(openPos.x, openPos.y, openPos.z);
+                    console.log(newObject)
+                    this.objects.uploaded_objects.push(newObject);
                     this.uploaded_objects_url.push(object.obj_url);
                     this.controls.updateObjects(this.objects);
                 });
@@ -94,17 +104,7 @@ class DemoScene {
             assetLoader.load(this.roomURL.href, (gltf) => {
                 console.log("loading model");
                 this.model = gltf.scene; // model
-
-                // initialize objects
-                const objects = this.model.children;
-                objects.forEach((obj) =>  {
-                    if (obj.name.includes("wall") || obj.name.includes("floor")) {
-                        this.objects.walls.push(obj);
-                    } else {
-                        this.objects.furniture.push(obj);
-                    }
-                });
-
+                console.log(this.model)
                 // get model dimensions
                 let bbox = new THREE.Box3().setFromObject(this.model);
                 this.modelSize = bbox.getSize(new THREE.Vector3());
@@ -112,6 +112,23 @@ class DemoScene {
                 // add model to scene
                 this.scene.add(this.model);
                 this.model.position.set(0, this.modelSize.y / 2, 0); // makes the ground at y = 0;
+
+                // initialize objects
+                const objects = this.model.children;
+                console.log(objects);
+                let count = 0;
+                objects.forEach((obj) =>  {
+                    console.log(count);
+                    count++;
+                    if (obj.name.includes("wall") || obj.name.includes("floor")) {
+                        this.objects.walls.push(obj);
+                    } else {
+                        this.objects.furniture.push(obj);
+                        this.model.remove(obj);
+                    }
+                });
+
+
 
                 // initializes grid
                 const size = Math.max(this.modelSize.x, this.modelSize.z);

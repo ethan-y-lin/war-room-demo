@@ -324,10 +324,10 @@ class DemoControls {
 							object.material.emissive.set( 0x000000 );
 
 							this.scene.add( object );
-                            console.log(object.position);
-                            console.log(this.modelSize);
-                            object.position.y = object.position.y + this.modelSize.y / 2;
-                            console.log(object.position);
+                            // console.log(object.position);
+                            // console.log(this.modelSize);
+                            // object.position.y = object.position.y + this.modelSize.y / 2;
+                            // console.log(object.position);
                             this.selectedGroup.remove(object);
 						} else {
 
