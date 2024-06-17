@@ -36,8 +36,6 @@ class DragControls extends THREE.EventDispatcher {
 		const scope = this;
 
 		function activate() {
-            console.log(scope.gridSize);
-            console.log(scope.gridScale);
 			_domElement.addEventListener( 'pointermove', onPointerMove);
 			_domElement.addEventListener( 'pointerdown', onPointerDown );
 			_domElement.addEventListener( 'pointerup', onPointerCancel );

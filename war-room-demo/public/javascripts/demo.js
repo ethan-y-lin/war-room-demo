@@ -11,8 +11,10 @@ class DemoScene {
 
     async initialize() {
         this.canvas = document.getElementById("scene-container");
-        this.objects = [];
-        this.uploaded_objects = [];
+        this.objects = {walls: [], 
+                        furniture: [],
+                        uploaded_objects: []};
+        this.uploaded_objects_url = [];
         this.scene = new THREE.Scene();
         this.roomURL = new URL('../assets/warroom1.glb', import.meta.url);
 
@@ -34,10 +36,9 @@ class DemoScene {
         this.canvas.appendChild( this.renderer.domElement );
 
 
-        console.log(this.gridSize)
-        console.log(this.gridScale)
+        console.log(this.objects)
         // initialize controls 
-        this.controls = new DemoControls(this.camera, this.canvas, this.objects, this.gridSize, this.gridScale); // initializes to orthoControls
+        this.controls = new DemoControls(this.camera, this.canvas, this.scene, this.objects, this.gridSize, this.gridScale, this.modelSize); // initializes to orthoControls
 
         this.canvas.addEventListener( 'resize', this.onWindowResize(this.camera.ortho) );
     }
@@ -45,12 +46,13 @@ class DemoScene {
     updateObjects () {
         const addedObjects = JSON.parse(document.querySelector('.object-data').dataset.objects);
         addedObjects.forEach((object) => {
-            if (! (object.obj_url == '' || this.uploaded_objects.includes(object.obj_url))) {      
+            if (! (object.obj_url == '' || this.uploaded_objects_url.includes(object.obj_url))) {      
                 const loader = new THREE.GLTFLoader();
                 loader.load(object.obj_url, (gltf) => {
                     this.scene.add(gltf.scene);
-                    this.objects.push(gltf.scene);
-                    this.uploaded_objects.push(object.obj_url);
+                    this.objects.uploaded_objects.push(gltf.scene);
+                    this.uploaded_objects_url.push(object.obj_url);
+                    this.controls.updateObjects(this.objects);
                 });
             }
         });
@@ -91,13 +93,27 @@ class DemoScene {
         return new Promise((resolve, reject) => {
             assetLoader.load(this.roomURL.href, (gltf) => {
                 console.log("loading model");
-                this.model = gltf.scene;
-                this.objects = this.model.children;
+                this.model = gltf.scene; // model
+
+                // initialize objects
+                const objects = this.model.children;
+                objects.forEach((obj) =>  {
+                    if (obj.name.includes("wall") || obj.name.includes("floor")) {
+                        this.objects.walls.push(obj);
+                    } else {
+                        this.objects.furniture.push(obj);
+                    }
+                });
+
+                // get model dimensions
                 let bbox = new THREE.Box3().setFromObject(this.model);
                 this.modelSize = bbox.getSize(new THREE.Vector3());
-                console.log(this.modelSize);
+
+                // add model to scene
                 this.scene.add(this.model);
-                this.model.position.set(0, this.modelSize.y / 2, 0);
+                this.model.position.set(0, this.modelSize.y / 2, 0); // makes the ground at y = 0;
+
+                // initializes grid
                 const size = Math.max(this.modelSize.x, this.modelSize.z);
                 this.gridSize = size;
                 const gridHelper = new THREE.GridHelper(size, size / this.gridScale, 0x000000, 0x00ffaa);
@@ -124,9 +140,10 @@ class DemoScene {
     }
 
     setInsideViewMode() {
+        this.updateObjects();
         this.camera.setInsideCamera(this.canvas);
         this.currentCamera = this.camera.inside;
-        this.controls.switchControls("inside" , this.objects, this.camera.inside, this.canvas);
+        this.controls.switchControls("inside", this.camera.inside, this.canvas);
         this.canvas.removeEventListener( 'resize', this.onWindowResize(this.camera.ortho) );
         this.canvas.removeEventListener( 'resize', this.onWindowResize(this.camera.outside) );
         this.canvas.addEventListener( 'resize', this.onWindowResize(this.camera.inside) );
@@ -135,7 +152,7 @@ class DemoScene {
     setOutsideViewMode() {
         this.camera.setOutsideCamera(this.canvas);
         this.currentCamera = this.camera.outside;
-        this.controls.switchControls("outside", this.objects,this.camera.outside, this.canvas);
+        this.controls.switchControls("outside", this.camera.outside, this.canvas);
         this.canvas.removeEventListener( 'resize', this.onWindowResize(this.camera.ortho) );
         this.canvas.removeEventListener( 'resize', this.onWindowResize(this.camera.inside) );
         this.canvas.addEventListener( 'resize', this.onWindowResize(this.camera.outside) );
@@ -146,7 +163,7 @@ class DemoScene {
         console.log(this.modelSize)
         this.camera.setOrthoCamera(this.canvas, this.modelSize, 2);
         this.currentCamera = this.camera.ortho;
-        this.controls.switchControls("ortho", this.objects, this.camera.ortho, this.canvas);
+        this.controls.switchControls("ortho", this.camera.ortho, this.canvas);
         this.canvas.removeEventListener( 'resize', this.onWindowResize(this.camera.outside) );
         this.canvas.removeEventListener( 'resize', this.onWindowResize(this.camera.inside) );
         this.canvas.addEventListener( 'resize', this.onWindowResize(this.camera.ortho) );
