@@ -43,10 +43,11 @@ class DemoScene {
         this.canvas.addEventListener( 'resize', this.onWindowResize(this.camera.ortho) );
     }
 
+    // shifted up
     openPosition = (obj) => {
         let bbox = new THREE.Box3().setFromObject(obj);
-        const size = bbox.getSize(new THREE.Vector3());
-        return new THREE.Vector3(0, size.y / 2, 0);
+        const shift = bbox.min.y;
+        return new THREE.Vector3(0, -shift, 0);
     }
 
     updateObjects () {
@@ -58,22 +59,26 @@ class DemoScene {
                     const newObject = gltf.scene;
                     newObject.name = object.name;
                     this.scene.add(newObject);
-                    const openPos = this.openPosition(newObject); // find an open position to display the box
-                    console.log(openPos);
-                    newObject.position.set(openPos.x, openPos.y, openPos.z);
-                    console.log(newObject)
 
                     // Compute the bounding box of the object
-                    const box = new THREE.Box3().setFromObject(newObject);
+                    const box = new THREE.Box3().setFromObject(newObject, true);
 
                     // Create a box helper
                     const boxGeometry = new THREE.BoxGeometry(box.max.x - box.min.x, box.max.y - box.min.y, box.max.z - box.min.z);
                     const boxMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.5 });
                     const boundingBox = new THREE.Mesh(boxGeometry, boxMaterial);
-                    boundingBox.parent = newObject;
+
+                    // const axesHelper = new THREE.AxesHelper(20);
+                    // newObject.add(axesHelper);
+                    boundingBox.position.set((box.max.x + box.min.x) / 2, (box.max.y + box.min.y) / 2, (box.max.z + box.min.z) / 2)
                     boundingBox.name = "bounding_box";
-                    newObject.children.push(boundingBox);
-                    console.log(newObject);
+                    newObject.add(boundingBox);
+
+                    const openPos = this.openPosition(newObject); // find an open position to display the box
+                    console.log(openPos);
+                    newObject.position.set(openPos.x, openPos.y, openPos.z);
+                    console.log(newObject)
+
                     this.objects.uploaded_objects.push(newObject);
                     this.uploaded_objects_url.push(object.obj_url);
                     this.controls.updateObjects(this.objects);
@@ -97,10 +102,6 @@ class DemoScene {
     
         // const dLightShadowHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
         // scene.add(dLightShadowHelper);
-        const cubeGeo = new THREE.BoxGeometry();
-        const cubeMat = new THREE.MeshBasicMaterial({ color: 0x00ff00});
-        const cube = new THREE.Mesh(cubeGeo, cubeMat);
-        scene.add(cube);
 
         const spotLight = new THREE.SpotLight(0xFFFFFF);
         scene.add(spotLight);
@@ -110,7 +111,7 @@ class DemoScene {
     
         // const sLightHelper = new THREE.SpotLightHelper(spotLight);
         // scene.add(sLightHelper);
-        const axesHelper = new THREE.AxesHelper( 5 );
+        const axesHelper = new THREE.AxesHelper( 100 );
         scene.add( axesHelper );
         const assetLoader = new THREE.GLTFLoader();
 
@@ -221,6 +222,8 @@ $('#fullscreen-button').on('click', function(){
         APP.controls.hideBlocker();
         APP.controls.pointerLock.isLocked = true;
         APP.renderer.domElement.addEventListener( 'mousemove', APP.controls.lock);
+    } else if (APP.camera.name == "ortho") {
+
     }
     console.log("set full screen")
 });

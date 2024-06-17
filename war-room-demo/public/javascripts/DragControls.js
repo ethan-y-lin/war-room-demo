@@ -95,7 +95,7 @@ class DragControls extends THREE.EventDispatcher {
                         const gridScale = 0.1;
                         const gridCellDim = gridScale;
                         _selected.position.divideScalar(gridCellDim).floor().multiplyScalar(gridCellDim).addScalar(gridCellDim/2);
-                        _selected.position.y = 0; // can make more dynamic in the future.
+                        // _selected.position.y = 0; // can make more dynamic in the future.
 
                         if(_selected.position.x + _offset.x < -gridSize / 2) _selected.position.x = -gridSize / 2 - _offset.x;
                         if(_selected.position.x + _offset.x > gridSize / 2) _selected.position.x = gridSize / 2 - _offset.x;
