@@ -134,28 +134,6 @@ exports.object_upload_post = [
   }),
 ];
 
-exports.object_list_post = asyncHandler(async(req, res, next) =>{
-  try{
-    const allObjects = await Object.find().sort({name: 1}).exex();
-    const categories = {};
-    defaultCategories.forEach(category => {
-      categories[category] = [];
-    });
- 
-    allObjects.forEach(obj => {
-      if(!categories[obj.category]){
-        categories[obj.category] = [];
-      }
-      categories[obj.category].push(obj);
-    });
-
-
-    res.render("index", {title: 'Furniture', categories: categories})
-} catch(err){
-    console.error('Error feching objects:', err);
-    next(err);
-}
-});
 
 // // Display Item delete form on GET.
 // exports.item_delete_get = asyncHandler (async (req, res, next) => {

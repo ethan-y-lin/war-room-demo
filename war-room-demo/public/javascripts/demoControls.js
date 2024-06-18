@@ -10,6 +10,7 @@ class DemoControls {
         this.camera = camera;
         this.scene = scene;
         this.objects = objects.furniture.concat(objects.walls).concat(objects.uploaded_objects);
+        this.pass_through_objects = objects.doors.concat(objects.windows);
         this.draggableObjects = objects.furniture.concat(objects.uploaded_objects);
         this.gridSize = gridSize;
         this.gridScale = gridScale;
@@ -58,6 +59,7 @@ class DemoControls {
         this.drag.dispose();
         this.pointerLock.dispose();
         this.orbit.dispose();
+        this.clearGumball();
         const instructions = document.getElementById( 'instructions' );
         instructions.removeEventListener( 'click', this.lock);
         this.pointerLock.removeEventListener('lock', this.hideBlocker);
@@ -143,8 +145,8 @@ class DemoControls {
                 this.pointerLock.moveForward( - this.velocity.z * delta );
                 this.setCameraBB(this.insideCameraBB, camera.inside);
                 let collision = this.checkCollisions(this.insideCameraBB, this.boundingBoxes)
-                if (collision.hasCollision && !collision.collidedBox.name.includes("door")) {
-                    console.log(collision.collidedObject)
+                if (collision.hasCollision && collision.collidedBox.name != "wall_11_3" && collision.collidedBox.name != "wall_11_4" ) {
+                    console.log(collision.collidedBox)
                     this.pointerLock.moveRight(this.velocity.x * delta );
                     this.pointerLock.moveForward(this.velocity.z * delta );
                     console.log("collision")
@@ -417,7 +419,7 @@ class DemoControls {
     }
 
     orthoOnClick = (event) => {
-        event.preventDefault();
+        // event.preventDefault();
 
 				if ( this.enableSelection === true ) {
 					const draggableObjects = this.drag.getObjects();
