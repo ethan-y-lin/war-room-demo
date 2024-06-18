@@ -3,28 +3,37 @@ const asyncHandler = require("express-async-handler");
 const {body, validationResult} = require("express-validator");
 
 const Category = require('../models/category');
-
+const Object = require('../models/object');
 // Handle Category create on POST.
 exports.category_upload_post = [
     // Validate and sanitize the name field.
-    body("name", "Item name must contain at least 3 characters")
-      .trim()
-      .isLength({ min: 3 })
-      .escape(),
+    // body("name", "Item name must contain at least 3 characters")
+    //   .trim()
+    //   .isLength({ min: 3 })
+    //   .escape(),
   
     // Process request after validation and sanitization.
     asyncHandler(async (req, res, next) => {
-
+        console.log("uploading category")
         // Extract the validation errors from a request.
         const errors = validationResult(req);
-        console.log("uploading category")
-        console.log(req.body.name);
+
         if (!errors.isEmpty()) {
             // There are errors. Go back to home page
-            res.render("/", {
-                // // object: req.body, // Use req.body instead of item object since it doesn't exist yet
-                // errors: errors.array(),
-            });
+            console.log(errors);
+
+            const objects = await Object.find().exec();
+            const categories = await Category.find().exec();
+
+            res.render("index", {
+                title: "War Room Demo",
+                modal: false,
+                modal_title: "",
+                objects: objects,
+                categories: categories,
+                errors: errors,
+                new_category: req.body
+              });
             return;
         }
   

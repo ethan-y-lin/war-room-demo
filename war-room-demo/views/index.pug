@@ -51,10 +51,14 @@ block content
                         
                             li  
                                 a &#43; Add new category
-                        form(method='POST' enctype='multipart/form-data' action = "/upload-category")
-                            div#category-form.form-group
-                                input#category-name.form-control(type='text', placeholder='Category Name' name='name')
+                        form(method='POST' action= "/upload-category")
+                            div.form-group
+                                input#category-name.form-control(type='text' placeholder='Category Name' name='name' required value=(undefined===new_category ? '' : new_category.name))
                                 button.button(type='submit') Submit
+                            if errors
+                                ul
+                                    for error in errors
+                                        li!= error.msg
                                 
                     ul#saved-plans.layer2.hidden
                         div.back-button1 &lt; back

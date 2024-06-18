@@ -74,7 +74,8 @@ exports.object_upload_post = [
     
     if (!errors.isEmpty()) {
       //default categories for form dropdown and layer 2 menu
-      const defaultCategories = ['chairs', 'sofas', 'tables'];
+      const objects = await Object.find().exec();
+      const categories = await Category.find().exec();
       // There are errors. Render the form again with sanitized values/error messages.
       // Get all categories, which we can use for adding to our item.
       console.log("render modal")
@@ -82,7 +83,7 @@ exports.object_upload_post = [
         modal_title: "Upload Object",
         object: req.body, // Use req.body instead of item object since it doesn't exist yet
         errors: errors.array(),
-        defaultCategories: defaultCategories,
+        categories: categories,
       });
       return;
     }
