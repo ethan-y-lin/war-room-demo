@@ -38,12 +38,13 @@ class DynamicCamera {
     setInsideCamera(canvas) {
         // inside camera
         let insideCamera = new THREE.PerspectiveCamera(
-            45, 
+            60, 
             canvas.offsetWidth / canvas.offsetHeight, 
             0.1, 
             1000
         );
-        insideCamera.position.set(5, 1.71, 5);
+        insideCamera.position.set(4, 1.7, -1);
+        insideCamera.rotation.y = 90;
         this.name = "inside";
         this.inside = insideCamera;
     }
@@ -56,7 +57,7 @@ class DynamicCamera {
             0.1, 
             1000
         );
-        outsideCamera.position.set(-10, 30, 30);
+        outsideCamera.position.set(-10, 10, 10);
         this.name = "outside";
         this.outside = outsideCamera;
     }

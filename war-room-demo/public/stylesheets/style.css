@@ -1,4 +1,5 @@
 body {
+  position: absolute;
   width: 100%;
   height: 100%;
   background-color: white;
@@ -15,22 +16,29 @@ body {
 .mainSection{
   display: flex;
   flex-direction: row;
-  height: auto;
   align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  margin: 0px;
 }
 
 #menu{
   display: flex;
   width: 15%;
   margin-left: 50px;
+  padding: 10px;
 }
 
 #scene{
   display: flex;
   flex-direction: column;
-  width: 85%;
-  height: auto;
+  width: 60%;
+  height: 100%;
+  padding: 20px;
   align-items: center;
+  position: relative;
+  margin: auto;
 }
 .no-cursor {
   cursor: none;
@@ -200,18 +208,16 @@ nav a{
 #blocker {
   display: none;
   position: absolute;
-  width: 800px;
-  height: 500px;
+  width: 100%;
+  height: 100%;
   background-color: rgba(0,0,0,0.5);
   z-index: 2;
-  margin-top: 140px;
 }
 
 
 #scene-container {
-  width: 800px;
-  height: 500px;
-  /* display: block; */
+  width: 100%;
+  height: 80%;
   display: flex;
   flex-direction: row;
   position: relative;
@@ -221,7 +227,8 @@ nav a{
 #hud{
   display: flex;
   flex-direction: row;
-  width: 800px;
+  width: 100%;
+  height: 100%;
   justify-content: space-between;
   position: absolute;
 }
@@ -249,7 +256,7 @@ nav a{
 #scene-right{
   display: flex;
   flex-direction: column;
-  height: 500px;
+  height: 100%;
   justify-content: space-between;
   position: relative;
 }
@@ -319,10 +326,12 @@ nav a{
   cursor: pointer;
 }
 
-.canvas2 {
-  width: 500px;
-  height: 500px;
-  background-color: black;
+
+canvas{
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  z-index: -1;
 }
 
 #object-upload-modal{
@@ -338,7 +347,7 @@ nav a{
 
 #modal-content{
   background-color:rgb(255, 239, 230);
-  margin: 10% auto;
+  margin: 15% auto;
   padding: 30px;
   border: 1px solid #888;
   width: 35%;
@@ -347,20 +356,17 @@ nav a{
   display: flex;
   flex-direction: column;
   justify-content: center;
-
 }
 
 #modal-content h1{
   margin-bottom: 30px;
   text-align: center;
-  margin-top: -10px;
 }
 
 #modal-content .form-group{
   text-align: start;
   margin-left: auto;
   margin-right: auto;
-  width: 100%;
   padding: 10px;
   margin-bottom: 5px;
   padding-left: 30px;
@@ -382,4 +388,32 @@ nav a{
 .close:hover{
   color:#888;
   cursor: pointer;
+}
+
+.button-after{
+  display: flex;
+  justify-content: end;
+}
+
+.upload-button{
+  background-color: transparent;
+  width: 60px;
+  height: 35px;
+  color:#384c44;
+  display: flex;
+  justify-content: center;
+  border: none;
+  margin-top: 10px;
+}
+
+.upload-button a{
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  margin: 0px;
+  padding: 0px;
+  font-size: 12px;
+}
+
+.upload-button a:hover{
+  font-weight: bold;
+  border-bottom: 1px solid #445c52;
 }
