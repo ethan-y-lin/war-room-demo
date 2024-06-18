@@ -90,13 +90,16 @@ class DragControls extends THREE.EventDispatcher {
 				if ( scope.mode === 'translate' ) {
 
 					if ( _raycaster.ray.intersectPlane( _plane, _intersection ) ) {
+						const y_pos = _selected.position.y;
 						_selected.position.copy( _intersection.sub( _offset ).applyMatrix4( _inverseMatrix ) );
                         const gridSize = 10.040862083435059;
                         const gridScale = 0.1;
                         const gridCellDim = gridScale;
+					
                         _selected.position.divideScalar(gridCellDim).floor().multiplyScalar(gridCellDim).addScalar(gridCellDim/2);
+						_selected.position.y = y_pos;
                         // _selected.position.y = 0; // can make more dynamic in the future.
-
+						console.log("After" + _selected.position.y);
                         if(_selected.position.x + _offset.x < -gridSize / 2) _selected.position.x = -gridSize / 2 - _offset.x;
                         if(_selected.position.x + _offset.x > gridSize / 2) _selected.position.x = gridSize / 2 - _offset.x;
                         if(_selected.position.z + _offset.z < -gridSize / 2) _selected.position.z = -gridSize / 2 - _offset.z;

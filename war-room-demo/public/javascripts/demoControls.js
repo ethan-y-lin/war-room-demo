@@ -31,7 +31,8 @@ class DemoControls {
 
         this.drag = new DragControls(this.draggableObjects, camera.ortho, canvas, this.gridSize, this.gridScale);
         this.mouse = new THREE.Vector2();
-        this.raycaster = new THREE.Raycaster();
+        this.raycaster1 = new THREE.Raycaster();
+        // this.raycaster2 = new THREE.Raycaster();
         this.enableSelection;
         this.startColor;
         this.selectedGroup = new THREE.Group();
@@ -161,32 +162,36 @@ class DemoControls {
     }
 
     dragCallback = (event) => {
-        console.log("dragging");
         const object = event.object;
-        const boundingBox = new THREE.Box3().setFromObject( object);
+        let boundingBox = new THREE.Box3().setFromObject( object);
+        
+        const newRaycaster = new THREE.Raycaster(object.position, new THREE.Vector3(0,-1,0), object.position.y - boundingBox.min.y);
+        // console.log(newRaycaster);
+        const intersects = newRaycaster.intersectObjects(this.objects,true);
+        if (intersects.length > 0) {
+            const firstObject = intersects[0].object;
+            const firstObjectBB = new THREE.Box3().setFromObject( firstObject);
+            object.position.set(object.position.x, 
+                firstObjectBB.max.y + (object.position.y - boundingBox.min.y) + 0.01,
+                object.position.z);
+            this.colorObject(object, 0x000000);
+        }
+
+        boundingBox = new THREE.Box3().setFromObject( object);
         const isCollided = this.checkCollisions(boundingBox, this.boundingBoxes);
-        console.log(isCollided);
         if (isCollided.hasCollision && isCollided.collidedBox.name != object.name) {
-            console.log("Collision!");
-            if (object.type == "Mesh") {
-                object.material.emissive.set( 0xff0000 );
-            } else if (object.type == "Group"){
-                object.children.forEach((obj) => {
-                    if (obj.name != "bounding_box" || obj.type != "Mesh"){
-                        obj.material.emissive.set(0xff0000);
-                    }
-                });
+            if (!isCollided.collidedBox.name.includes("wall")) {
+                console.log("raise")
+                // raise object above collidedBox
+                object.position.set(object.position.x, 
+                                    isCollided.collidedBox.box.max.y + (object.position.y - boundingBox.min.y) + 0.01,
+                                    object.position.z);
+            } else {
+                console.log("Collision!");
+                this.colorObject(object, 0xff0000);
             }
         } else {
-            if (object.type == "Mesh") {
-                object.material.emissive.set( 0x000000 );
-            } else if (object.type == "Group"){
-                object.children.forEach((obj) => {
-                    if (obj.name != "bounding_box" || obj.type != "Mesh"){
-                        obj.material.emissive.set(0x000000);
-                    }
-                });
-            }
+            this.colorObject(object, 0x000000);
         }
     }
 
@@ -197,13 +202,15 @@ class DemoControls {
         const boundingBox = new THREE.Box3().setFromObject( object);
         const isCollided = this.checkCollisions(boundingBox, this.boundingBoxes);
         console.log(isCollided);
+        
         if (isCollided.hasCollision && isCollided.collidedBox.name != object.name) {
             console.log("Collision!");
             object.position.set(this.drag_origin.x, this.drag_origin.y, this.drag_origin.z);
+            this.colorObject(object, 0x000000);
         } else {
             console.log("Successful drag")
-            this.boundingBoxes = this.getBoundingBoxes(this.objects); // update boundingBoxes
         }
+        this.boundingBoxes = this.getBoundingBoxes(this.objects); // update boundingBoxes
         // console.log("startColor after dragStart" + this.startColor);
         // event.object.material.color.setHex(this.startColor);
         
@@ -228,19 +235,30 @@ class DemoControls {
         this.pointerLock.lock();
     }
 
-    hasDoor (object) {
-        if (object.name.includes("door")){
-            return true;
+    colorObject(object, color) {
+        if (object.type == "Mesh") {
+            object.material.emissive.set( color );
+        } else if (object.type == "Group"){
+            object.children.forEach((obj) => {
+                if (obj.name != "bounding_box" || obj.type != "Mesh"){
+                    obj.material.emissive.set(color);
+                }
+            });
         }
-        if (object.children.length == 0) {
-            return false;
-        }
-        let bool = false;
-        for (let i = 0; i < object.children.length; i++) {
-            bool = bool || this.hasDoor(object.children[i]);
-        }
-        return bool;
-    } 
+    }
+    // hasDoor (object) {
+    //     if (object.name.includes("door")){
+    //         return true;
+    //     }
+    //     if (object.children.length == 0) {
+    //         return false;
+    //     }
+    //     let bool = false;
+    //     for (let i = 0; i < object.children.length; i++) {
+    //         bool = bool || this.hasDoor(object.children[i]);
+    //     }
+    //     return bool;
+    // } 
 
     getBoundingBoxes(objects) {
         let boxes = [];
@@ -344,37 +362,20 @@ class DemoControls {
                     this.mouse.x = ( event.clientX - rect.left ) / rect.width * 2 - 1;
                     this.mouse.y = - ( event.clientY - rect.top ) / rect.height * 2 + 1;
                     
-					this.raycaster.setFromCamera( this.mouse, this.camera.ortho );
+					this.raycaster1.setFromCamera( this.mouse, this.camera.ortho );
                     
-					const intersections = this.raycaster.intersectObjects( this.draggableObjects, true );
+					const intersections = this.raycaster1.intersectObjects( this.draggableObjects, true );
 					if ( intersections.length > 0 ) {
 
 						const bounding_box = intersections[ 0 ].object; // should be the bounding box
                         const object = bounding_box.parent;
                         
 						if ( this.selectedGroup.children.includes( object ) === true ) {
-                            if (object.type == "Mesh") {
-                                object.material.emissive.set( 0x000000 );
-                            } else if (object.type == "Group"){
-                                object.children.forEach((obj) => {
-                                    if (obj.name != "bounding_box" || obj.type != "Mesh"){
-                                        obj.material.emissive.set(0x000000);
-                                    }
-                                });
-                            }
-
+                            this.colorObject(object, 0x000000);
 							this.scene.attach( object );
                             this.selectedGroup.remove(object);
 						} else {
-                            if (object.type == "Mesh") {
-                                object.material.emissive.set( 0x0000ff );
-                            } else if (object.type == "Group"){
-                                object.children.forEach((obj) => {
-                                    if (obj.name != "bounding_box" || obj.type != "Mesh"){
-                                        obj.material.emissive.set(0x0000ff);
-                                    }
-                                });
-                            }
+                            this.colorObject(object, 0x0000ff);
 							
 							this.selectedGroup.attach( object );
                             this.scene.remove(object);
