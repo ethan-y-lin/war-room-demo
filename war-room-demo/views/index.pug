@@ -48,10 +48,12 @@ block content
                             li
                                 each category in categories 
                                     a.menu-header(id= category.name)= category.name
+                        
+                            li  
+                                a &#43; Add new category
                         form(method='POST' enctype='multipart/form-data' action = "/upload-category")
-                            div.form-group
-                                label(for='name') Add New Category: 
-                                input#name.form-control(type='text', placeholder='Name' name='name')
+                            div#category-form.form-group
+                                input#category-name.form-control(type='text', placeholder='Category Name' name='name')
                                 button.button(type='submit') Submit
                                 
                     ul#saved-plans.layer2.hidden
@@ -126,7 +128,7 @@ block content
                 form(method='POST' enctype='multipart/form-data' action = "/upload-object")
                     div.form-group
                         label(for='name') Name: 
-                        input#name.form-control(type='text', placeholder='Name' name='name' required value=(undefined===object ? '' : object.name) )
+                        input#object-name.form-control(type='text', placeholder='Name' name='name' required value=(undefined===object ? '' : object.name) )
                     div.form-group 
                         label(for='object') Upload Object:  
                         input(type='file' name='object' accept="object/glb, object/obj")

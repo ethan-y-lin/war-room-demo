@@ -417,3 +417,12 @@ canvas{
   font-weight: bold;
   border-bottom: 1px solid #445c52;
 }
+
+#category-form input{
+  height: 30px;
+}
+
+#category-form button{
+  font-size: 12px;
+  width: 50px;
+}
