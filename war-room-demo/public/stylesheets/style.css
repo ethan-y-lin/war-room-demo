@@ -418,11 +418,36 @@ canvas{
   border-bottom: 1px solid #445c52;
 }
 
+#category-form{
+  position: absolute;
+  margin: 5px;
+  padding: 3px;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(-100%);
+  transition: all 0.3s ease-in-out;
+}
+
 #category-form input{
   height: 30px;
+  border:1px solid #384c44;
+  border-radius: 3px;
 }
 
 #category-form button{
   font-size: 12px;
   width: 50px;
+  background-color:#384c44;
+  color: white;
+  border: none;
+}
+
+#category-form button:hover{
+  background-color:#a4c3b2;
+}
+
+#category-button:hover > #category-form{
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(0);
 }
