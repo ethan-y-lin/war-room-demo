@@ -18,7 +18,7 @@ block content
                         li
                             a.menu-unit#sp SAVED PLANS
                         li
-                            a(href="/upload") UPLOAD
+                            a(href="/upload-object") UPLOAD
                         li
                             a.menu-unit#p3 EXPORT
                 
@@ -48,9 +48,10 @@ block content
                             li
                                 each category in categories 
                                     a.menu-header(id= category.name)= category.name
-                        div.button-after
-                            button.upload-button 
-                                a(href="/upload") Upload...
+                        form(method='POST' enctype='multipart/form-data' action = "/upload-category")
+                            div.form-group
+                                label(for='name') Add New Category: 
+                                input#name.form-control(type='text', placeholder='Name' name='name')
                     ul#saved-plans.layer2.hidden
                         div.back-button1 &lt; back
                         div.menu-title
@@ -77,6 +78,9 @@ block content
                                                         a(href=object.url)= object.name
                                 else    
                                     p There are no objects.
+                            div.button-after
+                                button.upload-button 
+                                    a(href="/upload-object") Upload...
                     div#list3.layer3.hidden  
                         div.back-button2 &lt; back
                         div.menu-title
@@ -117,7 +121,7 @@ block content
             div#modal-content
                 a(class="close" href="/") &times; 
                 h1= modal_title
-                form(method='POST' enctype='multipart/form-data' action = "/upload")
+                form(method='POST' enctype='multipart/form-data' action = "/upload-object")
                     div.form-group
                         label(for='name') Name: 
                         input#name.form-control(type='text', placeholder='Name' name='name' required value=(undefined===object ? '' : object.name) )

@@ -129,7 +129,7 @@ class DemoScene {
 
                 // initialize objects
                 const objects = [...this.model.children]; // must be copy because removing direclty will cause some to be skipped.
-                
+
                 objects.forEach((obj) =>  {
                     if (obj.name.includes("wall") || obj.name.includes("floor")) {
                         this.objects.walls.push(obj);
