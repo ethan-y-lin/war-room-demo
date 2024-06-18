@@ -34,8 +34,7 @@ class DemoScene {
         this.renderer.setPixelRatio( this.canvas.devicePixelRatio );
         this.renderer.setSize(this.canvas.offsetWidth, this.canvas.offsetHeight);
         this.canvas.appendChild( this.renderer.domElement );
-
-
+        
         console.log(this.objects)
         // initialize controls 
         this.controls = new DemoControls(this.camera, this.canvas, this.scene, this.objects, this.gridSize, this.gridScale, this.modelSize); // initializes to orthoControls
@@ -162,9 +161,14 @@ class DemoScene {
     }
     
     onWindowResize(camera){
-        camera.aspect = this.canvas.offsetWidth / this.canvas.offsetHeight;
+        console.log("window resized");
+        const width = this.canvas.offsetWidth;
+        const height = this.canvas.offsetHeight;
+        // camera.aspect = this.canvas.offsetWidth / this.canvas.offsetHeight;
+        camera.aspect = width/height;
         camera.updateProjectionMatrix();
-        this.renderer.setSize(this.canvas.offsetWidth, this.canvas.offsetHeight);
+        this.renderer.setSize(width, height, false);
+        console.log(width);
     }
 
     setInsideViewMode() {
