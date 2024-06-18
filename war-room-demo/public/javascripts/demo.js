@@ -64,7 +64,7 @@ class DemoScene {
 
                     // Create a box helper
                     const boxGeometry = new THREE.BoxGeometry(box.max.x - box.min.x, box.max.y - box.min.y, box.max.z - box.min.z);
-                    const boxMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.5 });
+                    const boxMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.5 });
                     const boundingBox = new THREE.Mesh(boxGeometry, boxMaterial);
 
                     // const axesHelper = new THREE.AxesHelper(20);
@@ -227,7 +227,9 @@ $('#fullscreen-button').on('click', function(){
         APP.controls.pointerLock.isLocked = true;
         APP.renderer.domElement.addEventListener( 'mousemove', APP.controls.lock);
     } else if (APP.camera.name == "ortho") {
-
+        APP.renderer.domElement.addEventListener('keyup', APP.controls.orthoOnKeyUp);
+        APP.renderer.domElement.addEventListener('keydown', APP.controls.orthoOnKeyDown);
+        APP.renderer.domElement.addEventListener('click', APP.controls.orthoOnClick);
     }
     console.log("set full screen")
 });

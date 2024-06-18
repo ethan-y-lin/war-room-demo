@@ -18,6 +18,9 @@ class DemoControls {
         this.orbit = new THREE.OrbitControls(camera.outside, canvas);
         this.orbit.update();
 
+        this.gumball = null;
+
+
         this.pointerLock = new THREE.PointerLockControls(camera.inside, canvas);
         this.prevTime = performance.now();
         this.velocity = new THREE.Vector3();
@@ -27,15 +30,17 @@ class DemoControls {
         this.moveLeft = false;
         this.moveRight = false;
         this.insideCameraBB = new THREE.Box3();
-        this.boundingBoxes = this.getBoundingBoxes(objects);
+        this.boundingBoxes = this.getBoundingBoxes(this.objects);
 
         this.drag = new DragControls(this.draggableObjects, camera.ortho, canvas, this.gridSize, this.gridScale);
         this.mouse = new THREE.Vector2();
-        this.raycaster = new THREE.Raycaster();
+        this.raycaster1 = new THREE.Raycaster();
+        // this.raycaster2 = new THREE.Raycaster();
         this.enableSelection;
         this.startColor;
         this.selectedGroup = new THREE.Group();
         this.scene.add(this.selectedGroup);
+        this.drag_origin = new THREE.Vector3();
         this.switchControls("ortho", camera.ortho, canvas);
     }
 
@@ -62,8 +67,10 @@ class DemoControls {
         document.removeEventListener('keyup', this.orthoOnKeyUp);
         document.removeEventListener('keydown', this.orthoOnKeyDown);
         document.removeEventListener('click', this.orthoOnClick);
-        // this.drag.removeEventListener('dragstart', this.dragStartCallback);
-        // this.drag.removeEventListener('dragend', this.dragEndCallback);
+        document.removeEventListener('click', this.outsideOnClick);
+        this.drag.removeEventListener('dragstart', this.dragStartCallback);
+        this.drag.removeEventListener('dragend', this.dragEndCallback);
+        this.drag.removeEventListener('drag', this.dragCallback);
     }
 
     updateObjects(objects) {
@@ -82,17 +89,19 @@ class DemoControls {
         if (newControl == "ortho") {
             this.clearEventListeners();
             this.drag = new DragControls([...this.draggableObjects], camera, canvas, this.gridSize, this.gridScale);
-            // this.drag.addEventListener('dragstart', this.dragStartCallback);
-            // this.drag.addEventListener('dragend', this.dragEndCallback);
+            this.drag.addEventListener('dragstart', this.dragStartCallback);
+            this.drag.addEventListener('dragend', this.dragEndCallback);
+            this.drag.addEventListener('drag', this.dragCallback);
             document.addEventListener('keyup', this.orthoOnKeyUp);
             document.addEventListener('keydown', this.orthoOnKeyDown);
-            this.canvas.addEventListener('click', this.orthoOnClick);
+            document.addEventListener('click', this.orthoOnClick);
             this.drag.enabled = true;
             this.pointerLock.enabled = false;
             this.orbit.enabled = false;
             this.hideBlocker();
         } else if (newControl == "outside") {
             this.clearEventListeners();
+            document.addEventListener('click', this.outsideOnClick);
             this.orbit = new THREE.OrbitControls(camera, canvas);
             this.orbit.enabled = true;
             this.drag.enabled = false;
@@ -134,7 +143,7 @@ class DemoControls {
                 this.pointerLock.moveForward( - this.velocity.z * delta );
                 this.setCameraBB(this.insideCameraBB, camera.inside);
                 let collision = this.checkCollisions(this.insideCameraBB, this.boundingBoxes)
-                if (collision.hasCollision && collision.collidedObject.name != "wall_11") {
+                if (collision.hasCollision && !collision.collidedBox.name.includes("door")) {
                     console.log(collision.collidedObject)
                     this.pointerLock.moveRight(this.velocity.x * delta );
                     this.pointerLock.moveForward(this.velocity.z * delta );
@@ -150,17 +159,126 @@ class DemoControls {
         }
     }
 
-    dragStartCallback(event){
-        console.log("drag start");
-        this.startColor = event.object.material.color.getHex();
-        console.log("startColor before dragStart" + this.startColor);
-        event.object.material.color.setHex(0xff5733);
+    createGumball (object) {
+        this.gumball = new THREE.TransformControls(this.camera.outside, this.canvas);
+        
+        // Add mousedown/up event handling  
+        this.gumball.addEventListener("mouseDown", (event) => {
+            if(this.orbit != null)
+                this.orbit.enabled = false;
+        });
+
+        this.gumball.addEventListener("mouseUp", (event) => {
+            if(this.orbit != null)
+                this.orbit.enabled = true;
+        });
+
+        this.gumball.attach(object);
+        this.scene.add(this.gumball);
     }
 
-    dragEndCallback(event){
+    clearGumball() {
+        if (this.gumball == null) {
+            return;
+        }
+        this.scene.remove(this.gumball);
+        this.gumball.dispose();
+        this.gumball = null;
+    }
+
+    clickObject(object) {
+        if (this.gumball != null) {
+            if (object == this.gumball.object) {
+                return this.gumball;
+            } else {
+                this.clearGumball();
+            }
+        }
+        
+        this.createGumball(object);
+        return this.gumball;
+    }
+
+    outsideOnClick = (event) => {
+        const rect = this.canvas.getBoundingClientRect();
+
+        this.mouse.x = ( event.clientX - rect.left ) / rect.width * 2 - 1;
+        this.mouse.y = - ( event.clientY - rect.top ) / rect.height * 2 + 1;  
+        this.raycaster1.setFromCamera( this.mouse, this.camera.outside );
+        const intersections = this.raycaster1.intersectObjects( this.draggableObjects, true );
+        if (intersections.length > 0) {
+            console.log(intersections[0].object)
+            if (intersections[0].object.parent != null) {
+                this.clickObject(intersections[0].object.parent);
+            } else {
+                this.clickObject(intersections[0].object);
+            }
+        } else {
+            this.clearGumball();
+            this.orbit.enabled = true;
+        }  
+    }
+
+    dragStartCallback = (event) => {
+        console.log("drag start");
+        const object = event.object;
+        this.drag_origin = object.position.clone();
+        console.log(this.drag_origin);
+    }
+
+    dragCallback = (event) => {
+        const object = event.object;
+        let boundingBox = new THREE.Box3().setFromObject( object);
+        
+        const newRaycaster = new THREE.Raycaster(object.position, new THREE.Vector3(0,-1,0), object.position.y - boundingBox.min.y);
+        // console.log(newRaycaster);
+        const intersects = newRaycaster.intersectObjects(this.objects,true);
+        if (intersects.length > 0) {
+            const firstObject = intersects[0].object;
+            const firstObjectBB = new THREE.Box3().setFromObject( firstObject);
+            object.position.set(object.position.x, 
+                firstObjectBB.max.y + (object.position.y - boundingBox.min.y) + 0.01,
+                object.position.z);
+            this.colorObject(object, 0x000000);
+        }
+
+        boundingBox = new THREE.Box3().setFromObject( object);
+        const isCollided = this.checkCollisions(boundingBox, this.boundingBoxes);
+        if (isCollided.hasCollision && isCollided.collidedBox.name != object.name) {
+            if (!isCollided.collidedBox.name.includes("wall")) {
+                console.log("raise")
+                // raise object above collidedBox
+                object.position.set(object.position.x, 
+                                    isCollided.collidedBox.box.max.y + (object.position.y - boundingBox.min.y) + 0.01,
+                                    object.position.z);
+            } else {
+                console.log("Collision!");
+                this.colorObject(object, 0xff0000);
+            }
+        } else {
+            this.colorObject(object, 0x000000);
+        }
+    }
+
+    dragEndCallback = (event) => {
         console.log("drag end");
-        console.log("startColor after dragStart" + this.startColor);
-        event.object.material.color.setHex(this.startColor);
+        console.log(this.drag_origin);
+        const object = event.object;
+        const boundingBox = new THREE.Box3().setFromObject( object);
+        const isCollided = this.checkCollisions(boundingBox, this.boundingBoxes);
+        console.log(isCollided);
+        
+        if (isCollided.hasCollision && isCollided.collidedBox.name != object.name) {
+            console.log("Collision!");
+            object.position.set(this.drag_origin.x, this.drag_origin.y, this.drag_origin.z);
+            this.colorObject(object, 0x000000);
+        } else {
+            console.log("Successful drag")
+        }
+        this.boundingBoxes = this.getBoundingBoxes(this.objects); // update boundingBoxes
+        // console.log("startColor after dragStart" + this.startColor);
+        // event.object.material.color.setHex(this.startColor);
+        
     }
 
     hideBlocker = () => {
@@ -182,36 +300,36 @@ class DemoControls {
         this.pointerLock.lock();
     }
 
-    hasDoor (object) {
-        if (object.name.includes("door")){
-            return true;
+    colorObject(object, color) {
+        if (object.type == "Mesh") {
+            object.material.emissive.set( color );
+        } else if (object.type == "Group"){
+            object.children.forEach((obj) => {
+                if (obj.name != "bounding_box" || obj.type != "Mesh"){
+                    obj.material.emissive.set(color);
+                }
+            });
         }
-        if (object.children.length == 0) {
-            return false;
-        }
-        let bool = false;
-        for (let i = 0; i < object.children.length; i++) {
-            bool = bool || this.hasDoor(object.children[i]);
-        }
-        return bool;
-    } 
+    }
+    // hasDoor (object) {
+    //     if (object.name.includes("door")){
+    //         return true;
+    //     }
+    //     if (object.children.length == 0) {
+    //         return false;
+    //     }
+    //     let bool = false;
+    //     for (let i = 0; i < object.children.length; i++) {
+    //         bool = bool || this.hasDoor(object.children[i]);
+    //     }
+    //     return bool;
+    // } 
 
     getBoundingBoxes(objects) {
         let boxes = [];
         for (let i = 0; i < objects.length; i++) {
-            if (this.hasDoor(objects[i])){
-                 for (let j = 0; j < objects[i].children.length; j++){
-                    if (!objects[i].children[j].name.includes("door")){
-                        const boundingBox = new THREE.Box3().setFromObject( objects[i].children[j] );
-                        boxes.push([boundingBox,i]); 
-                    }else{
-                        console.log("door")
-                    }
-                 }
-            }else {
                 const boundingBox = new THREE.Box3().setFromObject( objects[i] );
-                boxes.push([boundingBox, i]);
-            }
+                boxes.push({box: boundingBox, name: objects[i].name, index: i});
     
         }
         return boxes;
@@ -219,11 +337,11 @@ class DemoControls {
     
     checkCollisions(box, boundingBoxes){
         for (let i = 0; i < boundingBoxes.length; i++) {
-            if (box.intersectsBox(boundingBoxes[i][0])) {
-                return {hasCollision: true, collidedObject: this.objects[boundingBoxes[i][1]]};
+            if (box.intersectsBox(boundingBoxes[i].box)) {
+                return {hasCollision: true, collidedBox: boundingBoxes[i]};
             }
         }
-        return false;
+        return {hasCollision: false, collidedObject: null} ;
     }
 
     insideOnKeyDown = ( event ) => {
@@ -309,37 +427,20 @@ class DemoControls {
                     this.mouse.x = ( event.clientX - rect.left ) / rect.width * 2 - 1;
                     this.mouse.y = - ( event.clientY - rect.top ) / rect.height * 2 + 1;
                     
-					this.raycaster.setFromCamera( this.mouse, this.camera.ortho );
+					this.raycaster1.setFromCamera( this.mouse, this.camera.ortho );
                     
-					const intersections = this.raycaster.intersectObjects( this.draggableObjects, true );
+					const intersections = this.raycaster1.intersectObjects( this.draggableObjects, true );
 					if ( intersections.length > 0 ) {
 
 						const bounding_box = intersections[ 0 ].object; // should be the bounding box
                         const object = bounding_box.parent;
                         
 						if ( this.selectedGroup.children.includes( object ) === true ) {
-                            if (object.type == "Mesh") {
-                                object.material.emissive.set( 0x000000 );
-                            } else if (object.type == "Group"){
-                                object.children.forEach((obj) => {
-                                    if (obj.name != "bounding_box" || obj.type != "Mesh"){
-                                        obj.material.emissive.set(0x000000);
-                                    }
-                                });
-                            }
-
+                            this.colorObject(object, 0x000000);
 							this.scene.attach( object );
                             this.selectedGroup.remove(object);
 						} else {
-                            if (object.type == "Mesh") {
-                                object.material.emissive.set( 0xff0000 );
-                            } else if (object.type == "Group"){
-                                object.children.forEach((obj) => {
-                                    if (obj.name != "bounding_box" || obj.type != "Mesh"){
-                                        obj.material.emissive.set(0xff0000);
-                                    }
-                                });
-                            }
+                            this.colorObject(object, 0x0000ff);
 							
 							this.selectedGroup.attach( object );
                             this.scene.remove(object);
