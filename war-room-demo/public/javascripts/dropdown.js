@@ -36,19 +36,13 @@ $(".menu-header").on('click', function(){
         // $("#sofas3, #tables3").addClass("hidden");
         $("#list3").addClass("hidden");
     }
+    if($(this).is("#fdahello")){
+        $("#category-fdahello").removeClass("hidden");
+    }
     if($(this).is("#list")){
         $("#list3").removeClass("hidden");
         $("#category-Chair").addClass("hidden");
     }
-    // if($(this).is("#sofas")){
-    //     $("#sofas3").removeClass("hidden");
-    //     $("#chairs3, #tables3").addClass("hidden");
-    // }
-    // if($(this).is("#tables")){
-    //     $("#tables3").removeClass("hidden");
-    //     $("#chairs3, #sofas3").addClass("hidden");
-    // }
-
 });
 
 $(".back-button1").on('click', function(){

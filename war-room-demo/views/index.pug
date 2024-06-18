@@ -51,14 +51,14 @@ block content
                             li
                                 div#category-button  
                                     a &#43; Add new category
-                                    form(method='POST' action = "/upload-category")
-                                        div#category-form.form-group.slideDown
-                                            input#category-name.form-control(type='text', placeholder='Category Name' name='name')
-                                            button.button(type='submit') Submit
-                                        if errors
-                                            ul
-                                                for error in errors
-                                                    li!= error.msg   
+                                form(method='POST' action = "/upload-category")
+                                    div#category-form.form-group.slideDown
+                                        input#category-name.form-control(type='text', placeholder='Category Name' name='name')
+                                        button.button(type='submit') Submit
+                                    if errors
+                                        ul
+                                            for error in errors
+                                                li!= error.msg   
                     ul#saved-plans.layer2.hidden
                         div.back-button1 &lt; back
                         div.menu-title
