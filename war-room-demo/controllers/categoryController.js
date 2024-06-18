@@ -1,6 +1,4 @@
-const path = require('path');
-const fs = require('fs')
-const cloudinary = require('../cloudinaryConfig');
+
 const asyncHandler = require("express-async-handler");
 const {body, validationResult} = require("express-validator");
 
@@ -16,13 +14,17 @@ exports.category_upload_post = [
   
     // Process request after validation and sanitization.
     asyncHandler(async (req, res, next) => {
+
         // Extract the validation errors from a request.
         const errors = validationResult(req);
-      
+        console.log("uploading category")
+        console.log(req.body.name);
         if (!errors.isEmpty()) {
             // There are errors. Go back to home page
-            console.log(errors);
-            res.redirect("/");
+            res.render("/", {
+                // // object: req.body, // Use req.body instead of item object since it doesn't exist yet
+                // errors: errors.array(),
+            });
             return;
         }
   
@@ -42,8 +44,10 @@ exports.category_upload_post = [
           // Category exists, redirect to its detail page.
           res.redirect('/');
         } else {
+        
           // Save the new category and redirect to its detail page.
           await category.save();
+          console.log("uploaded category");
           res.redirect('/');
         }
     }),
