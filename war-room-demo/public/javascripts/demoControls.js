@@ -18,6 +18,9 @@ class DemoControls {
         this.orbit = new THREE.OrbitControls(camera.outside, canvas);
         this.orbit.update();
 
+        this.gumball = null;
+
+
         this.pointerLock = new THREE.PointerLockControls(camera.inside, canvas);
         this.prevTime = performance.now();
         this.velocity = new THREE.Vector3();
@@ -64,6 +67,7 @@ class DemoControls {
         document.removeEventListener('keyup', this.orthoOnKeyUp);
         document.removeEventListener('keydown', this.orthoOnKeyDown);
         document.removeEventListener('click', this.orthoOnClick);
+        document.removeEventListener('click', this.outsideOnClick);
         this.drag.removeEventListener('dragstart', this.dragStartCallback);
         this.drag.removeEventListener('dragend', this.dragEndCallback);
         this.drag.removeEventListener('drag', this.dragCallback);
@@ -97,6 +101,7 @@ class DemoControls {
             this.hideBlocker();
         } else if (newControl == "outside") {
             this.clearEventListeners();
+            document.addEventListener('click', this.outsideOnClick);
             this.orbit = new THREE.OrbitControls(camera, canvas);
             this.orbit.enabled = true;
             this.drag.enabled = false;
@@ -152,6 +157,66 @@ class DemoControls {
         } else if(this.view == "outside") {
             this.orbit.update();
         }
+    }
+
+    createGumball (object) {
+        this.gumball = new THREE.TransformControls(this.camera.outside, this.canvas);
+        
+        // Add mousedown/up event handling  
+        this.gumball.addEventListener("mouseDown", (event) => {
+            if(this.orbit != null)
+                this.orbit.enabled = false;
+        });
+
+        this.gumball.addEventListener("mouseUp", (event) => {
+            if(this.orbit != null)
+                this.orbit.enabled = true;
+        });
+
+        this.gumball.attach(object);
+        this.scene.add(this.gumball);
+    }
+
+    clearGumball() {
+        if (this.gumball == null) {
+            return;
+        }
+        this.scene.remove(this.gumball);
+        this.gumball.dispose();
+        this.gumball = null;
+    }
+
+    clickObject(object) {
+        if (this.gumball != null) {
+            if (object == this.gumball.object) {
+                return this.gumball;
+            } else {
+                this.clearGumball();
+            }
+        }
+        
+        this.createGumball(object);
+        return this.gumball;
+    }
+
+    outsideOnClick = (event) => {
+        const rect = this.canvas.getBoundingClientRect();
+
+        this.mouse.x = ( event.clientX - rect.left ) / rect.width * 2 - 1;
+        this.mouse.y = - ( event.clientY - rect.top ) / rect.height * 2 + 1;  
+        this.raycaster1.setFromCamera( this.mouse, this.camera.outside );
+        const intersections = this.raycaster1.intersectObjects( this.draggableObjects, true );
+        if (intersections.length > 0) {
+            console.log(intersections[0].object)
+            if (intersections[0].object.parent != null) {
+                this.clickObject(intersections[0].object.parent);
+            } else {
+                this.clickObject(intersections[0].object);
+            }
+        } else {
+            this.clearGumball();
+            this.orbit.enabled = true;
+        }  
     }
 
     dragStartCallback = (event) => {
