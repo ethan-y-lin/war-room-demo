@@ -5,7 +5,7 @@ const asyncHandler = require("express-async-handler");
 const {body, validationResult} = require("express-validator");
 
 const Object = require("../models/object");
-
+const Category = require("../models/category");
 
 // Display list of all Objects.
 exports.object_list = asyncHandler(async (req, res, next) => {
@@ -18,14 +18,16 @@ exports.object_list = asyncHandler(async (req, res, next) => {
 
   // Display Item upload form on GET.
 exports.object_upload_get = asyncHandler (async (req, res, next) => {
+  const objects = await Object.find().exec();
+  const categories = await Category.find().exec();
   // Get all object, which we can use for adding to our item.
   console.log("render modal")
   res.render("index", {
     title: "War Room Demo",
     modal: true,
     modal_title: "Upload Object",
-    objects: [],
-    categories: {},
+    objects: objects,
+    categories: categories,
   }, function(err, html) {
     if (err) {
         // Handle the error, for example, log it and send a 500 response
@@ -124,6 +126,11 @@ exports.object_upload_post = [
         // Item exists, redirect to its detail page.
         res.redirect('/');
       } else {
+        const objectCategory = await Category.findById(req.body.category).exec();
+        console.log(objectCategory.objects);
+        const update = [...objectCategory.objects, object._id];
+        console.log(update);
+        await Category.findByIdAndUpdate(req.body.category, {objects: update}, {});
         // Save the new item and redirect to its detail page.
         await object.save();
         res.redirect('/');

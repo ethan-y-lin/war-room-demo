@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 const ObjectSchema = new Schema({
     name: {type: String, required: true, maxLength: 100},
     obj_url: {type: String},
-    category: {type: String},
+    category: {type: Schema.Types.ObjectId, ref: "Category", required: true},
 })
 
 ObjectSchema.virtual("url").get(function() {

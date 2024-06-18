@@ -139,9 +139,8 @@ block content
                     div.form-group 
                         label(for='category') Category: 
                         select#category.form-control(name='category')
-                            option(value='chairs') Chairs 
-                            option(value='sofas') Sofas
-                            option(value='tables') Tables                      
+                            each category in categories
+                                option(value= category._id)= category.name                 
                         button.button(type='submit') Submit
                     if errors
                         ul
