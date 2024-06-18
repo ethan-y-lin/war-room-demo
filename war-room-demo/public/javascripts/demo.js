@@ -13,6 +13,8 @@ class DemoScene {
         this.canvas = document.getElementById("scene-container");
         this.objects = {walls: [], 
                         furniture: [],
+                        doors: [],
+                        windows: [],
                         uploaded_objects: []};
         this.uploaded_objects_url = [];
         this.scene = new THREE.Scene();
@@ -25,11 +27,11 @@ class DemoScene {
         this.gridScale = 0.1; // meter
         await this.initGeometries(this.scene);
 
-        // initialize camera
+        // // initialize camera
         this.camera = new DynamicCamera(this.canvas, this.modelSize); // initializes to orthoCamera
         this.currentCamera = this.camera.ortho;
 
-        // initialize renderer
+        // // initialize renderer
         this.renderer = new THREE.WebGLRenderer( { antialias: true } );
         this.renderer.setPixelRatio( this.canvas.devicePixelRatio );
         this.renderer.setSize(this.canvas.offsetWidth, this.canvas.offsetHeight);
@@ -131,15 +133,7 @@ class DemoScene {
                 // initialize objects
                 const objects = [...this.model.children]; // must be copy because removing direclty will cause some to be skipped.
                 
-                objects.forEach((obj) =>  {
-                    if (obj.name.includes("wall") || obj.name.includes("floor")) {
-                        this.objects.walls.push(obj);
-                    } else {
-                        this.model.remove(obj);
-                    }
-                });
-
-
+                this.organizeObjects(objects);
 
                 // initializes grid
                 const size = Math.max(this.modelSize.x, this.modelSize.z);
@@ -153,6 +147,24 @@ class DemoScene {
         });
     }
 
+    organizeObjects (objects) {
+        objects.forEach((obj) =>  {
+            if (obj.name.includes("door") || obj.name.includes("wall_11_3") || obj.name.includes("wall_11_4")) {
+                this.objects.doors.push(obj);
+            } else if (obj.name.includes("window")) {
+                this.objects.windows.push(obj);
+            } else if (obj.name.includes("wall") || obj.name.includes("floor")) {
+                if (obj.children.length > 0) {
+                    this.organizeObjects(obj.children);
+                } else {
+                    this.objects.walls.push(obj);
+                }
+                this.objects.walls.push(obj);
+            } else {
+                this.model.remove(obj);
+            }
+        });
+    }
     animate () {
         requestAnimationFrame(() => {
             this.controls.updateControls(this.camera);
