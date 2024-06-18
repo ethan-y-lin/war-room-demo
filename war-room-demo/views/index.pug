@@ -3,7 +3,7 @@ extends layout
 block content
     div.object-data(data-objects=objects)
     div.mainSection
-        a(href="/list") Upload List
+        
         aside#menu
             nav.dropdown-menu
                 div#column1.hidden
@@ -43,26 +43,12 @@ block content
                         div.back-button1 &lt; back
                         div.menu-title
                             h2 FURNITURES
-                            each category in categories 
-                                li
-                                    div.menu-header 
-                                        a= category.name
-
-                        //- each categoryName in Object.keys(categories || {})
-                        //-     li 
-                        //-         div.menu-header
-                        //-             a= categoryName
-                        
-                                
-                        //- each categoryName in Object.keys(categories || {})
-                        //-     li 
-                        //-         span= categoryName 
-                                        //- ul  
-                                        //-     if categories[categoryName] && categories[categoryName].length > 0
-                                        //-         each item in categories[categoryName]  
-                                        //-             li= item.name 
-                                        //-     else    
-                                        //-         li No item available
+                        div.layerx
+                            li
+                                a#list.menu-header Full List
+                            li
+                                each category in categories 
+                                    a.menu-header(id= category.name)= category.name
                     ul#saved-plans.layer2.hidden
                         div.back-button1 &lt; back
                         div.menu-title
@@ -74,55 +60,31 @@ block content
                                 a Plan 2
                             li
                                 a Plan 3
-                //- div#column3.hidden
-                //-     div#chairs3.layer3.hidden
-                //-         div.back-button2 &lt; back
-                //-         div.menu-title
-                //-             h2 CHAIRS
-                //-         ul
-                //-             li
-                //-                 a Chair 1
-                //-             li
-                //-                 a Chair 2
-                //-     div#sofas3.layer3.hidden
-                //-         div.back-button2 &lt; back
-                //-         div.menu-title
-                //-             h2 SOFAS
-                //-         ul
-                //-             li
-                //-                 a Sofa 1
-                //-             li
-                //-                 a Sofa 2
-                //-     div#tables3.layer3.hidden
-                //-         div.back-button2 &lt; back
-                //-         div.menu-title
-                //-             h2 TABLES
-                //-         ul
-                //-             li
-                //-                 a Table 1
-                //-             li
-                //-                 a Table 2
-                //- if categories[categoryName] && categories[categoryName].length > 0
-                //-             each item in categories[categoryName]  
-                //-                 li= item.name 
-                //-         else    
-                //-             li No item available
-                
-                //- div.back-button1 &lt; back
-                        //- div.menu-title
-                        //-     h2 FURNITURES
-                        //- div.layerx
-                            //- li 
-                            //-     a(href="/list") Upload List
-                            //- li
-                            //-     div#chairs.menu-header
-                            //-         a Chairs
-                            //- li
-                            //-     div#sofas.menu-header
-                            //-         a Sofas
-                            //- li
-                            //-     div#tables.menu-header
-                            //-         a Tables
+                div#column3.hidden
+                    each category in categories
+                       ul(id= "category-"+category.name, class= "layer3 hidden")
+                            div.back-button2 &lt; back
+                            div.menu-title
+                                h2= category.name
+                            div.layerx
+                                if category.objects.length
+                                    each obj in category.objects
+                                        each object in objects  
+                                                if obj == object.id
+                                                    li
+                                                        a(href=object.url)= object.name
+                                else    
+                                    p There are no objects.
+                    div#list3.layer3.hidden  
+                        div.back-button2 &lt; back
+                        div.menu-title
+                            h2 Full List
+                        ul
+                            each category in categories
+                                each object in objects
+                                    li 
+                                        a(href=object.url)=object.name 
+
         main#scene
             div.title
                 h1 #{title}
@@ -150,23 +112,22 @@ block content
                 button#inside-view.button Inside
     if modal
         div#object-upload-modal
-                div#modal-content
-                    a(href="/") &times; 
-
-                    h1= modal_title
-                    form(method='POST' enctype='multipart/form-data' action = "/upload")
-                        div.form-group
-                            label(for='name') Name: 
-                            input#name.form-control(type='text', placeholder='Name' name='name' required value=(undefined===object ? '' : object.name) )
-                        div.form-group 
-                            label(for='object') Upload Object:  
-                            input(type='file' name='object' accept="object/glb, object/obj")
-                        div.form-group 
-                            label(for='category') Category: 
-                            select#category.form-control(name='category')
-                                option(value='chairs') Chairs 
-                                option(value='sofas') Sofas
-                                option(value='tables') Tables
+            div#modal-content
+                a(class="close" href="/") &times; 
+                h1= modal_title
+                form(method='POST' enctype='multipart/form-data' action = "/upload")
+                    div.form-group
+                        label(for='name') Name: 
+                        input#name.form-control(type='text', placeholder='Name' name='name' required value=(undefined===object ? '' : object.name) )
+                    div.form-group 
+                        label(for='object') Upload Object:  
+                        input(type='file' name='object' accept="object/glb, object/obj")
+                    div.form-group 
+                        label(for='category') Category: 
+                        select#category.form-control(name='category')
+                            option(value='chairs') Chairs 
+                            option(value='sofas') Sofas
+                            option(value='tables') Tables
                                 //- if defaultCategories
                                 //-     p hello dsa
                                 //-     each categoryKey in defaultCategories
