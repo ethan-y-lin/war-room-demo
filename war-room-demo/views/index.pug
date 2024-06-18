@@ -17,8 +17,8 @@ block content
                             a.menu-unit#m MEASUREMENTS
                         li
                             a.menu-unit#sp SAVED PLANS
-                        li
-                            a(href="/upload-object") UPLOAD
+                        //- li
+                        //-     a(href="/upload-object") UPLOAD
                         li
                             a.menu-unit#p3 EXPORT
                 
@@ -48,17 +48,17 @@ block content
                             each category in categories 
                                 li 
                                     a.menu-header(id= category.name)= category.name
-                        
-                            li  
-                                a &#43; Add new category
-                        form(method='POST' action = "/upload-category")
-                            div#category-form.form-group
-                                input#category-name.form-control(type='text', placeholder='Category Name' name='name')
-                                button.button(type='submit') Submit
-                            if errors
-                                ul
-                                    for error in errors
-                                        li!= error.msg   
+                            li
+                                div#category-button  
+                                    a &#43; Add new category
+                                    form(method='POST' action = "/upload-category")
+                                        div#category-form.form-group.slideDown
+                                            input#category-name.form-control(type='text', placeholder='Category Name' name='name')
+                                            button.button(type='submit') Submit
+                                        if errors
+                                            ul
+                                                for error in errors
+                                                    li!= error.msg   
                     ul#saved-plans.layer2.hidden
                         div.back-button1 &lt; back
                         div.menu-title

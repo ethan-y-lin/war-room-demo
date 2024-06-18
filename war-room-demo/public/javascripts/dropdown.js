@@ -65,3 +65,7 @@ $(".back-button2").on('click', function(){
 $("#reset").on('click', function(){
     history.go(0);
 })
+
+$("#category-button").on('click', function(){
+    $("#category-form").slideToggle("slow");
+})

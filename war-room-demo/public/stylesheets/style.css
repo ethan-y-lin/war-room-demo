@@ -419,19 +419,20 @@ canvas{
 }
 
 #category-form{
-  position: absolute;
   margin: 5px;
   padding: 3px;
-  visibility: hidden;
-  opacity: 0;
-  transform: translateY(-100%);
-  transition: all 0.3s ease-in-out;
+  /* transform: translateY(-100%);
+  transition: all 0.2s ease-in-out;
+  opacity: 0; */
+  display: none;
+  width: 80%;
 }
 
 #category-form input{
   height: 30px;
   border:1px solid #384c44;
   border-radius: 3px;
+  width: 50%;
 }
 
 #category-form button{
@@ -446,8 +447,13 @@ canvas{
   background-color:#a4c3b2;
 }
 
-#category-button:hover > #category-form{
-  visibility: visible;
-  opacity: 1;
-  transform: translateY(0);
+#category-button{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+}
+
+#category-button form{
+  margin-right: 0;
 }
