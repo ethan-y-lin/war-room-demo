@@ -48,12 +48,17 @@ block content
                             each category in categories 
                                 li 
                                     a.menu-header(id= category.name)= category.name
-                            li
-                                a#category-button &#43; Add new category
+                        
+                            li  
+                                a &#43; Add new category
                         form(method='POST' action = "/upload-category")
                             div#category-form.form-group
                                 input#category-name.form-control(type='text', placeholder='Category Name' name='name')
-                                button.button(type='submit') Submit                                
+                                button.button(type='submit') Submit
+                            if errors
+                                ul
+                                    for error in errors
+                                        li!= error.msg   
                     ul#saved-plans.layer2.hidden
                         div.back-button1 &lt; back
                         div.menu-title
@@ -123,7 +128,7 @@ block content
             div#modal-content
                 a(class="close" href="/") &times; 
                 h1= modal_title
-                form(method='POST' enctype='multipart/form-data' action = "/upload-object")
+                form(method='POST' enctype='multipart/form-data' action= "/upload-object")
                     div.form-group
                         label(for='name') Name: 
                         input#object-name.form-control(type='text', placeholder='Name' name='name' required value=(undefined===object ? '' : object.name) )

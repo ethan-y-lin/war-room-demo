@@ -16,7 +16,7 @@ router.get('/', app_controller.index);
 // GET request for creating an Object. 
 router.get('/upload-object', object_controller.object_upload_get);
 
-// POST request for creating Item.
+// POST request for creating Object.
 router.post('/upload-object', upload.single('object'), object_controller.object_upload_post);
 
 // GET request for dispalying list. 
@@ -26,6 +26,7 @@ router.get('/list', object_controller.object_list);
 // GET request for one Object.
 router.get("/:id", object_controller.object_detail);
 
-router.get('/upload-category', category_controller.category_upload_post);
+// POST request for creating Category.
+router.post('/upload-category', category_controller.category_upload_post);
 
 module.exports = router;
