@@ -424,7 +424,7 @@ canvas{
   display: flex;
 }
 
-#category-form{
+#category-form, #floorplan-form{
   padding: 3px;
   margin-top: 10px;
   display: none;
@@ -450,13 +450,12 @@ canvas{
   background-color:#a4c3b2;
 }
 
-#category-button{
+.dropdown-button{
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: end;
   font-size: 12px;
   text-align: end;
-
 }
 
 #category-button a{
@@ -469,6 +468,8 @@ canvas{
 }
 
 .delete-hover{
+  margin-top:10px;
+  float: right;
   width: 24px;
   height: 24px;
   border:none;
@@ -479,4 +480,5 @@ canvas{
 
 .delete-hover:hover{
   background-image: url("../img/delete-open.png");
+  cursor: pointer;
 }

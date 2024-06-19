@@ -59,3 +59,6 @@ $("#category-button").on('click', function(){
     $("#category-form").slideToggle("slow");
 })
 
+$("#floorplan-button").on('click', function(){
+    $("#floorplan-form").slideToggle("slow");
+})
