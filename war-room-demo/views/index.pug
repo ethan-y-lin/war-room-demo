@@ -30,24 +30,16 @@ block content
                         div.layerx
                             li
                                 a War Room
-                            //- li
-                            //-     a 1 Bedroom
-                            //- li
-                            //-     a 1 Bedroom + Den
-                            //- li
-                            //-     a 2 Bedroom
-                            //- li
-                            //-     a 2 Bedroom + Den
                             li
-                                div#floorplan-button.dropdown-button  
+                                div#room-button.dropdown-button  
                                     a &#43; Add new floor plan
-                                form(id="floorplan-form" method='POST' enctype='multipart/form-data' action = "/upload-floorplan")
+                                form(id="room-form" method='POST' enctype='multipart/form-data' action = "/upload-room")
                                     div.form-group
                                         label(for='name') Name: 
-                                        input#floorplan-name.form-control(type='text', placeholder='Floor plan' name='name' required value=(undefined===object ? '' : object.name) )
+                                        input#room-name.form-control(type='text', placeholder='Floor plan' name='name' required value=(undefined===room ? '' : room.name) )
                                     div.form-group 
-                                        label(for='object') Upload:  
-                                        input(type='file' name='object' accept="object/glb, object/obj")
+                                        label(for='room') Upload:  
+                                        input(type='file' name='room' accept="room/glb, room/obj")
                                     button.button(type='submit') Submit
                                     if errors
                                         ul
@@ -58,24 +50,23 @@ block content
                         div.menu-title
                             h2 FURNITURES
                         div.layerx
-                            li
-                                a#list.menu-header Full List
                             each category in categories 
                                 li 
                                     a.menu-header(id= category.name.replaceAll(' ', '-'))= category.name
                                     form(method='POST' action="/delete-category/" + category._id)
                                         div.form-group
                                             input#categoryid.form-control(type='hidden', name='categoryid', value=category._id )
-
                                         button.delete-hover(type='submit') 
-                                    
+                            li
+                                a#list.menu-header Full List        
                             li
                                 div#category-button.dropdown-button  
                                     a &#43; Add new category
                                 form(method='POST' action = "/upload-category" id = "c-form")
                                     div#category-form.form-group
-                                        input#category-name.form-control(type='text', placeholder='Category Name' name='name' value=(undefined===new_category ? '' : new_category.name) required)
-                                        button.button(type='submit') Submit
+                                        div.form-flex
+                                            input#category-name.form-control(type='text', placeholder='Category Name' name='name' value=(undefined===new_category ? '' : new_category.name) required)
+                                            button.button(type='submit') Submit
                                     if errors
                                         ul
                                             for error in errors
@@ -89,10 +80,8 @@ block content
                                 a Plan 1
                             li
                                 a Plan 2
-                                button.delete-hover
                             li
                                 a Plan 3
-                                button.delete-hover
                 div#column3.hidden
                     each category in categories
                        ul(id= "category-"+category.name.replaceAll(' ', '-'), class= "layer3 hidden")

@@ -424,9 +424,9 @@ canvas{
   display: flex;
 }
 
-#category-form, #floorplan-form{
+#category-form, #room-form{
   padding: 3px;
-  margin-top: 10px;
+  margin: 10px auto 0px auto;
   display: none;
   position: absolute;
 }
@@ -435,7 +435,7 @@ canvas{
   height: 30px;
   border:1px solid #384c44;
   border-radius: 3px;
-  width: 50%;
+  width: 60%;
 }
 
 #category-form button{
@@ -468,8 +468,8 @@ canvas{
 }
 
 .delete-hover{
+  position: absolute;
   margin-top:10px;
-  float: right;
   width: 24px;
   height: 24px;
   border:none;
@@ -481,4 +481,11 @@ canvas{
 .delete-hover:hover{
   background-image: url("../img/delete-open.png");
   cursor: pointer;
+}
+
+.form-flex{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
 }
