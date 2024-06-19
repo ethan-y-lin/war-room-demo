@@ -63,7 +63,12 @@ block content
                             each category in categories 
                                 li 
                                     a.menu-header(id= category.name.replaceAll(' ', '-'))= category.name
-                                    button.delete-hover
+                                    form(method='POST' action="/delete-category/" + category._id)
+                                        div.form-group
+                                            input#categoryid.form-control(type='hidden', name='categoryid', value=category._id )
+
+                                        button.delete-hover(type='submit') 
+                                    
                             li
                                 div#category-button.dropdown-button  
                                     a &#43; Add new category

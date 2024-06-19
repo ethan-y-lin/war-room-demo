@@ -62,3 +62,30 @@ exports.category_upload_post = [
         }
     }),
   ];
+
+  // Handle Category delete on POST
+exports.category_delete_post = asyncHandler(async (req, res, next) => {
+  console.log("Category delete");
+    // Get details of book and all their book instances (in parallel)
+  try {
+    const [category, categories, objects] = await Promise.all([
+      Category.findById(req.params.id).populate("objects").exec(),
+      Category.find().exec(),
+      Object.find().exec()]);
+
+    if (!category) {
+      return res.status(404).send('Item not found');
+    }
+
+    if (category.objects.length > 0) {
+      res.redirect("/");
+      return;
+    }
+    // Delete the item from the database
+    await Category.findByIdAndDelete(req.body.categoryid);
+    res.redirect("/");
+  } catch (error) {
+    console.error('Error deleting item:', error);
+    next(error);
+  }
+});
