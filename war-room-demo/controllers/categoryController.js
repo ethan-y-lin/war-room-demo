@@ -65,6 +65,7 @@ exports.category_upload_post = [
 
   // Handle Category delete on POST
 exports.category_delete_post = asyncHandler(async (req, res, next) => {
+  console.log("Category delete");
     // Get details of book and all their book instances (in parallel)
   try {
     const [category, categories, objects] = await Promise.all([
@@ -77,14 +78,7 @@ exports.category_delete_post = asyncHandler(async (req, res, next) => {
     }
 
     if (category.objects.length > 0) {
-      res.render ("index", {
-        title: "War Room Demo",
-        modal: false,
-        modal_title: "",
-        objects: objects,
-        categories: categories,
-        // new variable for displaying the category
-      });
+      res.redirect("/");
       return;
     }
     // Delete the item from the database
