@@ -30,18 +30,13 @@ $(".menu-unit").on('click', function(){
 $(".menu-header").on('click', function(){
     $(".layer2").addClass("hidden");
     $("#column3").removeClass("hidden");
-    
-    if($(this).is("#Chair")){
-        $("#category-Chair").removeClass("hidden");
-        // $("#sofas3, #tables3").addClass("hidden");
-        $("#list3").addClass("hidden");
-    }
-    if($(this).is("#fdahello")){
-        $("#category-fdahello").removeClass("hidden");
-    }
     if($(this).is("#list")){
+        $(".layer3").addClass("hidden");
         $("#list3").removeClass("hidden");
-        $("#category-Chair").addClass("hidden");
+    } else {
+        $(".layer3").addClass("hidden");
+        $("#category-" + this.id).removeClass("hidden");
+        $("#list3").addClass("hidden");
     }
 });
 
