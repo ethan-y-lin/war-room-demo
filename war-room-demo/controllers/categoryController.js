@@ -7,10 +7,10 @@ const Object = require('../models/object');
 // Handle Category create on POST.
 exports.category_upload_post = [
     // Validate and sanitize the name field.
-    // body("name", "Item name must contain at least 3 characters")
-    //   .trim()
-    //   .isLength({ min: 3 })
-    //   .escape(),
+    body("name", "Item name must contain at least 3 characters")
+      .trim()
+      .isLength({ min: 3 })
+      .escape(),
   
     // Process request after validation and sanitization.
     asyncHandler(async (req, res, next) => {
@@ -31,7 +31,7 @@ exports.category_upload_post = [
                 modal_title: "",
                 objects: objects,
                 categories: categories,
-                errors: errors,
+                errors: errors.array(),
                 new_category: req.body
               });
             return;

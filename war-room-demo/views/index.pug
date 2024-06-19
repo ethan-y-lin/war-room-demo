@@ -53,7 +53,7 @@ block content
                                     a &#43; Add new category
                                 form(method='POST' action = "/upload-category" id = "c-form")
                                     div#category-form.form-group
-                                        input#category-name.form-control(type='text', placeholder='Category Name' name='name')
+                                        input#category-name.form-control(type='text', placeholder='Category Name' name='name' value=(undefined===new_category ? '' : new_category.name) required)
                                         button.button(type='submit') Submit
                                     if errors
                                         ul
@@ -93,7 +93,6 @@ block content
                         div.menu-title
                             h2 Full List
                         ul
-                            each category in categories
                                 each object in objects
                                     li 
                                         a(href=object.url)= object.name 
@@ -134,10 +133,10 @@ block content
                         input#object-name.form-control(type='text', placeholder='Name' name='name' required value=(undefined===object ? '' : object.name) )
                     div.form-group 
                         label(for='object') Upload Object:  
-                        input(type='file' name='object' accept="object/glb, object/obj")
+                        input(type='file' name='object' accept="object/glb, object/obj" required)
                     div.form-group 
                         label(for='category') Category: 
-                        select#category.form-control(name='category')
+                        select#category.form-control(name='category' required)
                             each category in categories
                                 option(value= category._id)= category.name                 
                         button.button(type='submit') Submit

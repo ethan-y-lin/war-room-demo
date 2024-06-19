@@ -30,11 +30,9 @@ $(".menu-unit").on('click', function(){
 $(".menu-header").on('click', function(){
     $(".layer2").addClass("hidden");
     $("#column3").removeClass("hidden");
-    console.log(this);
-    console.log(this.id);
     if($(this).is("#list")){
-        $("#list3").removeClass("hidden");
         $(".layer3").addClass("hidden");
+        $("#list3").removeClass("hidden");
     } else {
         $(".layer3").addClass("hidden");
         $("#category-" + this.id).removeClass("hidden");

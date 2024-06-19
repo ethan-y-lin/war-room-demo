@@ -82,9 +82,12 @@ exports.object_upload_post = [
       // Get all categories, which we can use for adding to our item.
       console.log("render modal")
       res.render("index", {
+        title: "War Room Demo",
         modal_title: "Upload Object",
+        modal: true,
         object: req.body, // Use req.body instead of item object since it doesn't exist yet
         errors: errors.array(),
+        objects: objects,
         categories: categories,
       });
       return;
