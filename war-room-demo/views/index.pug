@@ -2,6 +2,7 @@ extends layout
 
 block content
     div.object-data(data-objects=objects)
+    div.room-data(data-room=current_room)
     div.mainSection        
         aside#menu
             nav.dropdown-menu
@@ -29,14 +30,15 @@ block content
                             h2 FLOOR PLANS
                         div.layerx
                             li
-                                a War Room
+                                each room in rooms
+                                    a.room-link(href="room"+room.url)= room.name
                             li
                                 div#room-button.dropdown-button  
                                     a &#43; Add new floor plan
-                                form(id="room-form" method='POST' enctype='multipart/form-data' action = "/upload-room")
+                                form(id="room-form" method='POST' enctype='multipart/form-data' action= "/upload-room")
                                     div.form-group
                                         label(for='name') Name: 
-                                        input#room-name.form-control(type='text', placeholder='Floor plan' name='name' required value=(undefined===room ? '' : room.name) )
+                                        input#room-name.form-control(type='text', placeholder='Floor plan' name='name'  )
                                     div.form-group 
                                         label(for='room') Upload:  
                                         input(type='file' name='room' accept="room/glb, room/obj")
@@ -95,7 +97,11 @@ block content
                                                 if obj == object.id
                                                     li
                                                         a(href=object.url)= object.name
-                                                        button.delete-hover
+                                                        form(method='POST' action="/delete-object/" + object._id)
+                                                            div.form-group
+                                                                input#objectid.form-control(type='hidden', name='objectid', value=object._id )
+
+                                                            button.delete-hover(type='submit') 
                                 else    
                                     p There are no objects.
                             div.button-after

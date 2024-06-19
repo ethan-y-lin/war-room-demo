@@ -5,6 +5,14 @@ const {body, validationResult} = require("express-validator");
 
 const Room = require("../models/room");
 
+
+// Handle Room open on GET
+exports.room_open_get = asyncHandler(async (req, res, next) => {
+  const room = await Room.findById(req.params.id).exec();
+  var string = encodeURIComponent(room.room_url);
+  res.redirect('/?valid=' + string);
+});
+
 // Handle Room create on POST.
 exports.room_upload_post = [
     // Validate and sanitize the name field.
@@ -14,9 +22,11 @@ exports.room_upload_post = [
       .escape(),
     // Process request after validation and sanitization.
     asyncHandler(async (req, res, next) => {
+      console.log("uploading room model")
       // Extract the validation errors from a request.
       const errors = validationResult(req);
-      
+      console.log(errors.array());
+      console.log(req.body);
       if (!errors.isEmpty()) {
         // There are errors. Render the form again with sanitized values/error messages.
         // Get all categories, which we can use for adding to our item.
@@ -40,7 +50,7 @@ exports.room_upload_post = [
               resolve(result);
             }).end(req.file.buffer);
           });
-  
+          console.log(roomUrl)
           roomUrl = result.secure_url;
         }
   
@@ -49,7 +59,7 @@ exports.room_upload_post = [
           name: req.body.name,
           room_url: roomUrl,
         });
-  
+        console.log(room);
         // Check if Item with same name already exists.
         const roomExists = await Room.findOne({ name: req.body.name })
           .collation({ locale: "en", strength: 2 })
@@ -60,7 +70,9 @@ exports.room_upload_post = [
           res.redirect('/');
         } else {
           // Save the new room and redirect to its detail page.
+
           await room.save();
+          console.log("Uploaded room model")
           res.redirect('/');
         }
       } catch (error) {
@@ -69,3 +81,4 @@ exports.room_upload_post = [
       }
     }),
   ];
+

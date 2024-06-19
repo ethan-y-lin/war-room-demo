@@ -145,52 +145,36 @@ exports.object_upload_post = [
   }),
 ];
 
+// Handle Object delete on POST
+exports.object_delete_post = asyncHandler(async (req, res, next) => {
+  try {
+    const object = await Object.findById(req.params.id);
 
-// // Display Item delete form on GET.
-// exports.item_delete_get = asyncHandler (async (req, res, next) => {
+    if (!object) {
+      return res.status(404).send('Item not found');
+    }
 
-//   const item = await Item.findById(req.params.id).exec();
+    // Extract public ID from Cloudinary URL
+    const urlParts = object.obj_url.split('/');
+    const publicId = urlParts[urlParts.length - 1].split('.')[0];
 
-//   if (item === null) {
-//     //no results
-//     res.redirect("/inventory/items");
-//   }
-//   res.render("item_delete", {
-//     title: "Delete Item",
-//     item: item
-//   });
-// });
+    // Delete the image from Cloudinary
+    cloudinary.uploader.destroy(publicId, (error, result) => {
+      if (error) {
+        console.error('Error deleting model from Cloudinary:', error);
+      } else {
+        console.log('Model deleted from Cloudinary:', result);
+      }
+    });
 
-// // Handle Item delete on POST
-// exports.item_delete_post = asyncHandler(async (req, res, next) => {
-//   try {
-//     const item = await Item.findById(req.params.id);
-
-//     if (!item) {
-//       return res.status(404).send('Item not found');
-//     }
-
-//     // Extract public ID from Cloudinary URL
-//     const urlParts = item.img_url.split('/');
-//     const publicId = urlParts[urlParts.length - 1].split('.')[0];
-
-//     // Delete the image from Cloudinary
-//     cloudinary.uploader.destroy(publicId, (error, result) => {
-//       if (error) {
-//         console.error('Error deleting image from Cloudinary:', error);
-//       } else {
-//         console.log('Image deleted from Cloudinary:', result);
-//       }
-//     });
-
-//     // Delete the item from the database
-//     await Item.findByIdAndDelete(req.body.itemid);
-//     res.redirect("/inventory/items");
-//   } catch (error) {
-//     console.error('Error deleting item:', error);
-//     next(error);
-//   }
-// });
+    // Delete the item from the database
+    await Object.findByIdAndDelete(req.body.objectid);
+    res.redirect("/");
+  } catch (error) {
+    console.error('Error deleting item:', error);
+    next(error);
+  }
+});
 
 // // Handle Item update on GET
 // exports.item_update_get = asyncHandler (async (req, res, next) => {

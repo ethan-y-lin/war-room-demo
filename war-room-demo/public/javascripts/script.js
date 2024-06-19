@@ -2,6 +2,7 @@ import {DemoScene} from "./demo.js"
 
 const startModel = new URL('../assets/warroom1.glb', import.meta.url);
 const secondModel = new URL('../assets/roommodemodel.glb', import.meta.url);
+
 let APP;
 
 function init(model) {
@@ -42,7 +43,7 @@ function init(model) {
     });
 }
 
-init(secondModel);
+// init(secondModel);
 
 $(document).on('keydown', function(event) {
     if (event.key === 'F1' || event.keyCode === 112) {
@@ -50,3 +51,13 @@ $(document).on('keydown', function(event) {
         init(startModel);
     }
 });
+
+$(window).on('load', function() {
+    const url = document.querySelector(".room-data").dataset.room;
+    if(url == "default") {
+        init(startModel);
+    } else {
+        init(new URL(url));
+    }
+});
+

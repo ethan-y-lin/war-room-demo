@@ -30,6 +30,9 @@ router.get('/list', object_controller.object_list);
 // GET request for one Object.
 router.get("/:id", object_controller.object_detail);
 
+// POST request for deleting a Object.
+router.post('/delete-object/:id', object_controller.object_delete_post);
+
 
 // CATEGORY ROUTES
 
@@ -41,7 +44,10 @@ router.post('/delete-category/:id', category_controller.category_delete_post);
 
 // ROOM ROUTES 
 
+// GET request for opening a Room.
+router.get('/room/:id', room_controller.room_open_get);
+
 // POST request for creating a Room.
-router.post('/upload-room', room_controller.room_upload_post);
+router.post('/upload-room', upload.single('room'), room_controller.room_upload_post);
 
 module.exports = router;
