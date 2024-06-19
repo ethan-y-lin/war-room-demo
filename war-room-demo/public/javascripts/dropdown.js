@@ -63,3 +63,4 @@ $("#reset").on('click', function(){
 $("#category-button").on('click', function(){
     $("#category-form").slideToggle("slow");
 })
+
