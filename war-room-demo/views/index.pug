@@ -38,6 +38,20 @@ block content
                                 a 2 Bedroom
                             li
                                 a 2 Bedroom + Den
+                            li
+                                div#floorplan-button  
+                                    a &#43; Add new floor plan
+                                form(method='POST' enctype='multipart/form-data' action = "/upload-floorplan")
+                                    div.form-group
+                                        label(for='name') Floor Plan: 
+                                        input#floorplan-name.form-control(type='text', placeholder='Floor plan' name='name' required value=(undefined===object ? '' : object.name) )
+                                    div.form-group 
+                                        label(for='object') Upload:  
+                                        input(type='file' name='object' accept="object/glb, object/obj")
+                                    if errors
+                                        ul
+                                            for error in errors
+                                                li!= error.msg   
                     ul#furnitures.layer2.hidden
                         div.back-button1 &lt; back
                         div.menu-title
@@ -48,6 +62,7 @@ block content
                             each category in categories 
                                 li 
                                     a.menu-header(id= category.name.replaceAll(' ', '-'))= category.name
+                                    button.delete-hover
                             li
                                 div#category-button  
                                     a &#43; Add new category

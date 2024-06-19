@@ -467,3 +467,16 @@ canvas{
 #category-button form{
   margin-right: 0;
 }
+
+.delete-hover{
+  width: 24px;
+  height: 24px;
+  border:none;
+  background-color: transparent;
+  background-image: url("../img/delete-close.png");
+  transition: background-image 0.2s ease-in-out;
+}
+
+.delete-hover:hover{
+  background-image: url("../img/delete-open.png");
+}
