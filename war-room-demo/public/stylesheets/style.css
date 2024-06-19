@@ -430,6 +430,27 @@ canvas{
   position: absolute;
 }
 
+#room-form{
+  font-size: 12px;
+}
+#room-form .form-group{
+  margin-bottom: 10px;
+}
+#room-name{
+  height: 25px;
+  border:1px solid #384c44;
+  border-radius: 3px;
+  width: 40%;
+}
+#room-upload-group{
+  display: flex;
+  flex-direction: row;
+}
+
+#room-form button{
+  margin: 0;
+}
+
 #category-form input{
   height: 30px;
   border:1px solid #384c44;
@@ -437,7 +458,7 @@ canvas{
   width: 60%;
 }
 
-#category-form button{
+#category-form button, #room-form button{
   font-size: 12px;
   width: 50px;
   background-color:#384c44;
@@ -445,7 +466,7 @@ canvas{
   border: none;
 }
 
-#category-form button:hover{
+#category-form button:hover, #room-form button:hover{
   background-color:#a4c3b2;
 }
 
@@ -455,6 +476,9 @@ canvas{
   justify-content: end;
   font-size: 12px;
   text-align: end;
+}
+.dropdown-button a{
+  margin: 0;
 }
 
 #category-button a{
