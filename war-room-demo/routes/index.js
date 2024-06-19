@@ -29,4 +29,7 @@ router.get("/:id", object_controller.object_detail);
 // POST request for creating Category.
 router.post('/upload-category', category_controller.category_upload_post);
 
+// POST request for deleting a Category.
+router.post('/category/:id/delete', category_controller.category_delete_post);
+
 module.exports = router;
