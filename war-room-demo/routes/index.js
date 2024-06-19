@@ -9,9 +9,13 @@ const upload = multer({ storage: storage });
 const object_controller = require("../controllers/objectController");
 const app_controller = require("../controllers/appController");
 const category_controller = require('../controllers/categoryController');
+const room_controller = require("../controllers/roomController");
 
 // Routes
 router.get('/', app_controller.index);
+
+
+// OBJECT ROUTES 
 
 // GET request for creating an Object. 
 router.get('/upload-object', object_controller.object_upload_get);
@@ -26,10 +30,18 @@ router.get('/list', object_controller.object_list);
 // GET request for one Object.
 router.get("/:id", object_controller.object_detail);
 
+
+// CATEGORY ROUTES
+
 // POST request for creating Category.
 router.post('/upload-category', category_controller.category_upload_post);
 
 // POST request for deleting a Category.
 router.post('/delete-category/:id', category_controller.category_delete_post);
+
+// ROOM ROUTES 
+
+// POST request for creating a Room.
+router.post('/upload-room', room_controller.room_upload_post);
 
 module.exports = router;
