@@ -1,5 +1,6 @@
 import { DynamicCamera } from "./dynamicCamera.js";
 import { DemoControls } from "./demoControls.js";
+import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.19/+esm';
 
 class DemoScene {
     
@@ -89,11 +90,15 @@ class DemoScene {
     }
 
     async initGeometries(scene) {
+        const hemiLight = new THREE.HemisphereLight(0x87ceeb, 0x543b0e, 0.6);
+        hemiLight.position.set(0, 50, 0);
+        scene.add(hemiLight);
 
-        const ambientLight = new THREE.AmbientLight(0x909090);
+        const ambientLight = new THREE.AmbientLight(0x7c7c7c);
         scene.add(ambientLight);
     
         const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 0.3);
+        directionalLight.color.setHSL(0.1, 1, 0.95);
         directionalLight.castShadow = true;
         scene.add(directionalLight);
         directionalLight.position.set(-30, 50, 0);
@@ -109,7 +114,30 @@ class DemoScene {
         spotLight.position.set(100, 100, 0);
         spotLight.castShadow = true;
         spotLight.angle = 0.2;
-    
+
+        const params = {
+            toggleHemisphereLight: function() {
+                hemiLight.visible = ! hemiLight.visible;
+            },
+            toggleAmbientLight: function() {
+                ambientLight.visible = ! ambientLight.visible;
+            },
+            toggleDirectionalLight: function() {
+                directionalLight.visible = ! directionalLight.visible;
+            },
+            toggleSpotLight: function (){
+                spotLight.visible = ! spotLight.visible;
+            }
+        };
+
+        const gui = new GUI();
+
+        gui.add( params, 'toggleHemisphereLight' ).name( 'toggle hemisphere light' );
+        gui.add( params, 'toggleAmbientLight' ).name( 'toggle ambient light' );
+        gui.add( params, 'toggleDirectionalLight' ).name( 'toggle directional light' );
+        gui.add( params, 'toggleSpotLight' ).name( 'toggle spot light' );
+        gui.open();
+        
         // const sLightHelper = new THREE.SpotLightHelper(spotLight);
         // scene.add(sLightHelper);
         const axesHelper = new THREE.AxesHelper( 100 );
@@ -158,6 +186,11 @@ class DemoScene {
                 this.objects.windows.push(obj);
             } else if (obj.name.includes("wall") || obj.name.includes("floor")) {
                 this.objects.walls.push(obj);
+                if(obj.name.includes("floor")){
+                    obj.material.color.setHex(0x8b5a2b);
+                } else if(obj.name.includes("floor")){
+                    obj.material.color.setHex(0xedeae5);
+                }
             } else {
                 this.model.remove(obj);
             }
