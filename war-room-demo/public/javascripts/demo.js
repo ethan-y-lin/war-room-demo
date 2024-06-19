@@ -3,13 +3,13 @@ import { DemoControls } from "./demoControls.js";
 
 class DemoScene {
     
-    constructor() {
-        this.initialize().then(() => {
+    constructor(roomURL) {
+        this.initialize(roomURL).then(() => {
             this.animate();
         });
     }
 
-    async initialize() {
+    async initialize(roomURL) {
         this.canvas = document.getElementById("scene-container");
         this.objects = {walls: [], 
                         furniture: [],
@@ -18,8 +18,8 @@ class DemoScene {
                         uploaded_objects: []};
         this.uploaded_objects_url = [];
         this.scene = new THREE.Scene();
-        this.roomURL = new URL('../assets/warroom1.glb', import.meta.url);
-
+        // this.roomURL = new URL('../assets/warroom1.glb', import.meta.url);
+        this.roomURL = roomURL;
         // initialize geometries
         this.model;
         this.modelSize;
@@ -124,14 +124,14 @@ class DemoScene {
                 // get model dimensions
                 let bbox = new THREE.Box3().setFromObject(this.model);
                 this.modelSize = bbox.getSize(new THREE.Vector3());
-
+                console.log(this.model.children);
                 // add model to scene
                 this.scene.add(this.model);
                 this.model.position.set(0, this.modelSize.y / 2, 0); // makes the ground at y = 0;
 
                 // initialize objects
                 const objects = [...this.model.children]; // must be copy because removing direclty will cause some to be skipped.
-                
+                console.log(objects);
                 this.organizeObjects(objects);
 
                 // initializes grid
@@ -148,16 +148,15 @@ class DemoScene {
 
     organizeObjects (objects) {
         objects.forEach((obj) =>  {
-            if (obj.name.includes("door") || obj.name.includes("wall_11_3") || obj.name.includes("wall_11_4")) {
+            if (obj.children.length > 0) {
+                this.organizeObjects(obj.children);
+                return;
+            }  
+            if (obj.name.includes("door")) {
                 this.objects.doors.push(obj);
             } else if (obj.name.includes("window")) {
                 this.objects.windows.push(obj);
             } else if (obj.name.includes("wall") || obj.name.includes("floor")) {
-                if (obj.children.length > 0) {
-                    this.organizeObjects(obj.children);
-                } else {
-                    this.objects.walls.push(obj);
-                }
                 this.objects.walls.push(obj);
             } else {
                 this.model.remove(obj);
@@ -212,36 +211,12 @@ class DemoScene {
         this.canvas.removeEventListener( 'resize', this.onWindowResize(this.camera.inside) );
         this.canvas.addEventListener( 'resize', this.onWindowResize(this.camera.ortho) );
     }
+
+    clear() {
+        // unimplemented
+    }
 }
 
-const APP = new DemoScene();
+export {DemoScene}
 
-$('#inside-view').on('click', function(){
-    APP.setInsideViewMode();
-})
-$('#outside-view').on('click', function(){
-    APP.setOutsideViewMode();
-})
-$('#ortho-view').on('click', function(){
-    APP.setOrthoViewMode();
-})
 
-$('#fullscreen-button').on('click', function(){
-    if (APP.renderer.domElement.requestFullscreen){
-        APP.renderer.domElement.requestFullscreen();
-    } else if (APP.renderer.domElement.webkitRequestFullscreen){
-        APP.renderer.domElement.webkitRequestFullscreen();
-    } else if (APP.renderer.domElement.msRequestFullscreen){
-        APP.renderer.domElement.msRequestFullscreen();
-    }
-    if (APP.camera.name == "inside") {
-        APP.controls.hideBlocker();
-        APP.controls.pointerLock.isLocked = true;
-        APP.renderer.domElement.addEventListener( 'mousemove', APP.controls.lock);
-    } else if (APP.camera.name == "ortho") {
-        APP.renderer.domElement.addEventListener('keyup', APP.controls.orthoOnKeyUp);
-        APP.renderer.domElement.addEventListener('keydown', APP.controls.orthoOnKeyDown);
-        APP.renderer.domElement.addEventListener('click', APP.controls.orthoOnClick);
-    }
-    console.log("set full screen")
-});

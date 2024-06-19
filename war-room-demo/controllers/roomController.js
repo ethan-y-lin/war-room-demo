@@ -1,13 +1,12 @@
-const path = require('path');
-const fs = require('fs')
+
 const cloudinary = require('../cloudinaryConfig');
 const asyncHandler = require("express-async-handler");
 const {body, validationResult} = require("express-validator");
 
-const Model = require("../models/model");
+const Room = require("../models/room");
 
-// Handle Model create on POST.
-exports.model_upload_post = [
+// Handle Room create on POST.
+exports.room_upload_post = [
     // Validate and sanitize the name field.
     body("name", "Item name must contain at least 3 characters")
       .trim()
@@ -27,10 +26,10 @@ exports.model_upload_post = [
   
       // No errors, proceed with Cloudinary upload and item creation
       try {
-        let modelUrl = '';
+        let roomUrl = '';
   
         if (req.file) {
-          // Upload model to Cloudinary
+          // Upload room to Cloudinary
           const result = await new Promise((resolve, reject) => {
             cloudinary.uploader.upload_stream({ 
               resource_type: 'raw',
@@ -42,26 +41,26 @@ exports.model_upload_post = [
             }).end(req.file.buffer);
           });
   
-          modelUrl = result.secure_url;
+          roomUrl = result.secure_url;
         }
   
         // Create a category object with escaped and trimmed data.
-        const model = new Model({ 
+        const room = new Room({ 
           name: req.body.name,
-          model_url: modelUrl,
+          room_url: roomUrl,
         });
   
         // Check if Item with same name already exists.
-        const modelExists = await Model.findOne({ name: req.body.name })
+        const roomExists = await Room.findOne({ name: req.body.name })
           .collation({ locale: "en", strength: 2 })
           .exec();
   
-        if (modelExists) {
-          // Item exists, redirect to its detail page.
+        if (roomExists) {
+          // Room exists, redirect to its detail page.
           res.redirect('/');
         } else {
-          // Save the new item and redirect to its detail page.
-          await model.save();
+          // Save the new room and redirect to its detail page.
+          await room.save();
           res.redirect('/');
         }
       } catch (error) {
