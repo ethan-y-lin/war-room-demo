@@ -53,9 +53,10 @@ exports.category_upload_post = [
           // Category exists, redirect to its detail page.
           res.redirect('/');
         } else {
-        
+          
           // Save the new category and redirect to its detail page.
           await category.save();
+          
           console.log("uploaded category");
           res.redirect('/');
         }

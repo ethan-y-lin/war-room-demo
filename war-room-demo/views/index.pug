@@ -47,7 +47,7 @@ block content
                                 a#list.menu-header Full List
                             each category in categories 
                                 li 
-                                    a.menu-header(id= category.name)= category.name
+                                    a.menu-header(id= category.name.replaceAll(' ', '-'))= category.name
                             li
                                 div#category-button  
                                     a &#43; Add new category
@@ -72,7 +72,7 @@ block content
                                 a Plan 3
                 div#column3.hidden
                     each category in categories
-                       ul(id= "category-"+category.name, class= "layer3 hidden")
+                       ul(id= "category-"+category.name.replaceAll(' ', '-'), class= "layer3 hidden")
                             div.back-button2 &lt; back
                             div.menu-title
                                 h2= category.name

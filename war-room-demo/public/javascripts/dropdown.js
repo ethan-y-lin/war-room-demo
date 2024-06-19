@@ -30,25 +30,16 @@ $(".menu-unit").on('click', function(){
 $(".menu-header").on('click', function(){
     $(".layer2").addClass("hidden");
     $("#column3").removeClass("hidden");
-    
-    if($(this).is("#Chair")){
-        $("#category-Chair").removeClass("hidden");
-        // $("#sofas3, #tables3").addClass("hidden");
-        $("#list3").addClass("hidden");
-    }
+    console.log(this);
+    console.log(this.id);
     if($(this).is("#list")){
         $("#list3").removeClass("hidden");
-        $("#category-Chair").addClass("hidden");
+        $(".layer3").addClass("hidden");
+    } else {
+        $(".layer3").addClass("hidden");
+        $("#category-" + this.id).removeClass("hidden");
+        $("#list3").addClass("hidden");
     }
-    // if($(this).is("#sofas")){
-    //     $("#sofas3").removeClass("hidden");
-    //     $("#chairs3, #tables3").addClass("hidden");
-    // }
-    // if($(this).is("#tables")){
-    //     $("#tables3").removeClass("hidden");
-    //     $("#chairs3, #sofas3").addClass("hidden");
-    // }
-
 });
 
 $(".back-button1").on('click', function(){
