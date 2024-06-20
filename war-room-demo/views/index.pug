@@ -18,8 +18,28 @@ block content
                             a.menu-unit#m MEASUREMENTS
                         li
                             a.menu-unit#sp SAVED PLANS
-                        //- li
-                        //-     a(href="/upload-object") UPLOAD
+                        li                     
+                            div.object-button
+                                a UPLOAD
+
+                        form(id="object-form" method='POST' enctype='multipart/form-data' action= "/upload-object")
+                            div.form-flex-col
+                                div.form-group.form-input
+                                    label(for='name') Name: 
+                                    input#object-name.form-control(type='text', placeholder='Name' name='name' required value=(undefined===object ? '' : object.name) )
+                                div.form-group.form-input
+                                    label(for='object') Upload:  
+                                    input(type='file' name='object' accept="object/glb, object/obj" required)
+                                div.form-group.form-input
+                                    label(for='category') Category: 
+                                    select#category.form-control(name='category' required)
+                                        each category in categories
+                                            option(value= category._id)= category.name
+                                button.button.submit-button(type='submit') Submit
+                            if errors
+                                ul
+                                    for error in errors
+                                        li!= error.msg
                         li
                             a.menu-unit#p3 EXPORT
                 
@@ -39,10 +59,10 @@ block content
                                     div.form-group
                                         label(for='name') Name: 
                                         input#room-name.form-control(type='text', placeholder='Floor plan' name='name'  )
-                                    div.form-group#room-upload-group
+                                    div.form-group#room-upload-form
                                         label(for='room') Upload:  
                                         input(type='file' name='room' accept="room/glb, room/obj")
-                                    button.button(type='submit') Submit
+                                    button.button.submit-button(type='submit') Submit
                                     if errors
                                         ul
                                             for error in errors
@@ -68,7 +88,7 @@ block content
                                     div#category-form.form-group
                                         div.form-flex
                                             input#category-name.form-control(type='text', placeholder='Category Name' name='name' value=(undefined===new_category ? '' : new_category.name) required)
-                                            button.button(type='submit') Submit
+                                            button.button.submit-button(type='submit') Submit
                                     if errors
                                         ul
                                             for error in errors
@@ -100,13 +120,10 @@ block content
                                                         form(method='POST' action="/delete-object/" + object._id)
                                                             div.form-group
                                                                 input#objectid.form-control(type='hidden', name='objectid', value=object._id )
-
                                                             button.delete-hover(type='submit') 
                                 else    
                                     p There are no objects.
-                            div.button-after
-                                button.upload-button 
-                                    a(href="/upload-object") Upload...
+                                
                     div#list3.layer3.hidden  
                         div.back-button2 &lt; back
                         div.menu-title
