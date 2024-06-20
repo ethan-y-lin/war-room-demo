@@ -62,3 +62,8 @@ $("#category-button").on('click', function(){
 $("#room-button").on('click', function(){
     $("#room-form").slideToggle("slow");
 })
+
+$(".object-button").on('click', function(){
+    console.log("object-button clicked");
+    $("#object-form").slideToggle("slow");
+})

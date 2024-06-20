@@ -118,7 +118,7 @@ nav a{
 .dropdown-menu ul a{
   display: block;
   float: left;
-  width: 150px;
+  width: 200px;
   padding: 10px 10px;
   color:  #445c52;
   background: transparent;
@@ -152,6 +152,10 @@ nav a{
 
 .layerx li{
   margin: 0px 5px 0px 5px;
+}
+
+.layerx p{
+  text-align: center;
 }
 
 .layer3 ul{
@@ -412,10 +416,6 @@ canvas{
   font-size: 12px;
 }
 
-.upload-button a:hover{
-  font-weight: bold;
-  border-bottom: 1px solid #445c52;
-}
 
 #c-form{
   margin: 0;
@@ -430,10 +430,20 @@ canvas{
   position: absolute;
 }
 
+#object-form{
+  display: none;
+  position: relative;
+  font-size: 14px;
+  width: 100%;
+  background-color:#a4c3b230;
+  padding: 3px;
+  border-bottom: 1px solid #445c5290;
+}
+
 #room-form{
   font-size: 12px;
 }
-#room-form .form-group{
+#room-form .form-group, #object-form .form-group{
   margin-bottom: 10px;
 }
 #room-name{
@@ -442,7 +452,8 @@ canvas{
   border-radius: 3px;
   width: 40%;
 }
-#room-upload-group{
+
+#room-upload-form{
   display: flex;
   flex-direction: row;
 }
@@ -451,14 +462,21 @@ canvas{
   margin: 0;
 }
 
-#category-form input{
+#category-name{
   height: 30px;
   border:1px solid #384c44;
   border-radius: 3px;
   width: 60%;
 }
 
-#category-form button, #room-form button{
+#object-name{
+  height: 30px;
+  border:1px solid #384c44;
+  border-radius: 3px;
+  margin-left: 3px;
+}
+
+.submit-button{
   font-size: 12px;
   width: 50px;
   background-color:#384c44;
@@ -511,4 +529,21 @@ canvas{
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+}
+
+.form-flex-col{
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  width: 100px;
+}
+
+
+.form-input{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items:center;
+  padding: 10px;
+
 }
