@@ -75,12 +75,6 @@ class DemoScene {
     #modelSize;
 
     /**
-     * 
-     */
-    #gridSize;
-    #gridScale;
-
-    /**
      * The custom camera object that contains the camera information
      * for each of the three views, "ortho", "outside", and "inside".
      * @type {DynamicCamera}
@@ -114,6 +108,7 @@ class DemoScene {
         });
     }
 
+    #grid_scale;
     /**
      * Initializes the DemoScene object given the room URL.  
      * @param {URL} roomURL 
@@ -131,7 +126,7 @@ class DemoScene {
         this.#roomURL = roomURL;
 
         // initialize geometries
-        this.#gridScale = 0.1; // meter
+        this.#grid_scale = 0.1; // meter
         await this.#initGeometries(this.#scene);
 
         // // initialize camera
@@ -146,7 +141,7 @@ class DemoScene {
         
         console.log(this.#objects)
         // initialize controls 
-        this.#controls = new DemoControls(this.#camera, this.#canvas, this.#scene, this.#objects, this.#gridSize, this.#gridScale, this.#modelSize); // initializes to orthoControls
+        this.#controls = new DemoControls(this.#camera, this.#canvas, this.#scene, this.#objects, this.#modelSize); // initializes to orthoControls
 
         this.#canvas.addEventListener( 'resize', this.#onWindowResize(this.#camera.ortho) );
         this.#measurement_objects = {vertices: new THREE.Group(), edges: new THREE.Group()};
@@ -172,7 +167,7 @@ class DemoScene {
                 loader.load(object.obj_url, (gltf) => {
                     const newObject = gltf.scene;
                     newObject.name = object.name;
-                    this.scene.add(newObject);
+                    this.#scene.add(newObject);
 
                     // Compute the bounding box of the object
                     const box = new THREE.Box3().setFromObject(newObject, true);
@@ -182,8 +177,6 @@ class DemoScene {
                     const boxMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.5 });
                     const boundingBox = new THREE.Mesh(boxGeometry, boxMaterial);
 
-                    // const axesHelper = new THREE.AxesHelper(20);
-                    // newObject.add(axesHelper);
                     boundingBox.position.set((box.max.x + box.min.x) / 2, (box.max.y + box.min.y) / 2, (box.max.z + box.min.z) / 2)
                     boundingBox.name = "bounding_box";
                     newObject.add(boundingBox);
@@ -193,9 +186,9 @@ class DemoScene {
                     newObject.position.set(openPos.x, openPos.y, openPos.z);
                     console.log(newObject)
 
-                    this.objects.uploaded.push(newObject);
-                    this.uploaded_objects_url.push(object.obj_url);
-                    this.controls.updateObjects(this.objects);
+                    this.#objects.uploaded.push(newObject);
+                    this.#uploaded_objects_url.push(object.obj_url);
+                    this.#controls.updateObjects(this.objects);
                 });
             }
         });
@@ -278,8 +271,7 @@ class DemoScene {
 
                 // initializes grid
                 const size = Math.max(this.#modelSize.x, this.#modelSize.z);
-                this.#gridSize = size;
-                const gridHelper = new THREE.GridHelper(size, size / this.#gridScale, 0x000000, 0x00ffaa);
+                const gridHelper = new THREE.GridHelper(size, size / this.#grid_scale, 0x000000, 0x00ffaa);
                 scene.add(gridHelper);
                 resolve();
             }, undefined, (error) => {
@@ -403,7 +395,7 @@ class DemoScene {
     }
 
     /**
-     * Sets the scene view to inside mode by updaing camera, controls, and objects.
+     * Sets the scene view to inside mode by updating camera, controls, and objects.
      */
     setInsideViewMode() {
         this.#updateObjects();
@@ -415,7 +407,7 @@ class DemoScene {
         this.#canvas.addEventListener( 'resize', this.#onWindowResize(this.#camera.inside) );
     }
     /**
-     * Sets the scene view to outside mode by updaing camera, controls, and objects.
+     * Sets the scene view to outside mode by updating camera, controls, and objects.
      */
     setOutsideViewMode() {
         this.#camera.setOutsideCamera(this.#canvas);
@@ -426,7 +418,7 @@ class DemoScene {
         this.#canvas.addEventListener( 'resize', this.#onWindowResize(this.#camera.outside) );
     }
     /**
-     * Sets the scene view to ortho mode by updaing camera, controls, and objects.
+     * Sets the scene view to ortho mode by updating camera, controls, and objects.
      */
     setOrthoViewMode() {
         this.#updateObjects();
@@ -439,14 +431,22 @@ class DemoScene {
         this.#canvas.addEventListener( 'resize', this.#onWindowResize(this.#camera.ortho) );
     }
 
+    /**
+     * 
+     * @returns 
+     */
     getControlsMode() {
         return this.#controls.mode;
     }
 
+    /**
+     * 
+     * @param {*} mode 
+     */
     setControlsMode(mode) {
         this.#controls.mode = mode;
     }
-    
+
     clear() {
         // unimplemented
     }
