@@ -110,7 +110,7 @@ class DemoScene {
      */
     constructor(roomURL) {
         this.#initialize(roomURL).then(() => {
-            this.animate();
+            this.#animate();
         });
     }
 
@@ -148,7 +148,7 @@ class DemoScene {
         // initialize controls 
         this.#controls = new DemoControls(this.#camera, this.#canvas, this.#scene, this.#objects, this.#gridSize, this.#gridScale, this.#modelSize); // initializes to orthoControls
 
-        this.#canvas.addEventListener( 'resize', this.onWindowResize(this.#camera.ortho) );
+        this.#canvas.addEventListener( 'resize', this.#onWindowResize(this.#camera.ortho) );
         this.#measurement_objects = {vertices: new THREE.Group(), edges: new THREE.Group()};
         this.#measurement_objects.vertices.name = "vertices";
         this.#measurement_objects.edges.name = "edges";
@@ -439,6 +439,14 @@ class DemoScene {
         this.#canvas.addEventListener( 'resize', this.#onWindowResize(this.#camera.ortho) );
     }
 
+    getControlsMode() {
+        return this.#controls.mode;
+    }
+
+    setControlsMode(mode) {
+        this.#controls.mode = mode;
+    }
+    
     clear() {
         // unimplemented
     }

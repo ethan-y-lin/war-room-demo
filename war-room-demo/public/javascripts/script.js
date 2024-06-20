@@ -22,10 +22,10 @@ function init(model) {
         APP.setOrthoViewMode();
     })
     $('#m').on('click', function(){
-        if (APP.controls.mode != "measure") {
-            APP.controls.mode = "measure";
+        if (APP.getControlsMode() != "measure") {
+            APP.setControlsMode("measure");
         } else {
-            APP.controls.mode = "regular";
+            APP.setControlsMode("regular");
         }
 
     })

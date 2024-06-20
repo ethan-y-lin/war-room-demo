@@ -9,9 +9,11 @@ class DemoControls {
         this.canvas = canvas;
         this.camera = camera;
         this.scene = scene;
-        this.objects = objects.furniture.concat(objects.walls).concat(objects.uploaded_objects);
+        console.log(objects);
+        this.objects = objects.furniture.concat(objects.walls).concat(objects.uploaded);
+        console.log(this.objects)
         this.pass_through_objects = objects.doors.concat(objects.windows);
-        this.draggableObjects = objects.furniture.concat(objects.uploaded_objects);
+        this.draggableObjects = objects.furniture.concat(objects.uploaded);
         this.gridSize = gridSize;
         this.gridScale = gridScale;
         this.modelSize = modelSize;
@@ -78,8 +80,8 @@ class DemoControls {
     }
 
     updateObjects(objects) {
-        this.objects = objects.furniture.concat(objects.walls).concat(objects.uploaded_objects);
-        this.draggableObjects = objects.furniture.concat(objects.uploaded_objects);
+        this.objects = objects.furniture.concat(objects.walls).concat(objects.uploaded);
+        this.draggableObjects = objects.furniture.concat(objects.uploaded);
     }
 
     /**
