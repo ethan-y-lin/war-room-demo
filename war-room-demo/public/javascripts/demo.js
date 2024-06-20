@@ -325,28 +325,29 @@ class DemoScene {
     #updateScene() {
         const displayDistanceElement = document.getElementById("measure-distance");
         if (this.#controls.mode == "measure") {
-            if (this.#controls.measurements.length > this.#measurement_objects.vertices.children.length) {
+            const measure_points = this.#controls.getMeasurePoints();
+            if (measure_points.length > this.#measurement_objects.vertices.children.length) {
 
                 const cubeGeometry = new THREE.BoxGeometry( 0.1, 0.1, 0.1 ); 
                 const cubeMaterial = new THREE.MeshBasicMaterial( {color: 0x0000ff} ); 
                 const cube = new THREE.Mesh( cubeGeometry, cubeMaterial ); 
-                const point = this.#controls.measurements[this.#controls.measurements.length-1];
+                const point = measure_points[measure_points.length-1];
                 cube.position.set(point.x, point.y, point.z);
                 this.#measurement_objects.vertices.add( cube );
-                const lineGeometry = new THREE.BufferGeometry().setFromPoints( this.#controls.measurements );
+                const lineGeometry = new THREE.BufferGeometry().setFromPoints( measure_points );
                 const lineMaterial = new THREE.LineBasicMaterial({
                                         color: 0x0000ff
                                     });
                 const line = new THREE.Line( lineGeometry, lineMaterial );
                 this.#measurement_objects.edges.add( line );
-            } else if (this.#controls.measurements.length < this.#measurement_objects.vertices.children.length) {
+            } else if (measure_points.length < this.#measurement_objects.vertices.children.length) {
                 displayDistanceElement.textContent = "0";
                 this.#measurement_objects.vertices.clear();
                 this.#measurement_objects.edges.clear();
                 return;
             }
-            if (this.#controls.measurements.length == 2) {
-                const dist = this.#controls.measurements[0].distanceTo(this.#controls.measurements[1]);
+            if (measure_points.length == 2) {
+                const dist = measure_points[0].distanceTo(measure_points[1]);
                 displayDistanceElement.textContent = dist + " meters";
             }
         } else {

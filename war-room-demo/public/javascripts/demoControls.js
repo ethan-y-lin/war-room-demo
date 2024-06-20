@@ -229,17 +229,16 @@ class DemoControls {
         this.#pass_through_objects = objects.doors.concat(objects.windows);
         this.#draggableObjects = objects.furniture.concat(objects.uploaded);
         this.#modelSize = modelSize;
-        this.#mode = "regular";
+        this.mode = "regular";
         this.#measure_points = [];
 
     
-        this.#orbit = null;
-        this.#orbit.update();
+        this.#orbit = new THREE.OrbitControls(camera.outside, canvas);
 
         this.#gumball = null;
 
 
-        this.#pointerLock = null;
+        this.#pointerLock = new THREE.PointerLockControls(camera.inside, canvas);
         this.#prev_time = performance.now();
         this.#velocity = new THREE.Vector3();
         this.#direction = new THREE.Vector3();
@@ -248,14 +247,14 @@ class DemoControls {
         this.#moveLeft = false;
         this.#moveRight = false;
         this.#insideCameraBB = new THREE.Box3();
-        this.#boundingBoxes = this.#getBoundingBoxes(this.objects);
+        this.#boundingBoxes = this.#getBoundingBoxes(this.#objects);
 
-        this.#drag = null;
+        this.#drag = new DragControls([...this.#draggableObjects], camera.ortho, canvas);
         this.#raycaster = new THREE.Raycaster();
         this.#selectedGroup = new THREE.Group();
         this.#scene.add(this.#selectedGroup);
         this.#dragOrigin = new THREE.Vector3();
-        this.#switchControls("ortho", camera.ortho, canvas);
+        this.switchControls("ortho", camera.ortho, canvas);
     }
 
     /**
@@ -302,9 +301,6 @@ class DemoControls {
         this.#drag.removeEventListener('dragstart', this.#dragStartCallback);
         this.#drag.removeEventListener('dragend', this.#dragEndCallback);
         this.#drag.removeEventListener('drag', this.#dragCallback);
-        this.#drag = null;
-        this.#orbit = null;
-        this.#pointerLock = null;
     }
 
     /**
@@ -520,7 +516,7 @@ class DemoControls {
      * dragged object red.
      * @param {Event} event 
      */
-    dragCallback = (event) => {
+    #dragCallback = (event) => {
         const object = event.object;
         let boundingBox = new THREE.Box3().setFromObject( object);
         
@@ -562,7 +558,7 @@ class DemoControls {
      * Also updates the boundingBoxes.
      * @param {*} event 
      */
-    dragEndCallback = (event) => {
+    #dragEndCallback = (event) => {
         console.log("drag end");
         console.log(this.#dragOrigin);
         const object = event.object;
@@ -767,7 +763,7 @@ class DemoControls {
         
         this.#raycaster.setFromCamera( mouse, this.#camera.ortho );
 
-        if (this.#mode == "regular") {
+        if (this.mode == "regular") {
             if ( this.#enableSelection === true ) {
                 const draggableObjects = this.#drag.getObjects();
                 draggableObjects.length = 0;
@@ -792,7 +788,7 @@ class DemoControls {
                     draggableObjects.push( ...this.#draggableObjects );
                 }
             }
-        } else if (this.#mode == "measure") {
+        } else if (this.mode == "measure") {
             if (this.#measure_points.length > 0) {
                 for (let i = 0 ; i < this.#measure_points.length; i++) {
                     let closestPoint = new THREE.Vector3();
@@ -810,7 +806,7 @@ class DemoControls {
                 }
             } 
             if (this.#measure_points.length < 2) {
-                let intersections = this.#raycaster.intersectObjects( this.objects, true );
+                let intersections = this.#raycaster.intersectObjects( this.#objects, true );
                 const planeIntersection = new THREE.Vector3();
                 const originPlane = new THREE.Plane (new THREE.Vector3(0,1,0));
                 this.#raycaster.ray.intersectPlane(originPlane, planeIntersection);
@@ -829,6 +825,10 @@ class DemoControls {
                 }
             }
         }
+    }
+
+    getMeasurePoints() {
+        return this.#measure_points;
     }
 }
 
