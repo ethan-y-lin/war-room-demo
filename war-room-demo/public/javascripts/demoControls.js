@@ -15,6 +15,8 @@ class DemoControls {
         this.gridSize = gridSize;
         this.gridScale = gridScale;
         this.modelSize = modelSize;
+        this.mode = "regular";
+        this.measurements = [];
 
         this.orbit = new THREE.OrbitControls(camera.outside, canvas);
         this.orbit.update();
@@ -419,47 +421,79 @@ class DemoControls {
     }
 
     orthoOnClick = (event) => {
+        event.preventDefault();
+        console.log(event.button);
         // event.preventDefault();
+        const rect = this.canvas.getBoundingClientRect();
 
-				if ( this.enableSelection === true ) {
-					const draggableObjects = this.drag.getObjects();
-					draggableObjects.length = 0;
-                    const rect = this.canvas.getBoundingClientRect();
+        this.mouse.x = ( event.clientX - rect.left ) / rect.width * 2 - 1;
+        this.mouse.y = - ( event.clientY - rect.top ) / rect.height * 2 + 1;
+        
+        this.raycaster1.setFromCamera( this.mouse, this.camera.ortho );
+        // switch (event.button) {
+        //     case 0: 
+        if (this.mode == "regular") {
+            if ( this.enableSelection === true ) {
+                const draggableObjects = this.drag.getObjects();
+                draggableObjects.length = 0;
+                const intersections = this.raycaster1.intersectObjects( this.draggableObjects, true );
+                if ( intersections.length > 0 ) {
+                    const bounding_box = intersections[ 0 ].object; // should be the bounding box
+                    const object = bounding_box.parent;
+                    if ( this.selectedGroup.children.includes( object ) === true ) {
+                        this.colorObject(object, 0x000000);
+                        this.scene.attach( object );
+                        this.selectedGroup.remove(object);
+                    } else {
+                        this.colorObject(object, 0x0000ff);                       
+                        this.selectedGroup.attach( object );
+                        this.scene.remove(object);
+                    }
+                    this.drag.transformGroup = true;
+                    draggableObjects.push( this.selectedGroup );
+                }
+                if ( this.selectedGroup.children.length === 0 ) {
+                    this.drag.transformGroup = false;
+                    draggableObjects.push( ...this.draggableObjects );
+                }
+            }
+        } else if (this.mode == "measure") {
+            if (this.measurements.length > 0) {
+                for (let i = 0 ; i < this.measurements.length; i++) {
+                    let closestPoint = new THREE.Vector3();
+                    this.raycaster1.ray.closestPointToPoint(this.measurements[i], closestPoint);
+                    console.log(closestPoint)
+                    if (closestPoint.distanceTo(this.measurements[i]) < 1) {
+                        if (i == 0) {
+                            this.measurements.shift();
+                            return;
+                        } else {
+                            this.measurements.pop();
+                            return;
+                        }
+                    }
+                }
+            } 
+            if (this.measurements.length < 2) {
+                let intersections = this.raycaster1.intersectObjects( this.objects, true );
+                const planeIntersection = new THREE.Vector3();
+                const originPlane = new THREE.Plane (new THREE.Vector3(0,1,0));
+                this.raycaster1.ray.intersectPlane(originPlane, planeIntersection);
+                console.log(this.raycaster1);
+                if (intersections.length > 0) {
+                    console.log(intersections);
+                    intersections[0].point.add(this.raycaster1.ray.direction.multiplyScalar(-0.05));
+                    this.measurements.push(intersections[0].point);
+                } else {
+                    console.log(planeIntersection);
+                    if (planeIntersection.length() < this.gridSize / 2) {
+                        planeIntersection.add(this.raycaster1.ray.direction.multiplyScalar(-0.05));
+                        this.measurements.push(planeIntersection);
+                    }
 
-                    this.mouse.x = ( event.clientX - rect.left ) / rect.width * 2 - 1;
-                    this.mouse.y = - ( event.clientY - rect.top ) / rect.height * 2 + 1;
-                    
-					this.raycaster1.setFromCamera( this.mouse, this.camera.ortho );
-                    
-					const intersections = this.raycaster1.intersectObjects( this.draggableObjects, true );
-					if ( intersections.length > 0 ) {
-
-						const bounding_box = intersections[ 0 ].object; // should be the bounding box
-                        const object = bounding_box.parent;
-                        
-						if ( this.selectedGroup.children.includes( object ) === true ) {
-                            this.colorObject(object, 0x000000);
-							this.scene.attach( object );
-                            this.selectedGroup.remove(object);
-						} else {
-                            this.colorObject(object, 0x0000ff);
-							
-							this.selectedGroup.attach( object );
-                            this.scene.remove(object);
-						}
-
-						this.drag.transformGroup = true;
-						draggableObjects.push( this.selectedGroup );
-
-					}
-					if ( this.selectedGroup.children.length === 0 ) {
-
-						this.drag.transformGroup = false;
-						draggableObjects.push( ...this.draggableObjects );
-
-					}
-
-				}
+                }
+            }
+        }
     }
 }
 

@@ -21,6 +21,14 @@ function init(model) {
     $('#ortho-view').on('click', function(){
         APP.setOrthoViewMode();
     })
+    $('#m').on('click', function(){
+        if (APP.controls.mode != "measure") {
+            APP.controls.mode = "measure";
+        } else {
+            APP.controls.mode = "regular";
+        }
+
+    })
     $('#fullscreen-button').on('click', function(){
         if (APP.renderer.domElement.requestFullscreen){
             APP.renderer.domElement.requestFullscreen();

@@ -43,6 +43,11 @@ class DemoScene {
         this.controls = new DemoControls(this.camera, this.canvas, this.scene, this.objects, this.gridSize, this.gridScale, this.modelSize); // initializes to orthoControls
 
         this.canvas.addEventListener( 'resize', this.onWindowResize(this.camera.ortho) );
+        this.measurementObjects = {vertices: new THREE.Group(), edges: new THREE.Group()};
+        this.measurementObjects.vertices.name = "vertices";
+        this.measurementObjects.edges.name = "edges";
+        this.scene.add(this.measurementObjects.vertices);
+        this.scene.add(this.measurementObjects.edges);
     }
 
     // shifted up
@@ -196,8 +201,47 @@ class DemoScene {
             }
         });
     }
+
+    updateScene() {
+        const displayDistanceElement = document.getElementById("measure-distance");
+        if (this.controls.mode == "measure") {
+            if (this.controls.measurements.length > this.measurementObjects.vertices.children.length) {
+
+                const cubeGeometry = new THREE.BoxGeometry( 0.1, 0.1, 0.1 ); 
+                const cubeMaterial = new THREE.MeshBasicMaterial( {color: 0x0000ff} ); 
+                const cube = new THREE.Mesh( cubeGeometry, cubeMaterial ); 
+                const point = this.controls.measurements[this.controls.measurements.length-1];
+                cube.position.set(point.x, point.y, point.z);
+                this.measurementObjects.vertices.add( cube );
+                const lineGeometry = new THREE.BufferGeometry().setFromPoints( this.controls.measurements );
+                const lineMaterial = new THREE.LineBasicMaterial({
+                                        color: 0x0000ff
+                                    });
+                const line = new THREE.Line( lineGeometry, lineMaterial );
+                this.measurementObjects.edges.add( line );
+            } else if (this.controls.measurements.length < this.measurementObjects.vertices.children.length) {
+                displayDistanceElement.textContent = "0";
+                this.measurementObjects.vertices.clear();
+                this.measurementObjects.edges.clear();
+                return;
+            }
+            if (this.controls.measurements.length == 2) {
+                const dist = this.controls.measurements[0].distanceTo(this.controls.measurements[1]);
+                displayDistanceElement.textContent = dist + " meters";
+            }
+        } else {
+            const displayDistanceElement = document.getElementById("measure-distance");
+            displayDistanceElement.textContent = 0;
+            this.measurementObjects.vertices.clear();
+            this.measurementObjects.edges.clear();
+        }
+
+
+    }
+
     animate () {
         requestAnimationFrame(() => {
+            this.updateScene();
             this.controls.updateControls(this.camera);
             this.renderer.render(this.scene, this.currentCamera);
             this.animate();
