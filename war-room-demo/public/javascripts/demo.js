@@ -175,7 +175,12 @@ class DemoScene {
             const newObject = gltf.scene;
             newObject.name = addedObject.name;
             this.#scene.add(newObject);
-
+            
+            newObject.traverse(function(node){
+                if (node.isMesh){
+                    node.castShadow = true;
+                    node.recieveShadow = true;}
+            })
             // Compute the bounding box of the object
             const box = new THREE.Box3().setFromObject(newObject, true);
 
@@ -369,6 +374,7 @@ class DemoScene {
                 } else if(obj.name.includes("wall")){
                     obj.material.color.setHex(0xedeae5);
                     obj.castShadow = true;
+                    obj.receiveShadow = true;
                 }
             } else {
                 this.#model.remove(obj);
