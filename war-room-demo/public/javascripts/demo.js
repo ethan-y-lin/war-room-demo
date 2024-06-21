@@ -250,18 +250,17 @@ class DemoScene {
     async #initGeometries(scene) {
         const hemiLight = new THREE.HemisphereLight(0x87ceeb, 0x392b1b, 0.6);
         hemiLight.position.set(0, 50, 0);
-        hemiLight.castShadow = true;
         const hLightHelper = new THREE.HemisphereLightHelper(hemiLight);
         scene.add(hemiLight);
-        scene.add(hLightHelper);
+        // scene.add(hLightHelper);
 
         const ambientLight = new THREE.AmbientLight(0x7c7c7c);
         scene.add(ambientLight);
     
-        const directionalLight = new THREE.DirectionalLight(0xFDFBD3, 1);
+        const directionalLight = new THREE.DirectionalLight(0xFDFBD3, 1.5);
         directionalLight.color.setHSL(0.1, 1, 0.95);
         directionalLight.castShadow = true;
-        directionalLight.position.set(-20, 80, 100);
+        directionalLight.position.set(-20, 70, 100);
         directionalLight.shadow.camera.bottom = -12;
         const dLightHelper = new THREE.DirectionalLightHelper(directionalLight);
         scene.add(directionalLight);
@@ -280,15 +279,18 @@ class DemoScene {
 
         const params = {
             toggleHemisphereLight: function() {
+                hLightHelper.visible = ! hLightHelper.visible;
                 hemiLight.visible = ! hemiLight.visible;
             },
             toggleAmbientLight: function() {
                 ambientLight.visible = ! ambientLight.visible;
             },
             toggleDirectionalLight: function() {
+                dLightHelper.visible = ! dLightHelper.visible;
                 directionalLight.visible = ! directionalLight.visible;
             },
             toggleSpotLight: function (){
+                sLightHelper.visible = ! sLightHelper.visible;
                 spotLight.visible = ! spotLight.visible;
             }
         };
@@ -305,8 +307,8 @@ class DemoScene {
         const groundGeo = new THREE.PlaneGeometry(1000, 1000);
         const groundMat = new THREE.MeshLambertMaterial({color: 0x1c150d});
         const ground = new THREE.Mesh(groundGeo, groundMat);
-        
         ground.rotation.x = -Math.PI/2;
+        ground.position.y = -0.2;
         ground.receiveShadow = true;
         scene.add(ground);
         
@@ -317,7 +319,7 @@ class DemoScene {
         scene.add(sky);
 
         const axesHelper = new THREE.AxesHelper( 100 );
-        scene.add( axesHelper );
+        // scene.add( axesHelper );
         const assetLoader = new THREE.GLTFLoader();
 
         return new Promise((resolve, reject) => {
