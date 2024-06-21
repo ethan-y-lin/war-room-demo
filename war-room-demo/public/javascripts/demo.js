@@ -1,6 +1,8 @@
 import { DynamicCamera } from "./dynamicCamera.js";
 import { DemoControls } from "./demoControls.js";
 import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.19/+esm';
+// import {fragment} from "../shaders/fragment.glsl";
+// import {vertex} from "../shaders/vertext.glsl";
 
 /**
  * This class represents a scene that is displayed on the HTML element 
@@ -212,25 +214,35 @@ class DemoScene {
      * @returns {Promise<void>} A promise that resolves when the geometries and model have been added to the scene.
      */
     async #initGeometries(scene) {
-        const hemiLight = new THREE.HemisphereLight(0x87ceeb, 0x543b0e, 0.6);
+        const hemiLight = new THREE.HemisphereLight(0x87ceeb, 0x392b1b, 0.6);
         hemiLight.position.set(0, 50, 0);
+        hemiLight.castShadow = true;
+        const hLightHelper = new THREE.HemisphereLightHelper(hemiLight);
         scene.add(hemiLight);
+        scene.add(hLightHelper);
 
         const ambientLight = new THREE.AmbientLight(0x7c7c7c);
         scene.add(ambientLight);
     
-        const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 0.3);
+        const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 1);
         directionalLight.color.setHSL(0.1, 1, 0.95);
         directionalLight.castShadow = true;
-        scene.add(directionalLight);
-        directionalLight.position.set(-30, 50, 0);
+        directionalLight.position.set(-100, 80, 0);
         directionalLight.shadow.camera.bottom = -12;
+        const dLightHelper = new THREE.DirectionalLightHelper(directionalLight);
+        scene.add(directionalLight);
+        scene.add(dLightHelper);
 
         const spotLight = new THREE.SpotLight(0xFFFFFF);
-        scene.add(spotLight);
-        spotLight.position.set(100, 100, 0);
+        spotLight.position.set(15, 100, 10);
         spotLight.castShadow = true;
+        spotLight.shadow.camera.near = 10;
+        spotLight.shadow.camera.far = 1000;
+        spotLight.shadow.camera.fov = 30;
         spotLight.angle = 0.2;
+        const sLightHelper = new THREE.SpotLightHelper(spotLight);
+        scene.add(spotLight);
+        scene.add(sLightHelper);
 
         const params = {
             toggleHemisphereLight: function() {
@@ -254,7 +266,22 @@ class DemoScene {
         gui.add( params, 'toggleDirectionalLight' ).name( 'toggle directional light' );
         gui.add( params, 'toggleSpotLight' ).name( 'toggle spot light' );
         gui.open();
+
+        //ground
+        const groundGeo = new THREE.PlaneGeometry(1000, 1000);
+        const groundMat = new THREE.MeshLambertMaterial({color: 0x392b1b});
+        const ground = new THREE.Mesh(groundGeo, groundMat);
+        ground.position.y = -0.1;
+        ground.rotation.x = -Math.PI/2;
+        ground.receiveShadow = true;
+        scene.add(ground);
         
+        //skydome
+        const skyGeo = new THREE.SphereGeometry(800, 32, 15);
+        const skyMat = new THREE.MeshLambertMaterial({color: 0x87ceeb, side: THREE.BackSide});
+        const sky = new THREE.Mesh(skyGeo, skyMat);
+        scene.add(sky);
+
         const axesHelper = new THREE.AxesHelper( 100 );
         scene.add( axesHelper );
         const assetLoader = new THREE.GLTFLoader();
@@ -310,8 +337,11 @@ class DemoScene {
                 this.#objects.walls.push(obj);
                 if(obj.name.includes("floor")){
                     obj.material.color.setHex(0x8b5a2b);
-                } else if(obj.name.includes("floor")){
+                    obj.receiveShadow = true;
+                } else if(obj.name.includes("wall")){
                     obj.material.color.setHex(0xedeae5);
+                    obj.castShadow = true;
+                    obj.receiveShadow = true;
                 }
             } else {
                 this.#model.remove(obj);
