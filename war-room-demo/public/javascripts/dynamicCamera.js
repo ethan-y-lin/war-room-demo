@@ -1,60 +1,88 @@
+/**
+ * Represents a dynamic camera setup for a 3D scene with multiple camera views.
+ * Provides methods to initialize and manage orthographic, inside perspective, 
+ * and outside perspective cameras.
+ * @constructor
+ * @param {HTMLElement} canvas - The HTML canvas element where the scene is rendered.
+ * @param {THREE.Vector3} modelSize - The size of the 3D model to adjust camera parameters.
+ */
 class DynamicCamera {
-
+    /**
+     * Constructs a new instance of DynamicCamera and initializes cameras.
+     * @param {HTMLElement} canvas - The HTML canvas element where the scene is rendered.
+     * @param {THREE.Vector3} modelSize - The size of the 3D model to adjust camera parameters.
+     */
     constructor(canvas, modelSize) {
-        this.intialize(canvas, modelSize);
+        this.initialize(canvas, modelSize);
     }
 
-    intialize(canvas, modelSize) {
-        console.log("camera initialized")
-        this.inside = null;
-        this.outside = null;
-        this.ortho = null;
+    /**
+     * Initializes the DynamicCamera instance by setting up orthographic,
+     * inside perspective, and outside perspective cameras.
+     * @param {HTMLElement} canvas - The HTML canvas element where the scene is rendered.
+     * @param {THREE.Vector3} modelSize - The size of the 3D model to adjust camera parameters.
+     */
+    initialize(canvas, modelSize) {
+        console.log("Camera initialized");
+        this.inside = null; // Inside perspective camera
+        this.outside = null; // Outside perspective camera
+        this.ortho = null; // Orthographic camera
         this.setOrthoCamera(canvas, modelSize, 2);
         this.setInsideCamera(canvas);
         this.setOutsideCamera(canvas);
-        this.name = "ortho";
+        this.name = "ortho"; // Initial camera mode is orthographic
     }
 
+    /**
+     * Sets up an orthographic camera for top-down (ortho) view.
+     * @param {HTMLElement} canvas - The HTML canvas element where the scene is rendered.
+     * @param {THREE.Vector3} modelSize - The size of the 3D model to adjust camera parameters.
+     * @param {number} padding - Padding around the model for the orthographic view.
+     */
     setOrthoCamera(canvas, modelSize, padding) {
-        // orthographic camera
+        // Orthographic camera setup
         let orthoCamera = new THREE.OrthographicCamera(
-            -modelSize.x/2-padding,
-            modelSize.x/2+padding,
-            modelSize.z/2+padding,
-            -modelSize.z/2-padding,
+            -modelSize.x/2 - padding,
+            modelSize.x/2 + padding,
+            modelSize.z/2 + padding,
+            -modelSize.z/2 - padding,
             0.1,
             1000
         );
         orthoCamera.position.set(0, 30, 0);
         orthoCamera.lookAt(0, 0, 0);
-        this.name = "ortho";
-        this.ortho = orthoCamera;
+        this.name = "ortho"; // Set camera mode to orthographic
+        this.ortho = orthoCamera; // Store orthographic camera
     }
 
-    setInsidePosition (camera, position) {
-        camera.position.set (position);
-    }
-
+    /**
+     * Sets up an inside perspective camera for interior view.
+     * @param {HTMLElement} canvas - The HTML canvas element where the scene is rendered.
+     */
     setInsideCamera(canvas) {
-        // inside camera
+        // Inside perspective camera setup
         let insideCamera = new THREE.PerspectiveCamera(
-            60, 
-            canvas.offsetWidth / canvas.offsetHeight, 
-            0.1, 
+            60,
+            canvas.offsetWidth / canvas.offsetHeight,
+            0.1,
             1000
         );
         insideCamera.position.set(4, 1.7, -1);
         insideCamera.rotation.y = 90;
-        this.name = "inside";
-        this.inside = insideCamera;
+        this.name = "inside"; // Set camera mode to inside perspective
+        this.inside = insideCamera; // Store inside perspective camera
     }
 
+    /**
+     * Sets up an outside perspective camera for exterior view.
+     * @param {HTMLElement} canvas - The HTML canvas element where the scene is rendered.
+     */
     setOutsideCamera(canvas) {
-         // outside camera
+        // Outside perspective camera setup
         let outsideCamera = new THREE.PerspectiveCamera(
-            45, 
-            canvas.offsetWidth / canvas.offsetHeight, 
-            0.1, 
+            45,
+            canvas.offsetWidth / canvas.offsetHeight,
+            0.1,
             1000
         );
         outsideCamera.position.set(-10, 3, 10);
@@ -63,4 +91,4 @@ class DynamicCamera {
     }
 }
 
-export {DynamicCamera}
+export { DynamicCamera };

@@ -14,12 +14,9 @@ const _right = new THREE.Vector3();
 
 class DragControls extends THREE.EventDispatcher {
 
-	constructor( _objects, _camera, _domElement, gridSize, gridScale ) {
+	constructor( _objects, _camera, _domElement) {
 
 		super();
-
-        this.gridSize = gridSize;
-        this.gridScale = gridScale;
 
 		_domElement.style.touchAction = 'none'; // disable touch scroll
 
