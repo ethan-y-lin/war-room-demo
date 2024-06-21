@@ -236,15 +236,16 @@ nav a{
   position: absolute;
 }
 
-#fp-war{
+#scene-left{
   display: flex;
   flex-direction: column;
   position: relative;
   margin-left: 10px;
   color: white;
+  justify-content: space-between;
 }
 
-#fp-war .up, #fp-war h2{
+#scene-left .up, #scene-left h2{
   margin-top: -10px;
   margin-bottom: -20px;
   font-family: Georgia, 'Times New Roman', Times, serif;
@@ -252,7 +253,13 @@ nav a{
   padding: 5px 25px 5px 10px;
 }
 
-#fp-war h2{
+#measurement-display p{
+  background: linear-gradient(to right, #171717, #58585800);
+  padding: 5px 25px 5px 10px;
+  font-weight:bold;
+}
+
+#scene-left h2{
   border-bottom: 1px solid #ffffff;
 }
 
