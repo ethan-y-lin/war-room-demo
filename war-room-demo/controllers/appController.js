@@ -7,8 +7,12 @@ exports.index = asyncHandler(async (req, res, next) => {
     const objects = await Object.find().exec();
     const categories = await Category.find().exec();
     const rooms = await Room.find().exec();
-  
-    let currentRoomUrl = req.query.valid;
+    console.log(req.session);
+    let object = req.session.object;
+    if (object === undefined) {
+      object = "none";
+    }
+    let currentRoomUrl = req.session.roomURL;
     if (currentRoomUrl == undefined) {
       currentRoomUrl = "default";
     }
@@ -20,6 +24,7 @@ exports.index = asyncHandler(async (req, res, next) => {
       objects: objects,
       categories: categories,
       rooms: rooms,
-      current_room: currentRoomUrl
+      current_room: currentRoomUrl,
+      addObject: object,
     });
   });

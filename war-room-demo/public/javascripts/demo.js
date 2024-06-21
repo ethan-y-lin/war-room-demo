@@ -99,6 +99,8 @@ class DemoScene {
      */
     #measurement_objects;
 
+    #canAdd;
+
     /**
      * Calls for the initialization the DemoScene object and then
      * calls the animation loop when initialization is completed.
@@ -151,6 +153,8 @@ class DemoScene {
         this.#measurement_objects.edges.name = "edges";
         this.#scene.add(this.#measurement_objects.vertices);
         this.#scene.add(this.#measurement_objects.edges);
+
+        this.#canAdd = true;
     }
 
     // shifted up
@@ -161,40 +165,74 @@ class DemoScene {
     }
 
     // PROBABLY WILL HAVE TO CHANGE DRASTICALLY
-    #updateObjects () {
-        const addedObjects = JSON.parse(document.querySelector('.object-data').dataset.objects);
-        addedObjects.forEach((object) => {
-            if (! (object.obj_url == '' || this.#uploaded_objects_url.includes(object.obj_url))) {      
-                const loader = new THREE.GLTFLoader();
-                loader.load(object.obj_url, (gltf) => {
-                    const newObject = gltf.scene;
-                    newObject.name = object.name;
-                    this.#scene.add(newObject);
+    #addObject () {
+        let objectData = document.querySelector('.object-data').dataset.object;
+        if (!(objectData == "none")) {
+            const addedObject = JSON.parse(objectData);
+            document.querySelector('.object-data').dataset.object = "none";
+            const loader = new THREE.GLTFLoader();
+            loader.load(addedObject.obj_url, (gltf) => {
+                const newObject = gltf.scene;
+                newObject.name = addedObject.name;
+                this.#scene.add(newObject);
+    
+                // Compute the bounding box of the object
+                const box = new THREE.Box3().setFromObject(newObject, true);
+    
+                // Create a box helper
+                const boxGeometry = new THREE.BoxGeometry(box.max.x - box.min.x, box.max.y - box.min.y, box.max.z - box.min.z);
+                const boxMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.5 });
+                const boundingBox = new THREE.Mesh(boxGeometry, boxMaterial);
+    
+                boundingBox.position.set((box.max.x + box.min.x) / 2, (box.max.y + box.min.y) / 2, (box.max.z + box.min.z) / 2)
+                boundingBox.name = "bounding_box";
+                newObject.add(boundingBox);
+    
+                const openPos = this.openPosition(newObject); // find an open position to display the box
+                console.log(openPos);
+                newObject.position.set(openPos.x, openPos.y, openPos.z);
+                console.log(newObject)
+    
+                this.#objects.uploaded.push(newObject);
+                this.#controls.updateObjects(this.#objects);
+            });
+        }
 
-                    // Compute the bounding box of the object
-                    const box = new THREE.Box3().setFromObject(newObject, true);
-
-                    // Create a box helper
-                    const boxGeometry = new THREE.BoxGeometry(box.max.x - box.min.x, box.max.y - box.min.y, box.max.z - box.min.z);
-                    const boxMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.5 });
-                    const boundingBox = new THREE.Mesh(boxGeometry, boxMaterial);
-
-                    boundingBox.position.set((box.max.x + box.min.x) / 2, (box.max.y + box.min.y) / 2, (box.max.z + box.min.z) / 2)
-                    boundingBox.name = "bounding_box";
-                    newObject.add(boundingBox);
-
-                    const openPos = this.openPosition(newObject); // find an open position to display the box
-                    console.log(openPos);
-                    newObject.position.set(openPos.x, openPos.y, openPos.z);
-                    console.log(newObject)
-
-                    this.#objects.uploaded.push(newObject);
-                    this.#uploaded_objects_url.push(object.obj_url);
-                    this.#controls.updateObjects(this.#objects);
-                });
-            }
-        });
     }
+    // #updateObjects () {
+    //     const addedObjects = JSON.parse(document.querySelector('.object-data').dataset.objects);
+    //     addedObjects.forEach((object) => {
+    //         if (! (object.obj_url == '' || this.#uploaded_objects_url.includes(object.obj_url))) {      
+    //             const loader = new THREE.GLTFLoader();
+    //             loader.load(object.obj_url, (gltf) => {
+    //                 const newObject = gltf.scene;
+    //                 newObject.name = object.name;
+    //                 this.#scene.add(newObject);
+
+    //                 // Compute the bounding box of the object
+    //                 const box = new THREE.Box3().setFromObject(newObject, true);
+
+    //                 // Create a box helper
+    //                 const boxGeometry = new THREE.BoxGeometry(box.max.x - box.min.x, box.max.y - box.min.y, box.max.z - box.min.z);
+    //                 const boxMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.5 });
+    //                 const boundingBox = new THREE.Mesh(boxGeometry, boxMaterial);
+
+    //                 boundingBox.position.set((box.max.x + box.min.x) / 2, (box.max.y + box.min.y) / 2, (box.max.z + box.min.z) / 2)
+    //                 boundingBox.name = "bounding_box";
+    //                 newObject.add(boundingBox);
+
+    //                 const openPos = this.openPosition(newObject); // find an open position to display the box
+    //                 console.log(openPos);
+    //                 newObject.position.set(openPos.x, openPos.y, openPos.z);
+    //                 console.log(newObject)
+
+    //                 this.#objects.uploaded.push(newObject);
+    //                 this.#uploaded_objects_url.push(object.obj_url);
+    //                 this.#controls.updateObjects(this.#objects);
+    //             });
+    //         }
+    //     });
+    // }
 
     /**
      * Initializes the geometries and lights in the given scene.
@@ -342,7 +380,7 @@ class DemoScene {
     }
 
     /**
-     * Updates the scene based on the current control mode and measurements.
+     * Updates the scene based on the current control view and mode.
      * 
      * In "measure" mode, it adds or removes measurement points and lines in the scene, 
      * and updates the displayed measurement distance. If measurements are cleared or reset, 
@@ -353,6 +391,9 @@ class DemoScene {
      * @private
      */
     #updateScene() {
+        if (this.#current_camera == this.#camera.ortho || this.#current_camera == this.#camera.outside ) {
+            this.#addObject();
+        }
         const displayDistanceElement = document.getElementById("measure-distance");
         if (this.#controls.mode == "measure") {
             const measure_points = this.#controls.getMeasurePoints();
@@ -386,8 +427,6 @@ class DemoScene {
             this.#measurement_objects.vertices.clear();
             this.#measurement_objects.edges.clear();
         }
-
-
     }
 
     /**
@@ -422,14 +461,12 @@ class DemoScene {
         camera.aspect = width/height;
         camera.updateProjectionMatrix();
         this.#renderer.setSize(width, height, false);
-        console.log(width);
     }
 
     /**
      * Sets the scene view to inside mode by updating camera, controls, and objects.
      */
     setInsideViewMode() {
-        this.#updateObjects();
         this.#camera.setInsideCamera(this.#canvas);
         this.#current_camera = this.#camera.inside;
         this.#controls.switchControls("inside", this.#camera.inside, this.#canvas);
@@ -452,8 +489,6 @@ class DemoScene {
      * Sets the scene view to ortho mode by updating camera, controls, and objects.
      */
     setOrthoViewMode() {
-        this.#updateObjects();
-        console.log(this.#modelSize)
         this.#camera.setOrthoCamera(this.#canvas, this.#modelSize, 2);
         this.#current_camera = this.#camera.ortho;
         this.#controls.switchControls("ortho", this.#camera.ortho, this.#canvas);

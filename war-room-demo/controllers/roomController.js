@@ -9,8 +9,13 @@ const Room = require("../models/room");
 // Handle Room open on GET
 exports.room_open_get = asyncHandler(async (req, res, next) => {
   const room = await Room.findById(req.params.id).exec();
-  var string = encodeURIComponent(room.room_url);
-  res.redirect('/?valid=' + string);
+  req.session.roomURL = room.room_url;
+  req.session.save((err) => {
+    if (err) {
+      return res.status(500).send('Failed to save session');
+    }
+    res.redirect("/");
+  });
 });
 
 // Handle Room create on POST.
