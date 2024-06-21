@@ -313,6 +313,7 @@ class DemoControls {
         this.#view = newControl;
         if (newControl == "ortho") {
             this.#reset();
+            this.#boundingBoxes = this.#getBoundingBoxes(this.#objects);
             this.#drag = new DragControls([...this.#draggableObjects], camera, canvas);
             this.#drag.addEventListener('dragstart', this.#dragStartCallback);
             this.#drag.addEventListener('dragend', this.#dragEndCallback);
@@ -332,7 +333,7 @@ class DemoControls {
             this.#drag.enabled = false;
             this.#pointerLock.enabled = false;
             this.#hideBlocker();
-        } else {
+        } else if (newControl == "inside"){
             this.#reset();
             this.#boundingBoxes = this.#getBoundingBoxes(this.#objects);
             this.#pointerLock = new THREE.PointerLockControls(camera, canvas);
@@ -349,6 +350,11 @@ class DemoControls {
         }
     }
 
+    updateObjects(objects) {
+        this.#objects = objects.furniture.concat(objects.walls).concat(objects.uploaded);
+        this.#pass_through_objects = objects.doors.concat(objects.windows);
+        this.#draggableObjects = objects.furniture.concat(objects.uploaded);
+    }
     /**
      * Updates the controls based on the current camera view mode.
      * 
@@ -503,7 +509,7 @@ class DemoControls {
         console.log("drag start");
         const object = event.object;
         this.#dragOrigin = object.position.clone();
-        console.log(this.#dragOrigin);
+        console.log(object);
     }
 
     /**
@@ -519,9 +525,7 @@ class DemoControls {
     #dragCallback = (event) => {
         const object = event.object;
         let boundingBox = new THREE.Box3().setFromObject( object);
-        
         const newRaycaster = new THREE.Raycaster(object.position, new THREE.Vector3(0,-1,0), object.position.y - boundingBox.min.y);
-        // console.log(newRaycaster);
         const intersects = newRaycaster.intersectObjects(this.#objects,true);
         if (intersects.length > 0) {
             const firstObject = intersects[0].object;
@@ -533,7 +537,7 @@ class DemoControls {
         }
 
         boundingBox = new THREE.Box3().setFromObject( object);
-        const isCollided = this.#checkCollisions(boundingBox, this.boundingBoxes);
+        const isCollided = this.#checkCollisions(boundingBox, this.#boundingBoxes);
         if (isCollided.hasCollision && isCollided.collidedBox.name != object.name) {
             if (!isCollided.collidedBox.name.includes("wall")) {
                 console.log("raise")
@@ -560,11 +564,9 @@ class DemoControls {
      */
     #dragEndCallback = (event) => {
         console.log("drag end");
-        console.log(this.#dragOrigin);
         const object = event.object;
         const boundingBox = new THREE.Box3().setFromObject( object);
         const isCollided = this.#checkCollisions(boundingBox, this.#boundingBoxes);
-        console.log(isCollided);
         
         if (isCollided.hasCollision && isCollided.collidedBox.name != object.name) {
             console.log("Collision!");
@@ -573,8 +575,7 @@ class DemoControls {
         } else {
             console.log("Successful drag")
         }
-        this.boundingBoxes = this.#getBoundingBoxes(this.#objects); // update boundingBoxes
-        
+        this.#boundingBoxes = this.#getBoundingBoxes(this.#objects); // update boundingBoxes
     }
 
 
@@ -597,13 +598,11 @@ class DemoControls {
     }
 
     #colorObject(object, color) {
-        if (object.type == "Mesh") {
+        if (object.type == "Mesh" && object.name != "bounding_box") {
             object.material.emissive.set( color );
-        } else if (object.type == "Group"){
+        } else if (object.children.length > 0){
             object.children.forEach((obj) => {
-                if (obj.name != "bounding_box" || obj.type != "Mesh"){
-                    obj.material.emissive.set(color);
-                }
+                this.#colorObject(obj, color);
             });
         }
     }
@@ -767,7 +766,7 @@ class DemoControls {
             if ( this.#enableSelection === true ) {
                 const draggableObjects = this.#drag.getObjects();
                 draggableObjects.length = 0;
-                const intersections = this.#raycaster.intersectObjects( this.draggableObjects, true );
+                const intersections = this.#raycaster.intersectObjects( this.#draggableObjects, true );
                 if ( intersections.length > 0 ) {
                     const bounding_box = intersections[ 0 ].object; // should be the bounding box
                     const object = bounding_box.parent;
@@ -778,7 +777,7 @@ class DemoControls {
                     } else {
                         this.#colorObject(object, 0x0000ff);                       
                         this.#selectedGroup.attach( object );
-                        this.scene.remove(object);
+                        this.#scene.remove(object);
                     }
                     this.#drag.transformGroup = true;
                     draggableObjects.push( this.#selectedGroup );
@@ -793,7 +792,6 @@ class DemoControls {
                 for (let i = 0 ; i < this.#measure_points.length; i++) {
                     let closestPoint = new THREE.Vector3();
                     this.#raycaster.ray.closestPointToPoint(this.#measure_points[i], closestPoint);
-                    console.log(closestPoint)
                     if (closestPoint.distanceTo(this.#measure_points[i]) < 1) {
                         if (i == 0) {
                             this.#measure_points.shift();
@@ -810,7 +808,6 @@ class DemoControls {
                 const planeIntersection = new THREE.Vector3();
                 const originPlane = new THREE.Plane (new THREE.Vector3(0,1,0));
                 this.#raycaster.ray.intersectPlane(originPlane, planeIntersection);
-                console.log(this.#raycaster);
                 if (intersections.length > 0) {
                     console.log(intersections);
                     intersections[0].point.add(this.#raycaster.ray.direction.multiplyScalar(-0.05));
