@@ -181,7 +181,7 @@ class DemoScene {
 
             // Create a box helper
             const boxGeometry = new THREE.BoxGeometry(box.max.x - box.min.x, box.max.y - box.min.y, box.max.z - box.min.z);
-            const boxMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.5 });
+            const boxMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
             const boundingBox = new THREE.Mesh(boxGeometry, boxMaterial);
 
             boundingBox.position.set((box.max.x + box.min.x) / 2, (box.max.y + box.min.y) / 2, (box.max.z + box.min.z) / 2)
