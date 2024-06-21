@@ -16,6 +16,8 @@ exports.index = asyncHandler(async (req, res, next) => {
     if (currentRoomUrl == undefined) {
       currentRoomUrl = "default";
     }
+    delete req.session.object;
+    delete req.session.roomURL;
     console.log("render home page")
     res.render("index", {
       title: "War Room Demo",
