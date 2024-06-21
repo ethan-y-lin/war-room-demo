@@ -735,6 +735,8 @@ class DemoControls {
 
             this.#drag.mode = ( this.#drag.mode === 'translate' ) ? 'rotate' : 'translate';
     
+        } else if (event.code == 'Backspace') {
+            this.#selectedGroup.clear();
         }
 
     }

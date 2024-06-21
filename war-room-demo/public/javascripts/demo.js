@@ -99,8 +99,6 @@ class DemoScene {
      */
     #measurement_objects;
 
-    #canAdd;
-
     /**
      * Calls for the initialization the DemoScene object and then
      * calls the animation loop when initialization is completed.
@@ -156,7 +154,6 @@ class DemoScene {
         this.#scene.add(this.#measurement_objects.vertices);
         this.#scene.add(this.#measurement_objects.edges);
 
-        this.#canAdd = true;
     }
 
     // shifted up
@@ -392,9 +389,6 @@ class DemoScene {
      * @private
      */
     #updateScene() {
-        // if (this.#current_camera == this.#camera.ortho || this.#current_camera == this.#camera.outside ) {
-        //     this.#addObject();
-        // }
         const displayDistanceElement = document.getElementById("measure-distance");
         if (this.#controls.mode == "measure") {
             const measure_points = this.#controls.getMeasurePoints();
