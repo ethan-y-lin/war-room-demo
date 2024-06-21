@@ -300,7 +300,7 @@ class DemoScene {
 
         //ground
         const groundGeo = new THREE.PlaneGeometry(1000, 1000);
-        const groundMat = new THREE.MeshLambertMaterial({color: 0x392b1b});
+        const groundMat = new THREE.MeshLambertMaterial({color: 0x1c150d});
         const ground = new THREE.Mesh(groundGeo, groundMat);
         ground.position.y = -0.1;
         ground.rotation.x = -Math.PI/2;
@@ -397,8 +397,8 @@ class DemoScene {
         const displayDistanceElement = document.getElementById("measure-distance");
         if (this.#controls.mode == "measure") {
             const measure_points = this.#controls.getMeasurePoints();
+            displayDistanceElement.textContent = "Measurement: 0";
             if (measure_points.length > this.#measurement_objects.vertices.children.length) {
-
                 const cubeGeometry = new THREE.BoxGeometry( 0.1, 0.1, 0.1 ); 
                 const cubeMaterial = new THREE.MeshBasicMaterial( {color: 0x0000ff} ); 
                 const cube = new THREE.Mesh( cubeGeometry, cubeMaterial ); 
@@ -412,18 +412,18 @@ class DemoScene {
                 const line = new THREE.Line( lineGeometry, lineMaterial );
                 this.#measurement_objects.edges.add( line );
             } else if (measure_points.length < this.#measurement_objects.vertices.children.length) {
-                displayDistanceElement.textContent = "0";
+                displayDistanceElement.textContent = "Measurement: 0";
                 this.#measurement_objects.vertices.clear();
                 this.#measurement_objects.edges.clear();
                 return;
             }
             if (measure_points.length == 2) {
                 const dist = measure_points[0].distanceTo(measure_points[1]);
-                displayDistanceElement.textContent = dist + " meters";
+                displayDistanceElement.textContent = "Measurement: " + dist + " meters";
             }
         } else {
             const displayDistanceElement = document.getElementById("measure-distance");
-            displayDistanceElement.textContent = 0;
+            displayDistanceElement.textContent = "Viewing";
             this.#measurement_objects.vertices.clear();
             this.#measurement_objects.edges.clear();
         }
