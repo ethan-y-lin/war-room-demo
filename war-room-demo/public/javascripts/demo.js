@@ -245,10 +245,7 @@ class DemoScene {
     async #initGeometries(scene) {
         const hemiLight = new THREE.HemisphereLight(0x87ceeb, 0x392b1b, 0.6);
         hemiLight.position.set(0, 50, 0);
-        hemiLight.castShadow = true;
-        const hLightHelper = new THREE.HemisphereLightHelper(hemiLight);
         scene.add(hemiLight);
-        scene.add(hLightHelper);
 
         const ambientLight = new THREE.AmbientLight(0x7c7c7c);
         scene.add(ambientLight);
@@ -258,9 +255,7 @@ class DemoScene {
         directionalLight.castShadow = true;
         directionalLight.position.set(-20, 80, 100);
         directionalLight.shadow.camera.bottom = -12;
-        const dLightHelper = new THREE.DirectionalLightHelper(directionalLight);
         scene.add(directionalLight);
-        scene.add(dLightHelper);
 
         const spotLight = new THREE.SpotLight(0xFFFFFF);
         spotLight.position.set(15, 100, 10);
@@ -269,9 +264,7 @@ class DemoScene {
         // spotLight.shadow.camera.far = 1000;
         // spotLight.shadow.camera.fov = 30;
         spotLight.angle = 0.2;
-        const sLightHelper = new THREE.SpotLightHelper(spotLight);
         scene.add(spotLight);
-        scene.add(sLightHelper);
 
         const params = {
             toggleHemisphereLight: function() {
@@ -311,8 +304,8 @@ class DemoScene {
         const sky = new THREE.Mesh(skyGeo, skyMat);
         scene.add(sky);
 
-        const axesHelper = new THREE.AxesHelper( 100 );
-        scene.add( axesHelper );
+        // const axesHelper = new THREE.AxesHelper( 100 );
+        // scene.add( axesHelper );
         const assetLoader = new THREE.GLTFLoader();
 
         return new Promise((resolve, reject) => {
@@ -323,7 +316,9 @@ class DemoScene {
                 // get model dimensions
                 let bbox = new THREE.Box3().setFromObject(this.#model);
                 this.#modelSize = bbox.getSize(new THREE.Vector3());
-
+                if (this.#modelSize.x < this.#modelSize.z) {
+                    this.#model.rotateOnAxis(new THREE.Vector3(0,1,0), Math.PI / 2);
+                }
                 // add model to scene
                 scene.add(this.#model);
                 this.#model.position.set(0, this.#modelSize.y / 2, 0); // makes the ground at y = 0;
@@ -394,7 +389,6 @@ class DemoScene {
         const displayDistanceElement = document.getElementById("measure-distance");
         if (this.#controls.mode == "measure") {
             const measure_points = this.#controls.getMeasurePoints();
-            displayDistanceElement.textContent = "Measurement: 0";
             if (measure_points.length > this.#measurement_objects.vertices.children.length) {
                 const cubeGeometry = new THREE.BoxGeometry( 0.1, 0.1, 0.1 ); 
                 const cubeMaterial = new THREE.MeshBasicMaterial( {color: 0x0000ff} ); 
@@ -415,7 +409,7 @@ class DemoScene {
                 return;
             }
             if (measure_points.length == 2) {
-                const dist = measure_points[0].distanceTo(measure_points[1]);
+                const dist = Math.round(measure_points[0].distanceTo(measure_points[1])*100) / 100;
                 displayDistanceElement.textContent = "Measurement: " + dist + " meters";
             }
         } else {

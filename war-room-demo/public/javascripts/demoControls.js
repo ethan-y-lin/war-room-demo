@@ -194,6 +194,7 @@ class DemoControls {
      */
     #dragOrigin;
     
+    #measureGroup;
     ////// ////// ////// //////
 
 
@@ -254,6 +255,8 @@ class DemoControls {
         this.#selectedGroup = new THREE.Group();
         this.#scene.add(this.#selectedGroup);
         this.#dragOrigin = new THREE.Vector3();
+        this.#measureGroup = new THREE.Group();
+        this.#scene.add(this.#measureGroup);
         this.switchControls("ortho", camera.ortho, canvas);
     }
 
@@ -298,6 +301,7 @@ class DemoControls {
         document.removeEventListener('keydown', this.#orthoOnKeyDown);
         document.removeEventListener('click', this.#orthoOnClick);
         document.removeEventListener('click', this.#outsideOnClick);
+        this.#canvas.removeEventListener('mousemove', this.#orthoOnMove);
         this.#drag.removeEventListener('dragstart', this.#dragStartCallback);
         this.#drag.removeEventListener('dragend', this.#dragEndCallback);
         this.#drag.removeEventListener('drag', this.#dragCallback);
@@ -321,6 +325,7 @@ class DemoControls {
             document.addEventListener('keyup', this.#orthoOnKeyUp);
             document.addEventListener('keydown', this.#orthoOnKeyDown);
             document.addEventListener('click', this.#orthoOnClick);
+            this.#canvas.addEventListener('mousemove', this.#orthoOnMove);
             this.#drag.enabled = true;
             this.#pointerLock.enabled = false;
             this.#orbit.enabled = false;
@@ -523,34 +528,37 @@ class DemoControls {
      * @param {Event} event 
      */
     #dragCallback = (event) => {
-        const object = event.object;
-        let boundingBox = new THREE.Box3().setFromObject( object);
-        const newRaycaster = new THREE.Raycaster(object.position, new THREE.Vector3(0,-1,0), object.position.y - boundingBox.min.y);
-        const intersects = newRaycaster.intersectObjects(this.#objects,true);
-        if (intersects.length > 0) {
-            const firstObject = intersects[0].object;
-            const firstObjectBB = new THREE.Box3().setFromObject( firstObject);
-            object.position.set(object.position.x, 
-                firstObjectBB.max.y + (object.position.y - boundingBox.min.y) + 0.01,
-                object.position.z);
-            this.#colorObject(object, 0x000000);
-        }
-
-        boundingBox = new THREE.Box3().setFromObject( object);
-        const isCollided = this.#checkCollisions(boundingBox, this.#boundingBoxes);
-        if (isCollided.hasCollision && isCollided.collidedBox.name != object.name) {
-            if (!isCollided.collidedBox.name.includes("wall")) {
-                console.log("raise")
-                // raise object above collidedBox
+        console.log("drag");
+        if (this.mode == "regular"){
+            const object = event.object;
+            let boundingBox = new THREE.Box3().setFromObject( object);
+            const newRaycaster = new THREE.Raycaster(object.position, new THREE.Vector3(0,-1,0), object.position.y - boundingBox.min.y);
+            const intersects = newRaycaster.intersectObjects(this.#objects,true);
+            if (intersects.length > 0) {
+                const firstObject = intersects[0].object;
+                const firstObjectBB = new THREE.Box3().setFromObject( firstObject);
                 object.position.set(object.position.x, 
-                                    isCollided.collidedBox.box.max.y + (object.position.y - boundingBox.min.y) + 0.01,
-                                    object.position.z);
-            } else {
-                console.log("Collision!");
-                this.#colorObject(object, 0xff0000);
+                    firstObjectBB.max.y + (object.position.y - boundingBox.min.y) + 0.01,
+                    object.position.z);
+                this.#colorObject(object, 0x000000);
             }
-        } else {
-            this.#colorObject(object, 0x000000);
+
+            boundingBox = new THREE.Box3().setFromObject( object);
+            const isCollided = this.#checkCollisions(boundingBox, this.#boundingBoxes);
+            if (isCollided.hasCollision && isCollided.collidedBox.name != object.name) {
+                if (!isCollided.collidedBox.name.includes("wall")) {
+                    console.log("raise")
+                    // raise object above collidedBox
+                    object.position.set(object.position.x, 
+                                        isCollided.collidedBox.box.max.y + (object.position.y - boundingBox.min.y) + 0.01,
+                                        object.position.z);
+                } else {
+                    console.log("Collision!");
+                    this.#colorObject(object, 0xff0000);
+                }
+            } else {
+                this.#colorObject(object, 0x000000);
+            }
         }
     }
 
@@ -820,6 +828,53 @@ class DemoControls {
                     }
 
                 }
+            }
+        }
+    }
+
+    #orthoOnMove = (event) => {
+        if (this.mode == "measure") {
+            console.log("drag measure");
+            this.#measureGroup.clear();
+            if (this.#measure_points.length == 1) {
+                const displayDistanceElement = document.getElementById("measure-distance");
+                // get raycaster
+                const rect = this.#canvas.getBoundingClientRect();
+                const mouse = new THREE.Vector2();
+                mouse.x = ( event.clientX - rect.left ) / rect.width * 2 - 1;
+                mouse.y = - ( event.clientY - rect.top ) / rect.height * 2 + 1;
+                this.#raycaster.setFromCamera( mouse, this.#camera.ortho );
+
+                let intersections = this.#raycaster.intersectObjects( this.#objects, true );
+                const planeIntersection = new THREE.Vector3();
+                const originPlane = new THREE.Plane (new THREE.Vector3(0,1,0));
+                this.#raycaster.ray.intersectPlane(originPlane, planeIntersection);
+                let point;
+                if (intersections.length > 0) {
+                    console.log(intersections);
+                    intersections[0].point.add(this.#raycaster.ray.direction.multiplyScalar(-0.05));
+                    point = intersections[0].point; 
+                } else {
+                    console.log(planeIntersection);
+                    if (planeIntersection.length() < this.#modelSize.x / 2) {
+                        planeIntersection.add(this.#raycaster.ray.direction.multiplyScalar(-0.05));
+                    }
+                    point = planeIntersection;
+                }
+
+                const lineGeometry = new THREE.BufferGeometry().setFromPoints( [this.#measure_points[0], point] );
+                const lineMaterial = new THREE.LineBasicMaterial({
+                                        color: 0x0000ff
+                                    });
+                const line = new THREE.Line( lineGeometry, lineMaterial );
+                const cubeGeometry = new THREE.BoxGeometry( 0.1, 0.1, 0.1 ); 
+                const cubeMaterial = new THREE.MeshBasicMaterial( {color: 0x0000ff} ); 
+                const cube = new THREE.Mesh( cubeGeometry, cubeMaterial ); 
+                cube.position.set(point.x, point.y, point.z);
+                this.#measureGroup.add(cube);
+                this.#measureGroup.add(line);
+                const dist = Math.round(this.#measure_points[0].distanceTo(point) * 100) / 100;
+                displayDistanceElement.textContent = "Measurement: " + dist + " meters";
             }
         }
     }
