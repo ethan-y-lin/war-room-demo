@@ -50,11 +50,14 @@ exports.object_upload_get = asyncHandler (async (req, res, next) => {
         err.status = 404;
         return next(err);
       }
-      res.render("object_detail", {
-        title: "Object Detail",
-        obj_name: object.name,
-        obj_url: object.obj_url,
+      req.session.object = object;
+      req.session.save((err) => {
+        if (err) {
+          return res.status(500).send('Failed to save session');
+        }
+        res.redirect("/");
       });
+
   });
 
 // Handle Object create on POST.
