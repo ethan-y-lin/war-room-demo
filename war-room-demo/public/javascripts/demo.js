@@ -188,7 +188,7 @@ class DemoScene {
 
                     this.#objects.uploaded.push(newObject);
                     this.#uploaded_objects_url.push(object.obj_url);
-                    this.#controls.updateObjects(this.objects);
+                    this.#controls.updateObjects(this.#objects);
                 });
             }
         });
