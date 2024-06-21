@@ -166,7 +166,6 @@ class DemoScene {
 
     // PROBABLY WILL HAVE TO CHANGE DRASTICALLY
     addObject (object) {
-        console.log(object);
 
         const addedObject = object;
         const loader = new THREE.GLTFLoader();
