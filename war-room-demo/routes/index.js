@@ -28,7 +28,7 @@ router.post('/upload-object', upload.single('object'), object_controller.object_
 router.get('/list', object_controller.object_list);
 
 // GET request for one Object.
-router.get("/:id", object_controller.object_detail, app_controller.index);
+router.get("/object/:id", object_controller.object_detail);
 
 // POST request for deleting a Object.
 router.post('/delete-object/:id', object_controller.object_delete_post);

@@ -115,7 +115,7 @@ block content
                                         each object in objects  
                                                 if obj == object.id
                                                     li
-                                                        a(href=object.url)= object.name
+                                                        a(href="#" data-url=`${object.url}`) #{object.name}
                                                         form(method='POST' action="/delete-object/" + object._id)
                                                             div.form-group
                                                                 input#objectid.form-control(type='hidden', name='objectid', value=object._id )
@@ -196,3 +196,4 @@ block content
     script(src="./javascripts/script.js" type="module")
     script(src="./javascripts/dropdown.js", type="module")
     script(src="./javascripts/modal.js", type="module")
+    script(src="./javascripts/listeners.js")
