@@ -175,7 +175,12 @@ class DemoScene {
             const newObject = gltf.scene;
             newObject.name = addedObject.name;
             this.#scene.add(newObject);
-
+            
+            newObject.traverse(function(node){
+                if (node.isMesh){
+                    node.castShadow = true;
+                    node.recieveShadow = true;}
+            })
             // Compute the bounding box of the object
             const box = new THREE.Box3().setFromObject(newObject, true);
 
@@ -250,10 +255,10 @@ class DemoScene {
         const ambientLight = new THREE.AmbientLight(0x7c7c7c);
         scene.add(ambientLight);
     
-        const directionalLight = new THREE.DirectionalLight(0xFDFBD3, 1);
+        const directionalLight = new THREE.DirectionalLight(0xFDFBD3, 1.5);
         directionalLight.color.setHSL(0.1, 1, 0.95);
         directionalLight.castShadow = true;
-        directionalLight.position.set(-20, 80, 100);
+        directionalLight.position.set(-20, 70, 100);
         directionalLight.shadow.camera.bottom = -12;
         scene.add(directionalLight);
 
@@ -268,15 +273,18 @@ class DemoScene {
 
         const params = {
             toggleHemisphereLight: function() {
+                hLightHelper.visible = ! hLightHelper.visible;
                 hemiLight.visible = ! hemiLight.visible;
             },
             toggleAmbientLight: function() {
                 ambientLight.visible = ! ambientLight.visible;
             },
             toggleDirectionalLight: function() {
+                dLightHelper.visible = ! dLightHelper.visible;
                 directionalLight.visible = ! directionalLight.visible;
             },
             toggleSpotLight: function (){
+                sLightHelper.visible = ! sLightHelper.visible;
                 spotLight.visible = ! spotLight.visible;
             }
         };
@@ -293,8 +301,8 @@ class DemoScene {
         const groundGeo = new THREE.PlaneGeometry(1000, 1000);
         const groundMat = new THREE.MeshLambertMaterial({color: 0x1c150d});
         const ground = new THREE.Mesh(groundGeo, groundMat);
-        
         ground.rotation.x = -Math.PI/2;
+        ground.position.y = -0.2;
         ground.receiveShadow = true;
         scene.add(ground);
         
@@ -364,6 +372,7 @@ class DemoScene {
                 } else if(obj.name.includes("wall")){
                     obj.material.color.setHex(0xedeae5);
                     obj.castShadow = true;
+                    obj.receiveShadow = true;
                 }
             } else {
                 this.#model.remove(obj);
