@@ -295,6 +295,9 @@ class DemoScene {
         gui.add( params, 'toggleAmbientLight' ).name( 'toggle ambient light' );
         gui.add( params, 'toggleDirectionalLight' ).name( 'toggle directional light' );
         gui.add( params, 'toggleSpotLight' ).name( 'toggle spot light' );
+        // gui.add( params, 'translate').name("translate mode");
+        // gui.add( params, 'rotate').name("rotate mode");
+
         gui.open();
 
         //ground
