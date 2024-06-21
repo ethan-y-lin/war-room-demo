@@ -85,9 +85,9 @@ class DynamicCamera {
             0.1,
             1000
         );
-        outsideCamera.position.set(-10, 10, 10);
-        this.name = "outside"; // Set camera mode to outside perspective
-        this.outside = outsideCamera; // Store outside perspective camera
+        outsideCamera.position.set(-10, 3, 10);
+        this.name = "outside";
+        this.outside = outsideCamera;
     }
 }
 
