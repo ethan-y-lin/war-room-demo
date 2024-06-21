@@ -32,12 +32,15 @@ exports.room_upload_post = [
       const errors = validationResult(req);
       console.log(errors.array());
       console.log(req.body);
-      if (!errors.isEmpty()) {
+      const rooms = await Room.find().exec();
+      
+      if (!errors.isEmpty() || rooms.length > 5) {
         // There are errors. Render the form again with sanitized values/error messages.
         // Get all categories, which we can use for adding to our item.
         res.redirect("/");
         return;
       }
+
   
       // No errors, proceed with Cloudinary upload and item creation
       try {
