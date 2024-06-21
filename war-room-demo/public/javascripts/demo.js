@@ -139,6 +139,8 @@ class DemoScene {
         this.#renderer = new THREE.WebGLRenderer( { antialias: true } );
         this.#renderer.setPixelRatio( this.#canvas.devicePixelRatio );
         this.#renderer.setSize(this.#canvas.offsetWidth, this.#canvas.offsetHeight);
+        this.#renderer.shadowMap.enabled = true;
+        this.#renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         this.#canvas.appendChild( this.#renderer.domElement );
         
         console.log(this.#objects)
@@ -176,7 +178,7 @@ class DemoScene {
 
                     // Create a box helper
                     const boxGeometry = new THREE.BoxGeometry(box.max.x - box.min.x, box.max.y - box.min.y, box.max.z - box.min.z);
-                    const boxMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.5 });
+                    const boxMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true});
                     const boundingBox = new THREE.Mesh(boxGeometry, boxMaterial);
 
                     boundingBox.position.set((box.max.x + box.min.x) / 2, (box.max.y + box.min.y) / 2, (box.max.z + box.min.z) / 2)
@@ -217,10 +219,10 @@ class DemoScene {
         const ambientLight = new THREE.AmbientLight(0x7c7c7c);
         scene.add(ambientLight);
     
-        const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 1);
+        const directionalLight = new THREE.DirectionalLight(0xFDFBD3, 1);
         directionalLight.color.setHSL(0.1, 1, 0.95);
         directionalLight.castShadow = true;
-        directionalLight.position.set(-100, 80, 0);
+        directionalLight.position.set(-20, 80, 100);
         directionalLight.shadow.camera.bottom = -12;
         const dLightHelper = new THREE.DirectionalLightHelper(directionalLight);
         scene.add(directionalLight);
@@ -228,10 +230,10 @@ class DemoScene {
 
         const spotLight = new THREE.SpotLight(0xFFFFFF);
         spotLight.position.set(15, 100, 10);
-        spotLight.castShadow = true;
-        spotLight.shadow.camera.near = 10;
-        spotLight.shadow.camera.far = 1000;
-        spotLight.shadow.camera.fov = 30;
+        // spotLight.castShadow = true;
+        // spotLight.shadow.camera.near = 10;
+        // spotLight.shadow.camera.far = 1000;
+        // spotLight.shadow.camera.fov = 30;
         spotLight.angle = 0.2;
         const sLightHelper = new THREE.SpotLightHelper(spotLight);
         scene.add(spotLight);
@@ -264,7 +266,7 @@ class DemoScene {
         const groundGeo = new THREE.PlaneGeometry(1000, 1000);
         const groundMat = new THREE.MeshLambertMaterial({color: 0x1c150d});
         const ground = new THREE.Mesh(groundGeo, groundMat);
-        ground.position.y = -0.1;
+        
         ground.rotation.x = -Math.PI/2;
         ground.receiveShadow = true;
         scene.add(ground);
@@ -298,8 +300,8 @@ class DemoScene {
 
                 // initializes grid
                 const size = Math.max(this.#modelSize.x, this.#modelSize.z);
-                const gridHelper = new THREE.GridHelper(size, size / this.#grid_scale, 0x000000, 0x00ffaa);
-                scene.add(gridHelper);
+                const gridHelper = new THREE.GridHelper(size, size / this.#grid_scale, 0x000000, 0x097969);
+                // scene.add(gridHelper);
                 resolve();
             }, undefined, (error) => {
                 reject(error);
@@ -333,7 +335,6 @@ class DemoScene {
                 } else if(obj.name.includes("wall")){
                     obj.material.color.setHex(0xedeae5);
                     obj.castShadow = true;
-                    obj.receiveShadow = true;
                 }
             } else {
                 this.#model.remove(obj);

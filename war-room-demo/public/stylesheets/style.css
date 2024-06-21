@@ -281,7 +281,6 @@ nav a{
 
 #scene-options button{
   color: white;
-  /* background-color:transparent; */
   background-color:#384c44;
   border: solid;
   border-width: thin;
@@ -355,7 +354,7 @@ canvas{
   background-color:rgba(0,0,0,0.5);
 }
 
-#modal-content{
+/* #modal-content{
   background-color:rgb(255, 239, 230);
   margin: 15% auto;
   padding: 30px;
@@ -366,7 +365,7 @@ canvas{
   display: flex;
   flex-direction: column;
   justify-content: center;
-}
+} */
 
 #modal-content h1{
   margin-bottom: 30px;
@@ -435,6 +434,8 @@ canvas{
   margin: 10px auto 0px auto;
   display: none;
   position: absolute;
+  background-color:#a4c3b230;
+  width: 100%;
 }
 
 #object-form{
@@ -449,6 +450,7 @@ canvas{
 
 #room-form{
   font-size: 12px;
+  padding: 3px;
 }
 #room-form .form-group, #object-form .form-group{
   margin-bottom: 10px;
@@ -477,7 +479,7 @@ canvas{
 }
 
 #object-name{
-  height: 30px;
+  height: 25px;
   border:1px solid #384c44;
   border-radius: 3px;
   margin-left: 3px;
