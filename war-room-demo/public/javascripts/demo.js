@@ -153,14 +153,20 @@ class DemoScene {
         this.#measurement_objects.edges.name = "edges";
         this.#scene.add(this.#measurement_objects.vertices);
         this.#scene.add(this.#measurement_objects.edges);
-
+        
+        // Create a box helper
+        const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
+        const boxMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+        const cube = new THREE.Mesh(boxGeometry, boxMaterial);
+        this.#scene.add(cube)
     }
 
     // shifted up
     openPosition = (obj) => {
         let bbox = new THREE.Box3().setFromObject(obj);
+        console.log(bbox)
         const shift = bbox.min.y;
-        return new THREE.Vector3(0, -shift, 0);
+        return new THREE.Vector3(0, -shift + 0.01, 0);
     }
 
     // PROBABLY WILL HAVE TO CHANGE DRASTICALLY
@@ -191,7 +197,7 @@ class DemoScene {
             newObject.add(boundingBox);
 
             const openPos = this.openPosition(newObject); // find an open position to display the box
-            console.log(openPos);
+            console.log(newObject.position)
             newObject.position.set(openPos.x, openPos.y, openPos.z);
             console.log(newObject)
 

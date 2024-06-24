@@ -405,7 +405,45 @@ class DemoControls {
             this.#prev_time = time;
         } else if(this.#view == "outside") {
             this.#orbit.update();
+            if (this.#gumball != null) {
+                const object = this.#gumball.object;
+                const boundingBox = new THREE.Box3().setFromObject( object);
+                const isCollided = this.#checkCollisions(boundingBox, this.#boundingBoxes);
+                if (isCollided.hasCollision && isCollided.collidedBox.name != object.name) {
+                    console.log("Collision!");
+                    this.#colorObject(object, 0xFF0000);
+                    this.#gravity(object)
+                } else {
+                    console.log("Successful drag")
+                    this.#colorObject(object, 0x000000);
+                    this.#dragOrigin = object.position.clone();
+                }
+                this.#boundingBoxes = this.#getBoundingBoxes(this.#objects); // update boundingBoxes
+            }
         }
+    }
+
+    #gravity (object) {
+        let boundingBox = new THREE.Box3().setFromObject( object);
+        const newRaycaster = new THREE.Raycaster(new THREE.Vector3(0, boundingBox.max.y, 0 ), new THREE.Vector3(0,-1,0));
+        console.log(newRaycaster.ray)
+        const intersects = newRaycaster.intersectObjects(this.#objects,true);
+        if (intersects.length > 0) {
+            const firstObject = intersects[0].object;
+            const firstObjectBB = new THREE.Box3().setFromObject( firstObject);
+            object.position.set(object.position.x, 
+                firstObjectBB.max.y + (object.position.y - boundingBox.min.y) + 0.01,
+                object.position.z);
+        }
+    }
+
+    #shiftCollidedObject (object, boundingBox) {
+        console.log(object.position)
+        console.log(collidedBox)
+        const collidedBoxCenter = collidedBox.max.add(collidedBox.min).divideScalar(2);
+        const difference = object.position.sub(collidedBoxCenter);
+        console.log(difference)
+        // object.position.set(this.#dragOrigin.x, this.#dragOrigin.y, this.#dragOrigin.z)
     }
 
     /**
@@ -415,11 +453,11 @@ class DemoControls {
      */
     #createGumball (object) {
         this.#gumball = new THREE.TransformControls(this.#camera.outside, this.#canvas);
-        
         // Add mousedown/up event handling  
         this.#gumball.addEventListener("mouseDown", (event) => {
-            if(this.#orbit != null)
+            if(this.#orbit != null) {
                 this.#orbit.enabled = false;
+            }
         });
 
         this.#gumball.addEventListener("mouseUp", (event) => {
@@ -534,6 +572,7 @@ class DemoControls {
             let boundingBox = new THREE.Box3().setFromObject( object);
             const newRaycaster = new THREE.Raycaster(object.position, new THREE.Vector3(0,-1,0), object.position.y - boundingBox.min.y);
             const intersects = newRaycaster.intersectObjects(this.#objects,true);
+            console.log(intersects)
             if (intersects.length > 0) {
                 const firstObject = intersects[0].object;
                 const firstObjectBB = new THREE.Box3().setFromObject( firstObject);
@@ -774,8 +813,6 @@ class DemoControls {
 
         if (this.mode == "regular") {
             if ( this.#enableSelection === true ) {
-                const draggableObjects = this.#drag.getObjects();
-                draggableObjects.length = 0;
                 const intersections = this.#raycaster.intersectObjects( this.#draggableObjects, true );
                 if ( intersections.length > 0 ) {
                     const bounding_box = intersections[ 0 ].object; // should be the bounding box
@@ -790,11 +827,9 @@ class DemoControls {
                         this.#scene.remove(object);
                     }
                     this.#drag.transformGroup = true;
-                    draggableObjects.push( this.#selectedGroup );
                 }
                 if ( this.#selectedGroup.children.length === 0 ) {
                     this.#drag.transformGroup = false;
-                    draggableObjects.push( ...this.#draggableObjects );
                 }
             }
         } else if (this.mode == "measure") {
