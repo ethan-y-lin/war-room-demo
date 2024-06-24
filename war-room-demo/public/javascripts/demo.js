@@ -153,7 +153,6 @@ class DemoScene {
         this.#measurement_objects.edges.name = "edges";
         this.#scene.add(this.#measurement_objects.vertices);
         this.#scene.add(this.#measurement_objects.edges);
-
     }
 
     // shifted up
@@ -292,8 +291,6 @@ class DemoScene {
         gui.add( params, 'toggleAmbientLight' ).name( 'toggle ambient light' );
         gui.add( params, 'toggleDirectionalLight' ).name( 'toggle directional light' );
         gui.add( params, 'toggleSpotLight' ).name( 'toggle spot light' );
-        // gui.add( params, 'translate').name("translate mode");
-        // gui.add( params, 'rotate').name("rotate mode");
 
         gui.open();
 
@@ -345,7 +342,6 @@ class DemoScene {
             });
         });
     }
-
     /**
      * Organizes objects in the scene by categorizing them into doors, windows, walls, and removing irrelevant objects.
      * The organization is based on the names of the objects. 

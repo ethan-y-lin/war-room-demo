@@ -301,6 +301,7 @@ class DemoControls {
         document.removeEventListener('keydown', this.#orthoOnKeyDown);
         document.removeEventListener('click', this.#orthoOnClick);
         document.removeEventListener('click', this.#outsideOnClick);
+        document.removeEventListener('keydown', this.#outsideOnKeyDown);
         this.#canvas.removeEventListener('mousemove', this.#orthoOnMove);
         this.#drag.removeEventListener('dragstart', this.#dragStartCallback);
         this.#drag.removeEventListener('dragend', this.#dragEndCallback);
@@ -333,6 +334,7 @@ class DemoControls {
         } else if (newControl == "outside") {
             this.#reset();
             document.addEventListener('click', this.#outsideOnClick);
+            document.addEventListener('keydown', this.#outsideOnKeyDown);
             this.#orbit = new THREE.OrbitControls(camera, canvas);
             this.#orbit.enabled = true;
             this.#drag.enabled = false;
@@ -426,6 +428,7 @@ class DemoControls {
             if(this.#orbit != null)
                 this.#orbit.enabled = true;
         });
+
 
         this.#gumball.attach(object);
         this.#scene.add(this.#gumball);
@@ -672,7 +675,17 @@ class DemoControls {
         }
         return {hasCollision: false, collidedObject: null} ;
     }
-
+    #outsideOnKeyDown = (event) =>{
+        switch(event.code){
+            case 'KeyT':
+                this.#gumball.setMode('translate');
+                break;
+            case 'KeyR':
+                this.#gumball.setMode('rotate');
+                break;
+            }
+        };
+    
     #insideOnKeyDown = ( event ) => {
 
         switch ( event.code ) {
