@@ -276,18 +276,15 @@ class DemoScene {
 
         const params = {
             toggleHemisphereLight: function() {
-                hLightHelper.visible = ! hLightHelper.visible;
                 hemiLight.visible = ! hemiLight.visible;
             },
             toggleAmbientLight: function() {
                 ambientLight.visible = ! ambientLight.visible;
             },
             toggleDirectionalLight: function() {
-                dLightHelper.visible = ! dLightHelper.visible;
                 directionalLight.visible = ! directionalLight.visible;
             },
             toggleSpotLight: function (){
-                sLightHelper.visible = ! sLightHelper.visible;
                 spotLight.visible = ! spotLight.visible;
             }
         };
