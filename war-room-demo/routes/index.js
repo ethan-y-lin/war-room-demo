@@ -13,7 +13,7 @@ const room_controller = require("../controllers/roomController");
 
 // Routes
 router.get('/', app_controller.index);
-
+router.get('/about', app_controller.about);
 
 // OBJECT ROUTES 
 

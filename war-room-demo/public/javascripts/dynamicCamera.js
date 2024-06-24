@@ -88,7 +88,7 @@ class DynamicCamera {
             0.1,
             1000
         );
-        outsideCamera.position.set(-10, 3, 10);
+        outsideCamera.position.set(-10, 8, 10);
         this.name = "outside";
         this.outside = outsideCamera;
     }
