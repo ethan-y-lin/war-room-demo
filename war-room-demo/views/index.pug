@@ -77,12 +77,13 @@ block content
                             h2 FURNITURES
                         div.layerx
                             each category in categories 
-                                li 
-                                    a.menu-header(id= category.name.replaceAll(' ', '-'))= category.name
-                                    form(method='POST' action="/delete-category/" + category._id)
-                                        div.form-group
-                                            input#categoryid.form-control(type='hidden', name='categoryid', value=category._id )
-                                        button.delete-hover(type='submit') 
+                                li
+                                    div.deletion
+                                        a.menu-header(id= category.name.replaceAll(' ', '-'))= category.name
+                                        form(method='POST' action="/delete-category/" + category._id)
+                                            div.form-group
+                                                input#categoryid.form-control(type='hidden', name='categoryid', value=category._id )
+                                            button.delete-hover(type='submit') 
                             li
                                 a#list.menu-header Full List        
                             li
@@ -120,11 +121,12 @@ block content
                                         each object in objects  
                                                 if obj == object.id
                                                     li
-                                                        a(href="#" data-url=`${object.url}`) #{object.name}
-                                                        form(method='POST' action="/delete-object/" + object._id)
-                                                            div.form-group
-                                                                input#objectid.form-control(type='hidden', name='objectid', value=object._id )
-                                                            button.delete-hover(type='submit') 
+                                                        div.deletion
+                                                            a(href="#" data-url=`${object.url}`) #{object.name}
+                                                            form(method='POST' action="/delete-object/" + object._id)
+                                                                div.form-group
+                                                                    input#objectid.form-control(type='hidden', name='objectid', value=object._id )
+                                                                button.delete-hover(type='submit') 
                                 else    
                                     p There are no objects.
                                 
@@ -133,9 +135,9 @@ block content
                         div.menu-title
                             h2 Full List
                         ul
-                                each object in objects
-                                    li 
-                                        a(href=object.url)= object.name 
+                            each object in objects
+                                li 
+                                    a(href=object.url)= object.name 
 
         main#scene
             div.title

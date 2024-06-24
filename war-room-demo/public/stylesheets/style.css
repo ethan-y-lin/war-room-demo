@@ -132,15 +132,16 @@ nav a{
   position: relative;
   border-bottom: 1px solid #445c524a;
   margin-left: 0px;
+  width: 100%;
 }
 
 .dropdown-menu ul a{
   display: block;
-  float: left;
   padding: 10px 10px;
   color:  #445c52;
   background: transparent;
   transition: 0.2s ease-in-out;
+  z-index: 1;
 }
 .dropdown-menu ul a:hover{
   background: linear-gradient(to right, #c1e5d100, #1892645a, #c1e5d100);
@@ -177,8 +178,15 @@ nav a{
 }
 
 .layerx li a{
-  width: 80%;
   margin: 5px 0px 5px 0px;
+  width: 100%;
+}
+
+.deletion{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
 }
 .layerx li button{
   float: right;
@@ -193,6 +201,7 @@ nav a{
   align-items: center;
   margin: 0px;
   padding: 0px;
+  width: 100%;
 }
 
 .layer3 ul li{
