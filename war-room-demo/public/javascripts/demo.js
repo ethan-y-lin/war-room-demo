@@ -153,12 +153,6 @@ class DemoScene {
         this.#measurement_objects.edges.name = "edges";
         this.#scene.add(this.#measurement_objects.vertices);
         this.#scene.add(this.#measurement_objects.edges);
-        
-        // Create a box helper
-        const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
-        const boxMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
-        const cube = new THREE.Mesh(boxGeometry, boxMaterial);
-        this.#scene.add(cube)
     }
 
     // shifted up
@@ -295,8 +289,6 @@ class DemoScene {
         gui.add( params, 'toggleAmbientLight' ).name( 'toggle ambient light' );
         gui.add( params, 'toggleDirectionalLight' ).name( 'toggle directional light' );
         gui.add( params, 'toggleSpotLight' ).name( 'toggle spot light' );
-        // gui.add( params, 'translate').name("translate mode");
-        // gui.add( params, 'rotate').name("rotate mode");
 
         gui.open();
 
@@ -348,7 +340,6 @@ class DemoScene {
             });
         });
     }
-
     /**
      * Organizes objects in the scene by categorizing them into doors, windows, walls, and removing irrelevant objects.
      * The organization is based on the names of the objects. 
