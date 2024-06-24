@@ -326,6 +326,7 @@ class DemoScene {
                 scene.add(this.#model);
                 this.#model.position.set(0, this.#modelSize.y / 2, 0); // makes the ground at y = 0;
 
+                console.log(this.#model.children)
                 // initialize objects
                 const objects = [...this.#model.children]; // must be copy because removing directly will cause some to be skipped.
                 this.#organizeObjects(objects);
