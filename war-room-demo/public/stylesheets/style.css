@@ -15,6 +15,17 @@ body {
   margin-top: 10px;
 }
 
+.tutorials{
+  position: absolute;
+  margin-left: 10px;
+}
+.tutorial-button:hover{
+  color: #384c44;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+
 .main-section{
   display: flex;
   flex-direction: row;
@@ -96,6 +107,7 @@ nav a{
   border-bottom: 2px solid rgb(30, 30, 30);
   margin-bottom: 5px;
   font-size: 36px;
+  margin-top: 3px;
 }
 
 .layer1{
@@ -118,13 +130,13 @@ nav a{
   display: block;
   float: left;
   position: relative;
-  border-bottom: 1px solid #445c5290;
+  border-bottom: 1px solid #445c524a;
+  margin-left: 0px;
 }
 
 .dropdown-menu ul a{
   display: block;
   float: left;
-  width: 200px;
   padding: 10px 10px;
   color:  #445c52;
   background: transparent;
@@ -160,13 +172,17 @@ nav a{
   margin: 0px 5px 0px 5px;
   display: flex;
   flex-direction: row;
+  position: relative;
   align-items: center;
 }
 
 .layerx li a{
   width: 80%;
+  margin: 5px 0px 5px 0px;
 }
-
+.layerx li button{
+  float: right;
+}
 .layerx p{
   text-align: center;
 }
@@ -199,16 +215,15 @@ nav a{
   width: 100px;
   height: 30px;
   margin: 5px;
-  background-color: transparent;
-  color: #384c44;
-  border: 1px solid #445c5260;
+  background-color: #384c44;
+  color: white;
+  border: 1px solid white;
   border-radius: 6px;
 }
 
 .button:hover{
   cursor: pointer;
-  background: #c1e5d160;
-  color: #333;
+  background: #a4c3b2;
 }
 
 .button:active{
@@ -348,7 +363,6 @@ nav a{
   cursor: pointer;
 }
 
-
 canvas{
   position: absolute;
   z-index: -1;
@@ -363,25 +377,6 @@ canvas{
   height: 100%;
   overflow: auto;
   background-color:rgba(0,0,0,0.5);
-}
-
-#modal-content h1{
-  margin-bottom: 30px;
-  text-align: center;
-}
-
-#modal-content .form-group{
-  text-align: start;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 10px;
-  margin-bottom: 5px;
-  padding-left: 30px;
-}
-
-#modal-content button{
-  margin-top: 40px;
-  margin-left: 70%;
 }
 
 .close{
@@ -471,7 +466,7 @@ canvas{
   height: 30px;
   border:1px solid #384c44;
   border-radius: 3px;
-  width: 60%;
+  width: 80%;
 }
 
 #object-name{
@@ -514,11 +509,10 @@ canvas{
 }
 
 .delete-hover{
-  position: absolute;
   margin-top:10px;
   width: 24px;
   height: 24px;
-  border:none;
+  border: none;
   background-color: transparent;
   background-image: url("../img/delete-close.png");
   transition: background-image 0.2s ease-in-out;
