@@ -158,8 +158,9 @@ class DemoScene {
     // shifted up
     openPosition = (obj) => {
         let bbox = new THREE.Box3().setFromObject(obj);
+        console.log(bbox)
         const shift = bbox.min.y;
-        return new THREE.Vector3(0, -shift, 0);
+        return new THREE.Vector3(0, -shift + 0.01, 0);
     }
 
     // PROBABLY WILL HAVE TO CHANGE DRASTICALLY
@@ -190,7 +191,7 @@ class DemoScene {
             newObject.add(boundingBox);
 
             const openPos = this.openPosition(newObject); // find an open position to display the box
-            console.log(openPos);
+            console.log(newObject.position)
             newObject.position.set(openPos.x, openPos.y, openPos.z);
             console.log(newObject)
 
@@ -269,18 +270,15 @@ class DemoScene {
 
         const params = {
             toggleHemisphereLight: function() {
-                hLightHelper.visible = ! hLightHelper.visible;
                 hemiLight.visible = ! hemiLight.visible;
             },
             toggleAmbientLight: function() {
                 ambientLight.visible = ! ambientLight.visible;
             },
             toggleDirectionalLight: function() {
-                dLightHelper.visible = ! dLightHelper.visible;
                 directionalLight.visible = ! directionalLight.visible;
             },
             toggleSpotLight: function (){
-                sLightHelper.visible = ! sLightHelper.visible;
                 spotLight.visible = ! spotLight.visible;
             }
         };
@@ -328,6 +326,7 @@ class DemoScene {
                 scene.add(this.#model);
                 this.#model.position.set(0, this.#modelSize.y / 2, 0); // makes the ground at y = 0;
 
+                console.log(this.#model.children)
                 // initialize objects
                 const objects = [...this.#model.children]; // must be copy because removing directly will cause some to be skipped.
                 this.#organizeObjects(objects);

@@ -1,5 +1,3 @@
-import { DragControls} from "./DragControls.js";
-
 /**
  * This class contains the control logic for each of the views and modes. 
  * Using ThreeJS add-on controls, this class supports "drag controls" for 
@@ -101,18 +99,19 @@ class DemoControls {
     #gumball;
 
     /**
+     * The last known state of the gumball.
+     * Ex. {mode: 'rotate', }
+     * @type {?}
+     * @private
+     */
+    #gumballState;
+
+    /**
      * The pointer lock controls object.
      * @type {THREE.PointerLockControls}
      * @private
      */
     #pointerLock;
-
-    /**
-     * The drag controls object.
-     * @type {THREE.DragControls}
-     * @private
-     */
-    #drag;
 
     ////// ////// ////// //////
 
@@ -171,19 +170,6 @@ class DemoControls {
      */
     #raycaster;
     
-    /**
-     * Control variable for multi-select functionality.
-     * @type {boolean}
-     * @private
-     */
-    #enableSelection;
-
-    /**
-     * The multi-selected group.
-     * @type {THREE.Group}
-     * @private
-     */
-    #selectedGroup;
 
     /**
      * The dragged object's position at the start of a drag.
@@ -237,7 +223,7 @@ class DemoControls {
         this.#orbit = new THREE.OrbitControls(camera.outside, canvas);
 
         this.#gumball = null;
-
+        this.#gumballState = {mode: 'translate'}
 
         this.#pointerLock = new THREE.PointerLockControls(camera.inside, canvas);
         this.#prev_time = performance.now();
@@ -249,11 +235,7 @@ class DemoControls {
         this.#moveRight = false;
         this.#insideCameraBB = new THREE.Box3();
         this.#boundingBoxes = this.#getBoundingBoxes(this.#objects);
-
-        this.#drag = new DragControls([...this.#draggableObjects], camera.ortho, canvas);
         this.#raycaster = new THREE.Raycaster();
-        this.#selectedGroup = new THREE.Group();
-        this.#scene.add(this.#selectedGroup);
         this.#dragOrigin = new THREE.Vector3();
         this.#measureGroup = new THREE.Group();
         this.#scene.add(this.#measureGroup);
@@ -287,7 +269,7 @@ class DemoControls {
      * sets control objects to null.
      */
     #reset() {
-        this.#drag.dispose();
+        // this.#drag.dispose();
         this.#pointerLock.dispose();
         this.#orbit.dispose();
         this.#clearGumball();
@@ -297,15 +279,11 @@ class DemoControls {
         this.#pointerLock.removeEventListener('unlock', this.#showBlocker);
         document.removeEventListener('keydown', this.#insideOnKeyDown);
         document.removeEventListener('keyup',this.#insideOnKeyUp);
-        document.removeEventListener('keyup', this.#orthoOnKeyUp);
-        document.removeEventListener('keydown', this.#orthoOnKeyDown);
         document.removeEventListener('click', this.#orthoOnClick);
         document.removeEventListener('click', this.#outsideOnClick);
-        document.removeEventListener('keydown', this.#outsideOnKeyDown);
         this.#canvas.removeEventListener('mousemove', this.#orthoOnMove);
-        this.#drag.removeEventListener('dragstart', this.#dragStartCallback);
-        this.#drag.removeEventListener('dragend', this.#dragEndCallback);
-        this.#drag.removeEventListener('drag', this.#dragCallback);
+        this.#pointerLock.enabled = false;
+        this.#orbit.enabled = false;
     }
 
     /**
@@ -319,34 +297,24 @@ class DemoControls {
         if (newControl == "ortho") {
             this.#reset();
             this.#boundingBoxes = this.#getBoundingBoxes(this.#objects);
-            this.#drag = new DragControls([...this.#draggableObjects], camera, canvas);
-            this.#drag.addEventListener('dragstart', this.#dragStartCallback);
-            this.#drag.addEventListener('dragend', this.#dragEndCallback);
-            this.#drag.addEventListener('drag', this.#dragCallback);
-            document.addEventListener('keyup', this.#orthoOnKeyUp);
-            document.addEventListener('keydown', this.#orthoOnKeyDown);
+            document.addEventListener('keydown', this.#toggleGumball);
             document.addEventListener('click', this.#orthoOnClick);
             this.#canvas.addEventListener('mousemove', this.#orthoOnMove);
-            this.#drag.enabled = true;
-            this.#pointerLock.enabled = false;
-            this.#orbit.enabled = false;
+
             this.#hideBlocker();
         } else if (newControl == "outside") {
             this.#reset();
+            this.#boundingBoxes = this.#getBoundingBoxes(this.#objects);
             document.addEventListener('click', this.#outsideOnClick);
-            document.addEventListener('keydown', this.#outsideOnKeyDown);
+            document.addEventListener('keydown', this.#toggleGumball);
             this.#orbit = new THREE.OrbitControls(camera, canvas);
             this.#orbit.enabled = true;
-            this.#drag.enabled = false;
-            this.#pointerLock.enabled = false;
             this.#hideBlocker();
         } else if (newControl == "inside"){
             this.#reset();
             this.#boundingBoxes = this.#getBoundingBoxes(this.#objects);
             this.#pointerLock = new THREE.PointerLockControls(camera, canvas);
             this.#pointerLock.enabled = true;
-            this.#orbit.enabled = false;
-            this.#drag.enabled = false;
             const instructions = document.getElementById( 'instructions' );
             instructions.addEventListener( 'click', this.#lock);
             this.#showBlocker();
@@ -405,9 +373,68 @@ class DemoControls {
                 }
             }
             this.#prev_time = time;
-        } else if(this.#view == "outside") {
+        } else if(this.#view == "outside" || this.#view == "ortho") {
             this.#orbit.update();
+            if (this.#gumball != null) {
+                const object = this.#gumball.object;
+                this.#setToGroundHeight(object)
+                const boundingBox = new THREE.Box3().setFromObject( object);
+                const isCollided = this.#checkCollisions(boundingBox, this.#boundingBoxes);
+                if (isCollided.hasCollision && isCollided.collidedBox.name != object.name) {
+                    console.log("Collision!");
+                    this.#colorObject(object, 0xFF0000);
+                } else {
+                    console.log("Successful drag")
+                    this.#colorObject(object, 0x000000);
+                    this.#dragOrigin = object.position.clone();
+                }
+                this.#boundingBoxes = this.#getBoundingBoxes(this.#objects); // update boundingBoxes
+            }
         }
+    }
+
+
+    #setToGroundHeight (object) {
+        let boundingBox = new THREE.Box3().setFromObject( object);
+        const newRaycaster = new THREE.Raycaster(new THREE.Vector3(0, boundingBox.max.y, 0 ), new THREE.Vector3(0,-1,0));
+        const intersects = newRaycaster.intersectObjects(this.#objects,true);
+        if (intersects.length > 0) {
+            let firstObject;
+            if (intersects.length > 1) {
+                firstObject = intersects[intersects.length - 2].object;
+            } else if (intersects.length == 1) {
+                firstObject = intersects[0].object;
+            }
+            const firstObjectBB = new THREE.Box3().setFromObject( firstObject);
+            object.position.set(object.position.x, 
+                firstObjectBB.max.y + (object.position.y - boundingBox.min.y) + 0.01,
+                object.position.z);
+        } else {
+            const newRaycaster = new THREE.Raycaster(new THREE.Vector3(0, boundingBox.max.y, 0 ), new THREE.Vector3(0,1,0));
+            const intersects2 = newRaycaster.intersectObjects(this.#objects,true);
+            if (intersects2.length > 0) {
+                let firstObject;
+                if (intersects2.length > 1) {
+                    firstObject = intersects2[1].object;
+                } else if (intersects2.length == 1) {
+                    firstObject = intersects2[0].object;
+                }
+                const firstObjectBB = new THREE.Box3().setFromObject( firstObject);
+                object.position.set(object.position.x, 
+                    firstObjectBB.max.y + (object.position.y - boundingBox.min.y) + 0.01,
+                    object.position.z);
+            }
+        }
+
+    }
+
+    #shiftCollidedObject (object, boundingBox) {
+        console.log(object.position)
+        console.log(collidedBox)
+        const collidedBoxCenter = collidedBox.max.add(collidedBox.min).divideScalar(2);
+        const difference = object.position.sub(collidedBoxCenter);
+        console.log(difference)
+        // object.position.set(this.#dragOrigin.x, this.#dragOrigin.y, this.#dragOrigin.z)
     }
 
     /**
@@ -415,13 +442,22 @@ class DemoControls {
      * @param {THREE.Object3D} object 
      * @private
      */
-    #createGumball (object) {
-        this.#gumball = new THREE.TransformControls(this.#camera.outside, this.#canvas);
+    #createGumball (object, camera) {
+        this.#gumball = new THREE.TransformControls(camera, this.#canvas);
         
+        this.#gumball.setMode(this.#gumballState.mode)
+        console.log(this.#gumball.getMode())
+        if (this.#gumball.getMode() == 'rotate') {
+            this.#gumball.showX = false;
+            this.#gumball.showZ = false;
+        } else {
+            this.#gumball.showY = false;
+        }
         // Add mousedown/up event handling  
         this.#gumball.addEventListener("mouseDown", (event) => {
-            if(this.#orbit != null)
+            if(this.#orbit != null) {
                 this.#orbit.enabled = false;
+            }
         });
 
         this.#gumball.addEventListener("mouseUp", (event) => {
@@ -442,6 +478,7 @@ class DemoControls {
         if (this.#gumball == null) {
             return;
         }
+        this.#gumballState.mode = this.#gumball.getMode();
         this.#scene.remove(this.#gumball);
         this.#gumball.dispose();
         this.#gumball = null;
@@ -462,7 +499,8 @@ class DemoControls {
      * @returns {THREE.TransformControls | null} Returns the gumball control associated with the clicked object,
      * or null if no gumball control is active.
      */
-    #clickObject(object) {
+    #clickObject(object, camera) {
+        console.log(object)
         if (this.#gumball != null) {
             if (object == this.#gumball.object) {
                 return this.#gumball;
@@ -471,7 +509,7 @@ class DemoControls {
             }
         }
         
-        this.#createGumball(object);
+        this.#createGumball(object, camera);
         return this.#gumball;
     }
 
@@ -496,9 +534,9 @@ class DemoControls {
         const intersections = this.#raycaster.intersectObjects( this.#draggableObjects, true );
         if (intersections.length > 0) {
             if (intersections[0].object.parent != null) {
-                this.#clickObject(intersections[0].object.parent);
+                this.#clickObject(intersections[0].object.parent, this.#camera.outside);
             } else {
-                this.#clickObject(intersections[0].object);
+                this.#clickObject(intersections[0].object, this.#camera.outside);
             }
         } else {
             this.#clearGumball();
@@ -537,6 +575,7 @@ class DemoControls {
             let boundingBox = new THREE.Box3().setFromObject( object);
             const newRaycaster = new THREE.Raycaster(object.position, new THREE.Vector3(0,-1,0), object.position.y - boundingBox.min.y);
             const intersects = newRaycaster.intersectObjects(this.#objects,true);
+            console.log(intersects)
             if (intersects.length > 0) {
                 const firstObject = intersects[0].object;
                 const firstObjectBB = new THREE.Box3().setFromObject( firstObject);
@@ -617,19 +656,7 @@ class DemoControls {
             });
         }
     }
-    // hasDoor (object) {
-    //     if (object.name.includes("door")){
-    //         return true;
-    //     }
-    //     if (object.children.length == 0) {
-    //         return false;
-    //     }
-    //     let bool = false;
-    //     for (let i = 0; i < object.children.length; i++) {
-    //         bool = bool || this.hasDoor(object.children[i]);
-    //     }
-    //     return bool;
-    // } 
+
 
     /**
      * Computes and returns an array of bounding boxes for the given objects.
@@ -675,14 +702,24 @@ class DemoControls {
         }
         return {hasCollision: false, collidedObject: null} ;
     }
-    #outsideOnKeyDown = (event) =>{
+
+    #toggleGumball = (event) =>{
         switch(event.code){
             case 'KeyT':
                 this.#gumball.setMode('translate');
+                this.#gumball.showX = true;
+                this.#gumball.showZ = true;
+                this.#gumball.showY = false;
                 break;
             case 'KeyR':
                 this.#gumball.setMode('rotate');
+                this.#gumball.showX = false;
+                this.#gumball.showZ = false;
+                this.#gumball.showY = true;
                 break;
+            case 'Backspace':
+                this.#scene.remove(this.#gumball.object)
+                this.#clearGumball();
             }
         };
     
@@ -740,26 +777,6 @@ class DemoControls {
         }
     };
 
-    #orthoOnKeyDown = ( event ) => {
-
-        this.#enableSelection = ( event.keyCode === 16 ) ? true : false;
-        
-        if ( event.keyCode === 77 ) {
-
-            this.#drag.mode = ( this.#drag.mode === 'translate' ) ? 'rotate' : 'translate';
-    
-        } else if (event.code == 'Backspace') {
-            this.#selectedGroup.clear();
-        }
-
-    }
-
-    #orthoOnKeyUp = () => {
-
-        this.#enableSelection = false;
-
-    }
-
     /**
      * Event handler for mouse click events in the orthographic view mode.
      * 
@@ -778,6 +795,7 @@ class DemoControls {
      */
     #orthoOnClick = (event) => {
         // event.preventDefault();
+
         const rect = this.#canvas.getBoundingClientRect();
         const mouse = new THREE.Vector2();
         mouse.x = ( event.clientX - rect.left ) / rect.width * 2 - 1;
@@ -786,30 +804,21 @@ class DemoControls {
         this.#raycaster.setFromCamera( mouse, this.#camera.ortho );
 
         if (this.mode == "regular") {
-            if ( this.#enableSelection === true ) {
-                const draggableObjects = this.#drag.getObjects();
-                draggableObjects.length = 0;
-                const intersections = this.#raycaster.intersectObjects( this.#draggableObjects, true );
-                if ( intersections.length > 0 ) {
-                    const bounding_box = intersections[ 0 ].object; // should be the bounding box
-                    const object = bounding_box.parent;
-                    if ( this.#selectedGroup.children.includes( object ) === true ) {
-                        this.#colorObject(object, 0x000000);
-                        this.#scene.attach( object );
-                        this.#selectedGroup.remove(object);
-                    } else {
-                        this.#colorObject(object, 0x0000ff);                       
-                        this.#selectedGroup.attach( object );
-                        this.#scene.remove(object);
-                    }
-                    this.#drag.transformGroup = true;
-                    draggableObjects.push( this.#selectedGroup );
+            const rect = this.#canvas.getBoundingClientRect();
+            const mouse = new THREE.Vector2();
+            mouse.x = ( event.clientX - rect.left ) / rect.width * 2 - 1;
+            mouse.y = - ( event.clientY - rect.top ) / rect.height * 2 + 1;  
+            this.#raycaster.setFromCamera( mouse, this.#camera.ortho );
+            const intersections = this.#raycaster.intersectObjects( this.#draggableObjects, true );
+            if (intersections.length > 0) {
+                if (intersections[0].object.parent != null) {
+                    this.#clickObject(intersections[0].object.parent, this.#camera.ortho);
+                } else {
+                    this.#clickObject(intersections[0].object, this.#camera.ortho);
                 }
-                if ( this.#selectedGroup.children.length === 0 ) {
-                    this.#drag.transformGroup = false;
-                    draggableObjects.push( ...this.#draggableObjects );
-                }
-            }
+            } else {
+                this.#clearGumball();
+            } 
         } else if (this.mode == "measure") {
             if (this.#measure_points.length > 0) {
                 for (let i = 0 ; i < this.#measure_points.length; i++) {

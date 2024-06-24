@@ -106,6 +106,7 @@ class DragControls extends THREE.EventDispatcher {
 
 					_diff.subVectors( _pointer, _previousPointer ).multiplyScalar( scope.rotateSpeed );
 					_selected.rotateOnWorldAxis( _up, _diff.x );
+					console.log(_selected)
 					_selected.rotateOnWorldAxis( _right.normalize(), - _diff.y );
 
 				}
@@ -211,8 +212,8 @@ class DragControls extends THREE.EventDispatcher {
 					} else if ( scope.mode === 'rotate' ) {
 
 						// the controls only support Y+ up
-						_up.set( 0, 1, 0 ).applyQuaternion( _camera.quaternion ).normalize();
-						_right.set( 1, 0, 0 ).applyQuaternion( _camera.quaternion ).normalize();
+						_up.set( 0, 0, 1 ).applyQuaternion( _camera.quaternion ).normalize();
+						_right.set( 0, 0, 1 ).applyQuaternion( _camera.quaternion ).normalize();
 
 					}
 
