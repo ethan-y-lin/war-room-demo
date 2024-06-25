@@ -1,9 +1,7 @@
 import { DynamicCamera } from "./dynamicCamera.js";
 import { DemoControls } from "./demoControls.js";
 import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.19/+esm';
-// import {fragment} from "../shaders/fragment.glsl";
-// import {vertex} from "../shaders/vertext.glsl";
-
+import { CSS2DRenderer, CSS2DObject } from "./CSS2DRenderer.js";
 /**
  * This class represents a scene that is displayed on the HTML element 
  * with the id: "#scene-container". It handles the contents of the scene,
@@ -99,6 +97,7 @@ class DemoScene {
      */
     #measurement_objects;
 
+    #labelRenderer;
     /**
      * Calls for the initialization the DemoScene object and then
      * calls the animation loop when initialization is completed.
@@ -158,6 +157,13 @@ class DemoScene {
 
         this.isFullScreen = false;
         this.#initListeners();
+
+        this.#labelRenderer = new CSS2DRenderer();
+        this.#labelRenderer.setSize(this.#canvas.offsetWidth, this.#canvas.offsetHeight );
+        this.#labelRenderer.domElement.style.position = 'absolute';
+        this.#labelRenderer.domElement.style.top = '0px';
+        this.#labelRenderer.domElement.style.pointerEvents = 'none';
+        this.#canvas.appendChild( this.#labelRenderer.domElement );
         
 
     }
@@ -277,9 +283,24 @@ class DemoScene {
             newObject.position.set(openPos.x, openPos.y, openPos.z);
             console.log(newObject)
 
+            // add label
+            const text = document.createElement( 'div' );
+            text.style.backgroundColor = 'red';
+            text.style.color = 'white';
+            text.className = 'label';
+            text.textContent = addedObject.name;
+    
+            const label = new CSS2DObject( text );
+            console.log(label);
+            newObject.add(label)
+
             this.#objects.uploaded.push(newObject);
             this.#controls.updateObjects(this.#objects);
+
             });
+
+
+        // root.add( label );
     }
     // #updateObjects () {
     //     const addedObjects = JSON.parse(document.querySelector('.object-data').dataset.objects);
@@ -519,6 +540,7 @@ class DemoScene {
             this.#updateScene();
             this.#controls.updateControls(this.#camera);           
             this.#renderer.render(this.#scene, this.#current_camera);
+            this.#labelRenderer.render(this.#scene, this.#current_camera);
             this.#animate();
         });
     }
@@ -529,15 +551,15 @@ class DemoScene {
      */
     #onWindowResize(camera){            
         console.log("window resized");
+        this.#renderer.setSize(this.#canvas.offsetWidth, this.#canvas.offsetHeight, false);
+        this.#labelRenderer.setSize(this.#canvas.offsetWidth, this.#canvas.offsetHeight, false);
         if (this.#camera.name == "ortho") {
             console.log("ortho camera")
-            this.#renderer.setSize(this.#canvas.offsetWidth, this.#canvas.offsetHeight, false);
             this.#camera.setOrthoCamera(this.#canvas, this.#modelSize, 2 );
             this.#current_camera = this.#camera.ortho;
         } else {
             camera.aspect = this.#canvas.offsetWidth / this.#canvas.offsetHeight;
             camera.updateProjectionMatrix();
-            this.#renderer.setSize(this.#canvas.offsetWidth, this.#canvas.offsetHeight, false);
         }
 
     }
