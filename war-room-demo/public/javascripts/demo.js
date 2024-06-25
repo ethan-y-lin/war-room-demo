@@ -131,23 +131,25 @@ class DemoScene {
         this.#grid_scale = 0.1; // meter
         await this.#initGeometries(this.#scene);
 
-        // // initialize camera
-        this.#camera = new DynamicCamera(this.#canvas, this.#modelSize); // initializes to orthoCamera
-        this.#current_camera = this.#camera.ortho;
-
         // // initialize renderer
         this.#renderer = new THREE.WebGLRenderer( { antialias: true } );
         this.#renderer.setPixelRatio( this.#canvas.devicePixelRatio );
         this.#renderer.setSize(this.#canvas.offsetWidth, this.#canvas.offsetHeight);
         this.#renderer.shadowMap.enabled = true;
         this.#renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        this.#renderer.domElement.style = "";
         this.#canvas.appendChild( this.#renderer.domElement );
+
+        // // initialize camera
+        this.#camera = new DynamicCamera(this.#canvas, this.#modelSize); // initializes to orthoCamera
+        this.#current_camera = this.#camera.ortho;
         
         console.log(this.#objects)
         // initialize controls 
         this.#controls = new DemoControls(this.#camera, this.#canvas, this.#scene, this.#objects, this.#modelSize); // initializes to orthoControls
 
-        this.#canvas.addEventListener( 'resize', this.#onWindowResize(this.#camera.ortho) );
+        window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.ortho) });
+        console.log(window)
         this.#measurement_objects = {vertices: new THREE.Group(), edges: new THREE.Group()};
         this.#measurement_objects.vertices.name = "vertices";
         this.#measurement_objects.edges.name = "edges";
@@ -435,7 +437,7 @@ class DemoScene {
     #animate () {
         requestAnimationFrame(() => {
             this.#updateScene();
-            this.#controls.updateControls(this.#camera);
+            this.#controls.updateControls(this.#camera);           
             this.#renderer.render(this.#scene, this.#current_camera);
             this.#animate();
         });
@@ -445,14 +447,19 @@ class DemoScene {
      * 
      * @param {*} camera 
      */
-    #onWindowResize(camera){
+    #onWindowResize(camera){            
         console.log("window resized");
-        const width = this.#canvas.offsetWidth;
-        const height = this.#canvas.offsetHeight;
-        // camera.aspect = this.canvas.offsetWidth / this.canvas.offsetHeight;
-        camera.aspect = width/height;
-        camera.updateProjectionMatrix();
-        this.#renderer.setSize(width, height, false);
+        if (this.#camera.name == "ortho") {
+            console.log("ortho camera")
+            
+            this.#camera.setOrthoCamera(this.#canvas, this.#modelSize, 2 );
+            this.#current_camera = this.#camera.ortho;
+        } else {
+            camera.aspect = this.#canvas.offsetWidth / this.#canvas.offsetHeight;
+            camera.updateProjectionMatrix();
+            this.#renderer.setSize(this.#canvas.offsetWidth, this.#canvas.offsetHeight, false);
+        }
+
     }
 
     /**
@@ -462,9 +469,9 @@ class DemoScene {
         this.#camera.setInsideCamera(this.#canvas);
         this.#current_camera = this.#camera.inside;
         this.#controls.switchControls("inside", this.#camera.inside, this.#canvas);
-        this.#canvas.removeEventListener( 'resize', this.#onWindowResize(this.#camera.ortho) );
-        this.#canvas.removeEventListener( 'resize', this.#onWindowResize(this.#camera.outside) );
-        this.#canvas.addEventListener( 'resize', this.#onWindowResize(this.#camera.inside) );
+        window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.ortho)} );
+        window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.outside)} );
+        window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.inside)} );
     }
     /**
      * Sets the scene view to outside mode by updating camera, controls, and objects.
@@ -473,9 +480,9 @@ class DemoScene {
         this.#camera.setOutsideCamera(this.#canvas);
         this.#current_camera = this.#camera.outside;
         this.#controls.switchControls("outside", this.#camera.outside, this.#canvas);
-        this.#canvas.removeEventListener( 'resize', this.#onWindowResize(this.#camera.ortho) );
-        this.#canvas.removeEventListener( 'resize', this.#onWindowResize(this.#camera.inside) );
-        this.#canvas.addEventListener( 'resize', this.#onWindowResize(this.#camera.outside) );
+        window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.ortho)} );
+        window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.inside)} );
+        window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.outside)} );
     }
     /**
      * Sets the scene view to ortho mode by updating camera, controls, and objects.
@@ -484,9 +491,9 @@ class DemoScene {
         this.#camera.setOrthoCamera(this.#canvas, this.#modelSize, 2);
         this.#current_camera = this.#camera.ortho;
         this.#controls.switchControls("ortho", this.#camera.ortho, this.#canvas);
-        this.#canvas.removeEventListener( 'resize', this.#onWindowResize(this.#camera.outside) );
-        this.#canvas.removeEventListener( 'resize', this.#onWindowResize(this.#camera.inside) );
-        this.#canvas.addEventListener( 'resize', this.#onWindowResize(this.#camera.ortho) );
+        window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.outside)} );
+        window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.inside)} );
+        window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.ortho)} );
     }
 
     /**

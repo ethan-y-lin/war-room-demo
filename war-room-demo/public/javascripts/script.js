@@ -31,6 +31,7 @@ function init(model) {
 
     })
     $('#fullscreen-button').on('click', function(){
+        console.log("full screen")
         if (APP.renderer.domElement.requestFullscreen){
             APP.renderer.domElement.requestFullscreen();
         } else if (APP.renderer.domElement.webkitRequestFullscreen){

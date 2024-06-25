@@ -45,15 +45,17 @@ class DynamicCamera {
         const height = width / aspectRatio;
         // Orthographic camera setup
         let orthoCamera = new THREE.OrthographicCamera(
-            width / 2,
             -width / 2,
-            -height / 2,
+            width / 2,
             height / 2,
+            -height / 2,
             0.1,
             1000
         );
         orthoCamera.position.set(0, 30, 0);
         orthoCamera.lookAt(0, 0, 0);
+        orthoCamera.updateMatrixWorld();
+        orthoCamera.name = Date.now();
         this.name = "ortho"; // Set camera mode to orthographic
         this.ortho = orthoCamera; // Store orthographic camera
     }
@@ -66,12 +68,13 @@ class DynamicCamera {
         // Inside perspective camera setup
         let insideCamera = new THREE.PerspectiveCamera(
             60,
-            canvas.offsetWidth / canvas.offsetHeight,
+            canvas.clientWidth / canvas.clientHeight,
             0.1,
             1000
         );
         insideCamera.position.set(4, 1.7, -1);
         insideCamera.rotation.y = 90;
+        insideCamera.name = Date.now();
         this.name = "inside"; // Set camera mode to inside perspective
         this.inside = insideCamera; // Store inside perspective camera
     }
@@ -84,7 +87,7 @@ class DynamicCamera {
         // Outside perspective camera setup
         let outsideCamera = new THREE.PerspectiveCamera(
             45,
-            canvas.offsetWidth / canvas.offsetHeight,
+            canvas.clientWidth / canvas.clientHeight,
             0.1,
             1000
         );
