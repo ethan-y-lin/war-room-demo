@@ -26,34 +26,37 @@ body {
 }
 
 
-.main-section{
+/* .main-section{
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
   width: 100%;
   height: 100%;
-  margin: 0px;
-}
+  margin-left: 360px;
+} */
+
 
 #menu{
   display: flex;
-  width: 25%;
+  width: 360px;
+  position: fixed;
   height: 100%;
   padding: 10px;
   justify-content: center;
   background-color: #a4c3b26a;
+  left: 0;
 }
 
 #scene{
   display: flex;
   flex-direction: column;
-  width: 75%;
+  margin-left: 360px;
   height: 100%;
   align-items: center;
   position: relative;
-  margin: auto;
   padding: 0px 50px 0px 50px;
+
 }
 .no-cursor {
   cursor: none;
@@ -352,7 +355,7 @@ nav a{
   height: 40px;
   width: 40px;
   cursor: pointer;
-  z-index: 100;
+  z-index: 999;
 }
 
 #fullscreen-button:hover{

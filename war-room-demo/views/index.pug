@@ -6,169 +6,169 @@ block content
     div.tutorials 
         p
             a.tutorial-button &#9432; Tutorials
-    div.main-section        
-        aside#menu
-            nav.dropdown-menu
-                div#column1.hidden
+          
+    aside#menu
+        nav.dropdown-menu
+            div#column1.hidden
+                div.menu-title
+                    h2 Menu
+                ul.layer1
+                    li
+                        a.menu-unit#fp FLOOR PLANS
+                    li
+                        a.menu-unit#f FURNITURES
+                    li
+                        a.menu-unit#m MEASUREMENT
+                    li
+                        a.menu-unit#sp SAVED PLANS
+                    li                     
+                        div.object-button
+                            a UPLOAD
+                    form(id="object-form" method='POST' enctype='multipart/form-data' action= "/upload-object")
+                        div.form-flex-col
+                            div.form-group.form-input
+                                label(for='name') Name: 
+                                input#object-name.form-control(type='text', placeholder='Name' name='name' required value=(undefined===object ? '' : object.name) )
+                            div.form-group.form-input
+                                label(for='object') Upload:  
+                                input(type='file' name='object' accept="object/glb, object/obj" required)
+                            div.form-group.form-input
+                                label(for='category') Category: 
+                                select#category.form-control(name='category' required)
+                                    each category in categories
+                                        option(value= category._id)= category.name
+                            button.button.submit-button(type='submit') Submit
+                        if errors
+                            ul
+                                for error in errors
+                                    li!= error.msg
+                    li
+                        a.menu-unit#p3 EXPORT
+                    li 
+                        a(href='/about') ABOUT
+            
+            div#column2
+                ul#floor-plans.layer2.hidden
+                    div.back-button1 &lt; back
                     div.menu-title
-                        h2 Menu
-                    ul.layer1
+                        h2 FLOOR PLANS
+                    div.layerx
+                        each room in rooms
+                            li
+                                a.room-link(href="room"+room.url)= room.name
                         li
-                            a.menu-unit#fp FLOOR PLANS
-                        li
-                            a.menu-unit#f FURNITURES
-                        li
-                            a.menu-unit#m MEASUREMENT
-                        li
-                            a.menu-unit#sp SAVED PLANS
-                        li                     
-                            div.object-button
-                                a UPLOAD
-                        form(id="object-form" method='POST' enctype='multipart/form-data' action= "/upload-object")
-                            div.form-flex-col
-                                div.form-group.form-input
-                                    label(for='name') Name: 
-                                    input#object-name.form-control(type='text', placeholder='Name' name='name' required value=(undefined===object ? '' : object.name) )
-                                div.form-group.form-input
-                                    label(for='object') Upload:  
-                                    input(type='file' name='object' accept="object/glb, object/obj" required)
-                                div.form-group.form-input
-                                    label(for='category') Category: 
-                                    select#category.form-control(name='category' required)
-                                        each category in categories
-                                            option(value= category._id)= category.name
-                                button.button.submit-button(type='submit') Submit
+                            div#room-button.dropdown-button  
+                                a &#43; Add new floor plan
+                        form(id="room-form" method='POST' enctype='multipart/form-data' action= "/upload-room")
+                            div.form-group
+                                label(for='name') Name: 
+                                input#room-name.form-control(type='text', placeholder='Floor plan' name='name'  )
+                            div.form-group#room-upload-form
+                                label(for='room') Upload:  
+                                input(type='file' name='room' accept="room/glb, room/obj")
+                            button.button.submit-button(type='submit') Submit
                             if errors
                                 ul
                                     for error in errors
-                                        li!= error.msg
-                        li
-                            a.menu-unit#p3 EXPORT
-                        li 
-                            a(href='/about') ABOUT
-                
-                div#column2
-                    ul#floor-plans.layer2.hidden
-                        div.back-button1 &lt; back
-                        div.menu-title
-                            h2 FLOOR PLANS
-                        div.layerx
-                            each room in rooms
-                                li
-                                    a.room-link(href="room"+room.url)= room.name
+                                        li!= error.msg  
+                ul#furnitures.layer2.hidden
+                    div.back-button1 &lt; back
+                    div.menu-title
+                        h2 FURNITURES
+                    div.layerx
+                        each category in categories 
                             li
-                                div#room-button.dropdown-button  
-                                    a &#43; Add new floor plan
-                            form(id="room-form" method='POST' enctype='multipart/form-data' action= "/upload-room")
-                                div.form-group
-                                    label(for='name') Name: 
-                                    input#room-name.form-control(type='text', placeholder='Floor plan' name='name'  )
-                                div.form-group#room-upload-form
-                                    label(for='room') Upload:  
-                                    input(type='file' name='room' accept="room/glb, room/obj")
-                                button.button.submit-button(type='submit') Submit
+                                div.deletion
+                                    a.menu-header(id= category.name.replaceAll(' ', '-'))= category.name
+                                    form(method='POST' action="/delete-category/" + category._id)
+                                        div.form-group
+                                            input#categoryid.form-control(type='hidden', name='categoryid', value=category._id )
+                                        button.delete-hover(type='submit') 
+                        li
+                            a#list.menu-header Full List        
+                        li
+                            div#category-button.dropdown-button  
+                                a &#43; Add new category
+                            form(method='POST' action = "/upload-category" id = "c-form")
+                                div#category-form.form-group
+                                    div.form-flex
+                                        input#category-name.form-control(type='text', placeholder='Category Name' name='name' value=(undefined===new_category ? '' : new_category.name) required)
+                                        button.button.submit-button(type='submit') Submit
                                 if errors
                                     ul
                                         for error in errors
-                                            li!= error.msg  
-                    ul#furnitures.layer2.hidden
-                        div.back-button1 &lt; back
-                        div.menu-title
-                            h2 FURNITURES
-                        div.layerx
-                            each category in categories 
-                                li
-                                    div.deletion
-                                        a.menu-header(id= category.name.replaceAll(' ', '-'))= category.name
-                                        form(method='POST' action="/delete-category/" + category._id)
-                                            div.form-group
-                                                input#categoryid.form-control(type='hidden', name='categoryid', value=category._id )
-                                            button.delete-hover(type='submit') 
-                            li
-                                a#list.menu-header Full List        
-                            li
-                                div#category-button.dropdown-button  
-                                    a &#43; Add new category
-                                form(method='POST' action = "/upload-category" id = "c-form")
-                                    div#category-form.form-group
-                                        div.form-flex
-                                            input#category-name.form-control(type='text', placeholder='Category Name' name='name' value=(undefined===new_category ? '' : new_category.name) required)
-                                            button.button.submit-button(type='submit') Submit
-                                    if errors
-                                        ul
-                                            for error in errors
-                                                li!= error.msg   
-                    ul#saved-plans.layer2.hidden
-                        div.back-button1 &lt; back
-                        div.menu-title
-                            h2 SAVED PLANS
-                        div.layerx
-                            li
-                                a Plan 1
-                            li
-                                a Plan 2
-                            li
-                                a Plan 3
-                div#column3.hidden
-                    each category in categories
-                       ul(id= "category-"+category.name.replaceAll(' ', '-'), class= "layer3 hidden")
-                            div.back-button2 &lt; back
-                            div.menu-title
-                                h2= category.name
-                            div.layerx
-                                if category.objects.length
-                                    each obj in category.objects
-                                        each object in objects  
-                                                if obj == object.id
-                                                    li
-                                                        div.deletion
-                                                            a(href="#" data-url=`${object.url}`) #{object.name}
-                                                            form(method='POST' action="/delete-object/" + object._id)
-                                                                div.form-group
-                                                                    input#objectid.form-control(type='hidden', name='objectid', value=object._id )
-                                                                button.delete-hover(type='submit') 
-                                else    
-                                    p There are no objects.
-                                
-                    div#list3.layer3.hidden  
+                                            li!= error.msg   
+                ul#saved-plans.layer2.hidden
+                    div.back-button1 &lt; back
+                    div.menu-title
+                        h2 SAVED PLANS
+                    div.layerx
+                        li
+                            a Plan 1
+                        li
+                            a Plan 2
+                        li
+                            a Plan 3
+            div#column3.hidden
+                each category in categories
+                    ul(id= "category-"+category.name.replaceAll(' ', '-'), class= "layer3 hidden")
                         div.back-button2 &lt; back
                         div.menu-title
-                            h2 Full List
-                        ul
-                            each object in objects
-                                li 
-                                    a(href=object.url)= object.name 
-
-        main#scene
-            div.title
-                h1 #{title}
-            div#scene-container
-                div#blocker
-                    div#instructions
+                            h2= category.name
+                        div.layerx
+                            if category.objects.length
+                                each obj in category.objects
+                                    each object in objects  
+                                            if obj == object.id
+                                                li
+                                                    div.deletion
+                                                        a(href="#" data-url=`${object.url}`) #{object.name}
+                                                        form(method='POST' action="/delete-object/" + object._id)
+                                                            div.form-group
+                                                                input#objectid.form-control(type='hidden', name='objectid', value=object._id )
+                                                            button.delete-hover(type='submit') 
+                            else    
+                                p There are no objects.
+                            
+                div#list3.layer3.hidden  
+                    div.back-button2 &lt; back
+                    div.menu-title
+                        h2 Full List
+                    ul
+                        each object in objects
+                            li 
+                                a(href=object.url)= object.name 
+     
+    main#scene
+        div.title
+            h1 #{title}
+        div#scene-container
+            div#blocker
+                div#instructions
+                    p
+                        h1 Click to play
+                    p Move: WASD
+                    p Look: MOUSE
+            div#hud
+                div#toggle-control 
+                    p " R " Rotate | " T " Translate
+                div#scene-left
+                    div#floorplan-name
                         p
-                            h1 Click to play
-                        p Move: WASD
-                        p Look: MOUSE
-                div#hud
-                    div#toggle-control 
-                        p " R " Rotate | " T " Translate
-                    div#scene-left
-                        div#floorplan-name
-                            p
-                                h2 War Room
-                            p.up Unsaved plan
-                        div#measurement-display
-                            p#measure-distance
-                    div#scene-right
-                        div#full-screen
-                            button#fullscreen-button ⛶
-                        div#scene-options
-                            button#reset Reset
-                            button Save
-            div.view-buttons
-                button#ortho-view.button Orthographic
-                button#outside-view.button Outside
-                button#inside-view.button Inside
+                            h2 War Room
+                        p.up Unsaved plan
+                    div#measurement-display
+                        p#measure-distance
+                div#scene-right
+                    div#full-screen
+                        button#fullscreen-button ⛶
+                    div#scene-options
+                        button#reset Reset
+                        button Save
+        div.view-buttons
+            button#ortho-view.button Orthographic
+            button#outside-view.button Outside
+            button#inside-view.button Inside
 
     script(src="./javascripts/jquery-3.7.1.min.js")
     script(src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js")
