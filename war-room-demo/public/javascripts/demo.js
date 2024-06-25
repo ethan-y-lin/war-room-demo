@@ -185,7 +185,19 @@ class DemoScene {
                 this.#controls.mode = "regular";
             }
         })
-
+        
+        $(document).on('keydown', (event)  => {
+            if (event.key == "Escape") {
+                event.preventDefault();
+                this.isFullScreen = false;
+                document.exitFullscreen();
+            }
+        });
+        window.addEventListener("fullscreenchange", (event) => {
+            if (this.isFullScreen) {
+                this.isFullScreen = false;
+            }
+        });
         $('#fullscreen-button').on('click', () => {
             // Clear event listeners
             this.#renderer.domElement.removeEventListener( 'mousemove', this.#controls.getLock());
