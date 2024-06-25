@@ -8,49 +8,8 @@ let start = true;
 
 function init(model) {
     console.log(model);
-    $('#inside-view').off('click');
-    $('#outside-view').off('click');
-    $('#ortho-view').off('click');
-    $('#fullscreen-button').off('click');
-    APP = new DemoScene(model);
-    $('#inside-view').on('click', function(){
-        APP.setInsideViewMode();
-    })
-    $('#outside-view').on('click', function(){
-        APP.setOutsideViewMode();
-    })
-    $('#ortho-view').on('click', function(){
-        APP.setOrthoViewMode();
-    })
-    $('#m').on('click', function(){
-        if (APP.getControlsMode() != "measure") {
-            APP.setControlsMode("measure");
-        } else {
-            APP.setControlsMode("regular");
-        }
 
-    })
-    $('#fullscreen-button').on('click', function(){
-        console.log("full screen")
-        if (APP.renderer.domElement.requestFullscreen){
-            APP.renderer.domElement.requestFullscreen();
-        } else if (APP.renderer.domElement.webkitRequestFullscreen){
-            APP.renderer.domElement.webkitRequestFullscreen();
-        } else if (APP.renderer.domElement.msRequestFullscreen){
-            APP.renderer.domElement.msRequestFullscreen();
-        }
-        // should create a function within APP that correctly handles fullscreen changes
-        if (APP.camera.name == "inside") {
-            APP.controls.hideBlocker();
-            APP.controls.pointerLock.isLocked = true;
-            APP.renderer.domElement.addEventListener( 'mousemove', APP.controls.lock);
-        } else if (APP.camera.name == "ortho") {
-            APP.renderer.domElement.addEventListener('keyup', APP.controls.orthoOnKeyUp);
-            APP.renderer.domElement.addEventListener('keydown', APP.controls.orthoOnKeyDown);
-            APP.renderer.domElement.addEventListener('click', APP.controls.orthoOnClick);
-        }
-        console.log("set full screen")
-    });
+    APP = new DemoScene(model);
     const objectLinks = document.querySelectorAll('#column3 a[data-url]');
     
     objectLinks.forEach(link => {

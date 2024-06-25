@@ -155,8 +155,76 @@ class DemoScene {
         this.#measurement_objects.edges.name = "edges";
         this.#scene.add(this.#measurement_objects.vertices);
         this.#scene.add(this.#measurement_objects.edges);
+
+        this.isFullScreen = false;
+        this.#initListeners();
+        
+
     }
 
+    #initListeners() {
+        $('#inside-view').off('click');
+        $('#outside-view').off('click');
+        $('#ortho-view').off('click');
+        $('#fullscreen-button').off('click');
+
+        $('#inside-view').on('click', () => {
+            this.setInsideViewMode();
+        })
+        $('#outside-view').on('click', () => {
+            this.setOutsideViewMode();
+        })
+        $('#ortho-view').on('click', () => {
+            this.setOrthoViewMode();
+        })
+
+        $('#m').on('click', () => {
+            if (this.#controls.mode != "measure") {
+                this.#controls.mode = "measure";
+            } else {
+                this.#controls.mode = "regular";
+            }
+        })
+
+        $('#fullscreen-button').on('click', () => {
+            // Clear event listeners
+            this.#renderer.domElement.removeEventListener( 'mousemove', this.#controls.getLock());
+
+            if (!this.isFullScreen) {
+                // set dom element
+                let domElement;
+                if (this.#camera.name == "inside") {
+                    domElement = this.#renderer.domElement;
+                } else {
+                    domElement = this.#canvas;
+                }
+
+                // trigger full screen
+                console.log("full screen")
+                if (domElement.requestFullscreen){
+                    domElement.requestFullscreen();
+                } else if (domElement.webkitRequestFullscreen){
+                    domElement.webkitRequestFullscreen();
+                } else if (domElement.msRequestFullscreen){
+                    domElement.msRequestFullscreen();
+                }
+
+                if (this.#camera.name == "inside") {
+                    this.#controls.hideBlocker();
+                    this.#controls.getPointerLock().isLocked = true;
+                    domElement.addEventListener( 'mousemove', this.#controls.getLock());
+                }
+                console.log("set full screen")
+                this.isFullScreen = true;
+            } else {
+                this.isFullScreen = false;
+                document.exitFullscreen();
+            }
+
+
+            
+        });
+    }
     // shifted up
     openPosition = (obj) => {
         let bbox = new THREE.Box3().setFromObject(obj);
@@ -496,20 +564,8 @@ class DemoScene {
         window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.ortho)} );
     }
 
-    /**
-     * 
-     * @returns 
-     */
-    getControlsMode() {
-        return this.#controls.mode;
-    }
-
-    /**
-     * 
-     * @param {*} mode 
-     */
-    setControlsMode(mode) {
-        this.#controls.mode = mode;
+    getControls() {
+        return this.#controls;
     }
 
     getRenderer() {
