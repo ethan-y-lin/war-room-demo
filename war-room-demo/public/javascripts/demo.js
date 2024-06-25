@@ -1,8 +1,6 @@
 import { DynamicCamera } from "./dynamicCamera.js";
 import { DemoControls } from "./demoControls.js";
 import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.19/+esm';
-// import {fragment} from "../shaders/fragment.glsl";
-// import {vertex} from "../shaders/vertext.glsl";
 
 /**
  * This class represents a scene that is displayed on the HTML element 
@@ -154,7 +152,9 @@ class DemoScene {
         this.#measurement_objects.vertices.name = "vertices";
         this.#measurement_objects.edges.name = "edges";
         this.#scene.add(this.#measurement_objects.vertices);
-        this.#scene.add(this.#measurement_objects.edges);
+        this.#scene.add(this.#measurement_objects.edges); 
+        
+        this.guiControls();
     }
 
     // shifted up
@@ -269,31 +269,7 @@ class DemoScene {
         // spotLight.shadow.camera.fov = 30;
         spotLight.angle = 0.2;
         scene.add(spotLight);
-
-        const params = {
-            toggleHemisphereLight: function() {
-                hemiLight.visible = ! hemiLight.visible;
-            },
-            toggleAmbientLight: function() {
-                ambientLight.visible = ! ambientLight.visible;
-            },
-            toggleDirectionalLight: function() {
-                directionalLight.visible = ! directionalLight.visible;
-            },
-            toggleSpotLight: function (){
-                spotLight.visible = ! spotLight.visible;
-            }
-        };
-
-        const gui = new GUI();
-        const folderLight = gui.addFolder('Light');
-        folderLight.add( params, 'toggleHemisphereLight' ).name( 'toggle hemisphere light' );
-        folderLight.add( params, 'toggleAmbientLight' ).name( 'toggle ambient light' );
-        folderLight.add( params, 'toggleDirectionalLight' ).name( 'toggle directional light' );
-        folderLight.add( params, 'toggleSpotLight' ).name( 'toggle spot light' );
-
-        gui.open();
-
+        
         //ground
         const groundGeo = new THREE.PlaneGeometry(1000, 1000);
         const groundMat = new THREE.MeshLambertMaterial({color: 0x1c150d});
@@ -389,8 +365,10 @@ class DemoScene {
      * @private
      */
     #updateScene() {
+        const displayModeElement = document.getElementById("display-mode");
         const displayDistanceElement = document.getElementById("measure-distance");
-        if (this.#controls.mode == "measure") {
+        if (this.#controls.mode == "measure") {            
+            displayModeElement.textContent = "Measurement: ";
             const measure_points = this.#controls.getMeasurePoints();
             if (measure_points.length > this.#measurement_objects.vertices.children.length) {
                 const cubeGeometry = new THREE.BoxGeometry( 0.1, 0.1, 0.1 ); 
@@ -405,19 +383,21 @@ class DemoScene {
                                     });
                 const line = new THREE.Line( lineGeometry, lineMaterial );
                 this.#measurement_objects.edges.add( line );
+                         
             } else if (measure_points.length < this.#measurement_objects.vertices.children.length) {
-                displayDistanceElement.textContent = "Measurement: 0";
+                displayDistanceElement.textContent = "";   
                 this.#measurement_objects.vertices.clear();
                 this.#measurement_objects.edges.clear();
                 return;
             }
             if (measure_points.length == 2) {
                 const dist = Math.round(measure_points[0].distanceTo(measure_points[1])*100) / 100;
-                displayDistanceElement.textContent = "Measurement: " + dist + " meters";
+                displayDistanceElement.textContent = dist + " meters";
             }
         } else {
-            const displayDistanceElement = document.getElementById("measure-distance");
-            displayDistanceElement.textContent = "Viewing";
+            const displayModeElement = document.getElementById("display-mode");
+            displayModeElement.textContent = "Viewing";
+            displayDistanceElement.textContent = "";
             this.#measurement_objects.vertices.clear();
             this.#measurement_objects.edges.clear();
         }
@@ -496,12 +476,72 @@ class DemoScene {
         window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.ortho)} );
     }
 
+    guiControls(){
+        const gui = new GUI();
+        console.log(this.#scene);
+        
+        // toggling light sources
+        const hLight = this.getHemiLight();
+        const aLight = this.getAmbientLight();
+        const dLight = this.getDirectionalLight();
+        const sLight = this.getSpotLight();
+        const folderLights = gui.addFolder('Light');
+        folderLights.close();
+
+        const lights = {
+            toggleHemisphereLight: function() {
+                hLight.visible = ! hLight.visible;
+            },
+            toggleAmbientLight: function() {
+                aLight.visible = ! aLight.visible;
+            },
+            toggleDirectionalLight: function() {
+                dLight.visible = ! dLight.visible;
+                console.log("toggling");
+            },
+            toggleSpotLight: function (){
+                sLight.visible = ! sLight.visible;
+            }
+        };
+        folderLights.add( lights, 'toggleHemisphereLight' ).name( 'toggle hemisphere light' );
+        folderLights.add( lights, 'toggleAmbientLight' ).name( 'toggle ambient light' );
+        folderLights.add( lights, 'toggleDirectionalLight' ).name( 'toggle directional light' );
+        folderLights.add( lights, 'toggleSpotLight' ).name( 'toggle spot light' );
+
+        //toggling object controls (translate/rotate)
+        const folderControls = gui.addFolder('Controls');
+        folderControls.close();
+
+        
+        //changing material color?
+        const folderColors = gui.addFolder('Change Colors');
+        folderColors.close();
+        
+        //changing measurement units
+        const measurements = gui.addFolder('Measurement Units');
+        measurements.close();
+
+        gui.close();
+    }
+
     /**
      * 
      * @returns 
      */
     getControlsMode() {
         return this.#controls.mode;
+    }
+    getHemiLight(){
+        return this.#scene.children[0];
+    }
+    getAmbientLight(){
+        return this.#scene.children[1];
+    }
+    getDirectionalLight(){
+        return this.#scene.children[2];
+    }
+    getSpotLight(){
+        return this.#scene.children[3];
     }
 
     /**
