@@ -429,11 +429,9 @@ class DemoControls {
     }
 
     #shiftCollidedObject (object, boundingBox) {
-        console.log(object.position)
-        console.log(collidedBox)
+
         const collidedBoxCenter = collidedBox.max.add(collidedBox.min).divideScalar(2);
         const difference = object.position.sub(collidedBoxCenter);
-        console.log(difference)
         // object.position.set(this.#dragOrigin.x, this.#dragOrigin.y, this.#dragOrigin.z)
     }
 
@@ -446,7 +444,6 @@ class DemoControls {
         this.#gumball = new THREE.TransformControls(camera, this.#canvas);
         
         this.#gumball.setMode(this.#gumballState.mode)
-        console.log(this.#gumball.getMode())
         if (this.#gumball.getMode() == 'rotate') {
             this.#gumball.showX = false;
             this.#gumball.showZ = false;
@@ -500,7 +497,6 @@ class DemoControls {
      * or null if no gumball control is active.
      */
     #clickObject(object, camera) {
-        console.log(object)
         if (this.#gumball != null) {
             if (object == this.#gumball.object) {
                 return this.#gumball;
@@ -555,7 +551,6 @@ class DemoControls {
         console.log("drag start");
         const object = event.object;
         this.#dragOrigin = object.position.clone();
-        console.log(object);
     }
 
     /**
@@ -841,11 +836,9 @@ class DemoControls {
                 const originPlane = new THREE.Plane (new THREE.Vector3(0,1,0));
                 this.#raycaster.ray.intersectPlane(originPlane, planeIntersection);
                 if (intersections.length > 0) {
-                    console.log(intersections);
                     intersections[0].point.add(this.#raycaster.ray.direction.multiplyScalar(-0.05));
                     this.#measure_points.push(intersections[0].point);
                 } else {
-                    console.log(planeIntersection);
                     if (planeIntersection.length() < this.#modelSize.x / 2) {
                         planeIntersection.add(this.#raycaster.ray.direction.multiplyScalar(-0.05));
                         this.#measure_points.push(planeIntersection);
@@ -875,11 +868,9 @@ class DemoControls {
                 this.#raycaster.ray.intersectPlane(originPlane, planeIntersection);
                 let point;
                 if (intersections.length > 0) {
-                    console.log(intersections);
                     intersections[0].point.add(this.#raycaster.ray.direction.multiplyScalar(-0.05));
                     point = intersections[0].point; 
                 } else {
-                    console.log(planeIntersection);
                     if (planeIntersection.length() < this.#modelSize.x / 2) {
                         planeIntersection.add(this.#raycaster.ray.direction.multiplyScalar(-0.05));
                     }
