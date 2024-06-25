@@ -451,7 +451,7 @@ class DemoScene {
         console.log("window resized");
         if (this.#camera.name == "ortho") {
             console.log("ortho camera")
-            
+            this.#renderer.setSize(this.#canvas.offsetWidth, this.#canvas.offsetHeight, false);
             this.#camera.setOrthoCamera(this.#canvas, this.#modelSize, 2 );
             this.#current_camera = this.#camera.ortho;
         } else {
@@ -512,6 +512,9 @@ class DemoScene {
         this.#controls.mode = mode;
     }
 
+    getRenderer() {
+        return this.#renderer;
+    }
     clear() {
         // unimplemented
     }

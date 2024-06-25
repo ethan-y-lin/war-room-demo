@@ -372,11 +372,6 @@ nav a{
   cursor: pointer;
 }
 
-canvas{
-  position: absolute;
-  z-index: -1;
-}
-
 #object-upload-modal{
   position: fixed;
   z-index: 99;
