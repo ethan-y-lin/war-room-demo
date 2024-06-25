@@ -3,7 +3,10 @@ extends layout
 block content
     div.object-data(data-object=addObject)
     div.room-data(data-room=current_room)
-    div.mainSection        
+    div.tutorials 
+        p
+            a.tutorial-button &#9432; Tutorials
+    div.main-section        
         aside#menu
             nav.dropdown-menu
                 div#column1.hidden
@@ -41,6 +44,8 @@ block content
                                         li!= error.msg
                         li
                             a.menu-unit#p3 EXPORT
+                        li 
+                            a(href='/about') ABOUT
                 
                 div#column2
                     ul#floor-plans.layer2.hidden
@@ -54,30 +59,31 @@ block content
                             li
                                 div#room-button.dropdown-button  
                                     a &#43; Add new floor plan
-                                form(id="room-form" method='POST' enctype='multipart/form-data' action= "/upload-room")
-                                    div.form-group
-                                        label(for='name') Name: 
-                                        input#room-name.form-control(type='text', placeholder='Floor plan' name='name'  )
-                                    div.form-group#room-upload-form
-                                        label(for='room') Upload:  
-                                        input(type='file' name='room' accept="room/glb, room/obj")
-                                    button.button.submit-button(type='submit') Submit
-                                    if errors
-                                        ul
-                                            for error in errors
-                                                li!= error.msg  
+                            form(id="room-form" method='POST' enctype='multipart/form-data' action= "/upload-room")
+                                div.form-group
+                                    label(for='name') Name: 
+                                    input#room-name.form-control(type='text', placeholder='Floor plan' name='name'  )
+                                div.form-group#room-upload-form
+                                    label(for='room') Upload:  
+                                    input(type='file' name='room' accept="room/glb, room/obj")
+                                button.button.submit-button(type='submit') Submit
+                                if errors
+                                    ul
+                                        for error in errors
+                                            li!= error.msg  
                     ul#furnitures.layer2.hidden
                         div.back-button1 &lt; back
                         div.menu-title
                             h2 FURNITURES
                         div.layerx
                             each category in categories 
-                                li 
-                                    a.menu-header(id= category.name.replaceAll(' ', '-'))= category.name
-                                    form(method='POST' action="/delete-category/" + category._id)
-                                        div.form-group
-                                            input#categoryid.form-control(type='hidden', name='categoryid', value=category._id )
-                                        button.delete-hover(type='submit') 
+                                li
+                                    div.deletion
+                                        a.menu-header(id= category.name.replaceAll(' ', '-'))= category.name
+                                        form(method='POST' action="/delete-category/" + category._id)
+                                            div.form-group
+                                                input#categoryid.form-control(type='hidden', name='categoryid', value=category._id )
+                                            button.delete-hover(type='submit') 
                             li
                                 a#list.menu-header Full List        
                             li
@@ -115,11 +121,12 @@ block content
                                         each object in objects  
                                                 if obj == object.id
                                                     li
-                                                        a(href="#" data-url=`${object.url}`) #{object.name}
-                                                        form(method='POST' action="/delete-object/" + object._id)
-                                                            div.form-group
-                                                                input#objectid.form-control(type='hidden', name='objectid', value=object._id )
-                                                            button.delete-hover(type='submit') 
+                                                        div.deletion
+                                                            a(href="#" data-url=`${object.url}`) #{object.name}
+                                                            form(method='POST' action="/delete-object/" + object._id)
+                                                                div.form-group
+                                                                    input#objectid.form-control(type='hidden', name='objectid', value=object._id )
+                                                                button.delete-hover(type='submit') 
                                 else    
                                     p There are no objects.
                                 
@@ -128,9 +135,9 @@ block content
                         div.menu-title
                             h2 Full List
                         ul
-                                each object in objects
-                                    li 
-                                        a(href=object.url)= object.name 
+                            each object in objects
+                                li 
+                                    a(href=object.url)= object.name 
 
         main#scene
             div.title
@@ -162,28 +169,6 @@ block content
                 button#ortho-view.button Orthographic
                 button#outside-view.button Outside
                 button#inside-view.button Inside
-    if modal
-        div#object-upload-modal
-            div#modal-content
-                a(class="close" href="/") &times; 
-                h1= modal_title
-                form(method='POST' enctype='multipart/form-data' action= "/upload-object")
-                    div.form-group
-                        label(for='name') Name: 
-                        input#object-name.form-control(type='text', placeholder='Name' name='name' required value=(undefined===object ? '' : object.name) )
-                    div.form-group 
-                        label(for='object') Upload Object:  
-                        input(type='file' name='object' accept="object/glb, object/obj" required)
-                    div.form-group 
-                        label(for='category') Category: 
-                        select#category.form-control(name='category' required)
-                            each category in categories
-                                option(value= category._id)= category.name                 
-                        button.button(type='submit') Submit
-                    if errors
-                        ul
-                            for error in errors
-                                li!= error.msg
 
     script(src="./javascripts/jquery-3.7.1.min.js")
     script(src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js")

@@ -336,7 +336,7 @@ class DemoScene {
                 // initializes grid
                 const size = Math.max(this.#modelSize.x, this.#modelSize.z);
                 const gridHelper = new THREE.GridHelper(size, size / this.#grid_scale, 0x000000, 0x097969);
-                // scene.add(gridHelper);
+                //scene.add(gridHelper);
                 resolve();
             }, undefined, (error) => {
                 reject(error);

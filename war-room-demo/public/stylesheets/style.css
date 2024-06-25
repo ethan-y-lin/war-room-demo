@@ -10,10 +10,23 @@ body {
 .title h1{
   font-size: 56px;
   font-weight: 400;
-  color:rgb(60, 60, 60);
+  color:#000;
+  margin-bottom: 40px;
+  margin-top: 10px;
 }
 
-.mainSection{
+.tutorials{
+  position: absolute;
+  margin-left: 10px;
+}
+.tutorial-button:hover{
+  color: #384c44;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+
+.main-section{
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -25,19 +38,22 @@ body {
 
 #menu{
   display: flex;
-  width: 15%;
-  margin-left: 50px;
+  width: 25%;
+  height: 100%;
   padding: 10px;
+  justify-content: center;
+  background-color: #a4c3b26a;
 }
 
 #scene{
   display: flex;
   flex-direction: column;
-  width: 60%;
+  width: 75%;
   height: 100%;
   align-items: center;
   position: relative;
   margin: auto;
+  padding: 0px 50px 0px 50px;
 }
 .no-cursor {
   cursor: none;
@@ -56,6 +72,8 @@ nav a{
   background-color: transparent;
   text-decoration: none;
   margin: 5px 0px 5px 0px;
+  font-size: 24px;
+  font-weight: lighter;
 }
 
 .dropdown-menu{
@@ -64,16 +82,14 @@ nav a{
   justify-content: center;
 }
 
-#column1, #column2, #column3{
-  position: absolute;
-}
-
 .back-button1, .back-button2{
   color:rgb(180, 180, 180);
-  width: 50px;
+  width: 80px;
   background: none;
   transition: 0.2s ease-in-out;
   margin-bottom: 10px;
+  font-size: 20px;
+  text-decoration: none;
 }
 
 .back-button1:hover, .back-button2:hover{
@@ -83,13 +99,15 @@ nav a{
 }
 
 .menu-title h2{
-  color: rgb(70, 70, 70);
+  color: rgb(20, 20, 20);
   background-color: transparent;
   text-align: center;
   padding: 10px;
   font-weight:200;
   border-bottom: 2px solid rgb(30, 30, 30);
   margin-bottom: 5px;
+  font-size: 36px;
+  margin-top: 3px;
 }
 
 .layer1{
@@ -112,17 +130,18 @@ nav a{
   display: block;
   float: left;
   position: relative;
-  border-bottom: 1px solid #445c5290;
+  border-bottom: 1px solid #445c524a;
+  margin-left: 0px;
+  width: 100%;
 }
 
 .dropdown-menu ul a{
   display: block;
-  float: left;
-  width: 200px;
   padding: 10px 10px;
   color:  #445c52;
   background: transparent;
   transition: 0.2s ease-in-out;
+  z-index: 1;
 }
 .dropdown-menu ul a:hover{
   background: linear-gradient(to right, #c1e5d100, #1892645a, #c1e5d100);
@@ -152,8 +171,26 @@ nav a{
 
 .layerx li{
   margin: 0px 5px 0px 5px;
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  align-items: center;
 }
 
+.layerx li a{
+  margin: 5px 0px 5px 0px;
+  width: 100%;
+}
+
+.deletion{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+.layerx li button{
+  float: right;
+}
 .layerx p{
   text-align: center;
 }
@@ -164,6 +201,7 @@ nav a{
   align-items: center;
   margin: 0px;
   padding: 0px;
+  width: 100%;
 }
 
 .layer3 ul li{
@@ -186,16 +224,15 @@ nav a{
   width: 100px;
   height: 30px;
   margin: 5px;
-  background-color: transparent;
-  color: #384c44;
-  border: 1px solid #445c5260;
+  background-color: #384c44;
+  color: white;
+  border: 1px solid white;
   border-radius: 6px;
 }
 
 .button:hover{
   cursor: pointer;
-  background: #c1e5d160;
-  color: #333;
+  background: #a4c3b2;
 }
 
 .button:active{
@@ -216,7 +253,6 @@ nav a{
   background-color: rgba(0,0,0,0.5);
   z-index: 2;
 }
-
 
 #scene-container {
   width: 100%;
@@ -256,7 +292,8 @@ nav a{
 #measurement-display p{
   background: linear-gradient(to right, #171717, #58585800);
   padding: 5px 25px 5px 10px;
-  font-weight:bold;
+  font-weight: bold;
+  margin-bottom: 5px;
 }
 
 #scene-left h2{
@@ -289,9 +326,9 @@ nav a{
   padding: 1px;
   cursor: pointer;
   height: 30px;
-  width: 50px;
+  width: 60px;
   font-family: Georgia, 'Times New Roman', Times, serif;
-  font-size: 14px;
+  font-size: 18px;
   border-radius: 3px;
 }
 
@@ -315,7 +352,7 @@ nav a{
   height: 40px;
   width: 40px;
   cursor: pointer;
-  /* z-index: 2; */
+  z-index: 100;
 }
 
 #fullscreen-button:hover{
@@ -331,14 +368,11 @@ nav a{
   align-items: center;
   color: white;
   text-align: center;
-  font-size: 14px;
+  font-size: 28px;
   cursor: pointer;
 }
 
-
 canvas{
-  width: 100%;
-  height: 100%;
   position: absolute;
   z-index: -1;
 }
@@ -352,38 +386,6 @@ canvas{
   height: 100%;
   overflow: auto;
   background-color:rgba(0,0,0,0.5);
-}
-
-/* #modal-content{
-  background-color:rgb(255, 239, 230);
-  margin: 15% auto;
-  padding: 30px;
-  border: 1px solid #888;
-  width: 35%;
-  height: 45%;
-  color: #333;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-} */
-
-#modal-content h1{
-  margin-bottom: 30px;
-  text-align: center;
-}
-
-#modal-content .form-group{
-  text-align: start;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 10px;
-  margin-bottom: 5px;
-  padding-left: 30px;
-}
-
-#modal-content button{
-  margin-top: 40px;
-  margin-left: 70%;
 }
 
 .close{
@@ -429,32 +431,30 @@ canvas{
   display: flex;
 }
 
-#category-form, #room-form{
-  padding: 3px;
-  margin: 10px auto 0px auto;
-  display: none;
-  position: absolute;
-  background-color:#a4c3b230;
-  width: 100%;
-}
-
-#object-form{
+#object-form, #category-form, #room-form{
   display: none;
   position: relative;
   font-size: 14px;
   width: 100%;
   background-color:#a4c3b230;
-  padding: 3px;
+  padding: 5px;
   border-bottom: 1px solid #445c5290;
 }
 
 #room-form{
   font-size: 12px;
   padding: 3px;
+  margin: 0px;
 }
+
 #room-form .form-group, #object-form .form-group{
-  margin-bottom: 10px;
+  margin: 0px;
+  padding: 5px;
+  width: 90%;
+  position: relative;
+
 }
+
 #room-name{
   height: 25px;
   border:1px solid #384c44;
@@ -475,7 +475,7 @@ canvas{
   height: 30px;
   border:1px solid #384c44;
   border-radius: 3px;
-  width: 60%;
+  width: 80%;
 }
 
 #object-name{
@@ -501,11 +501,11 @@ canvas{
   display: flex;
   flex-direction: column;
   justify-content: end;
-  font-size: 12px;
   text-align: end;
 }
 .dropdown-button a{
   margin: 0;
+  font-size: 18px;
 }
 
 #category-button a{
@@ -518,11 +518,10 @@ canvas{
 }
 
 .delete-hover{
-  position: absolute;
   margin-top:10px;
   width: 24px;
   height: 24px;
-  border:none;
+  border: none;
   background-color: transparent;
   background-image: url("../img/delete-close.png");
   transition: background-image 0.2s ease-in-out;
@@ -572,10 +571,21 @@ canvas{
   background:  #171717b0;
 }
 
+#floorplan-name h2{
+  font-size: 28px;
+}
+#measurement-display{
+  font-size: 28px;
+}
+
 .lil-gui { 
 	--background-color: #000;
 	--widget-color:#384c44;
 	--padding: 5px;
   --width: 150px;
   --right: 0px;
+}
+
+#back-to-index{
+  margin-left: 10px;
 }

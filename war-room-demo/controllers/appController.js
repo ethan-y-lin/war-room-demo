@@ -30,3 +30,7 @@ exports.index = asyncHandler(async (req, res, next) => {
       addObject: object,
     });
   });
+
+  exports.about = (req, res) => {
+    res.render('about', {title: "About"});
+  };
