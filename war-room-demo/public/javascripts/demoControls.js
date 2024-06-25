@@ -181,6 +181,7 @@ class DemoControls {
     #dragOrigin;
     
     #measureGroup;
+
     ////// ////// ////// //////
 
 
@@ -275,7 +276,7 @@ class DemoControls {
         this.#clearGumball();
         const instructions = document.getElementById( 'instructions' );
         instructions.removeEventListener( 'click', this.#lock);
-        this.#pointerLock.removeEventListener('lock', this.#hideBlocker);
+        this.#pointerLock.removeEventListener('lock', this.hideBlocker);
         this.#pointerLock.removeEventListener('unlock', this.#showBlocker);
         document.removeEventListener('keydown', this.#insideOnKeyDown);
         document.removeEventListener('keyup',this.#insideOnKeyUp);
@@ -301,7 +302,7 @@ class DemoControls {
             document.addEventListener('click', this.#orthoOnClick);
             this.#canvas.addEventListener('mousemove', this.#orthoOnMove);
 
-            this.#hideBlocker();
+            this.hideBlocker();
         } else if (newControl == "outside") {
             this.#reset();
             this.#boundingBoxes = this.#getBoundingBoxes(this.#objects);
@@ -309,7 +310,7 @@ class DemoControls {
             document.addEventListener('keydown', this.#toggleGumball);
             this.#orbit = new THREE.OrbitControls(camera, canvas);
             this.#orbit.enabled = true;
-            this.#hideBlocker();
+            this.hideBlocker();
         } else if (newControl == "inside"){
             this.#reset();
             this.#boundingBoxes = this.#getBoundingBoxes(this.#objects);
@@ -318,7 +319,7 @@ class DemoControls {
             const instructions = document.getElementById( 'instructions' );
             instructions.addEventListener( 'click', this.#lock);
             this.#showBlocker();
-            this.#pointerLock.addEventListener( 'lock', this.#hideBlocker);
+            this.#pointerLock.addEventListener( 'lock', this.hideBlocker);
             this.#pointerLock.addEventListener( 'unlock', this.#showBlocker);
             document.addEventListener('keydown', this.#insideOnKeyDown);
             document.addEventListener('keyup',this.#insideOnKeyUp);
@@ -384,7 +385,6 @@ class DemoControls {
                     console.log("Collision!");
                     this.#colorObject(object, 0xFF0000);
                 } else {
-                    console.log("Successful drag")
                     this.#colorObject(object, 0x000000);
                     this.#dragOrigin = object.position.clone();
                 }
@@ -624,7 +624,7 @@ class DemoControls {
     }
 
 
-    #hideBlocker = () => {
+    hideBlocker = () => {
         const blocker = document.getElementById( 'blocker' );
         const instructions = document.getElementById( 'instructions' );
         instructions.style.display = 'none';
@@ -892,6 +892,14 @@ class DemoControls {
                 displayDistanceElement.textContent = dist + " meters";
             }
         }
+    }
+
+    getPointerLock() {
+        return this.#pointerLock;
+    }
+
+    getLock() {
+        return this.#lock;
     }
 
     getMeasurePoints() {

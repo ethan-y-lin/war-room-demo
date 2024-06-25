@@ -1,7 +1,7 @@
 import { DynamicCamera } from "./dynamicCamera.js";
 import { DemoControls } from "./demoControls.js";
 import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.19/+esm';
-
+import { CSS2DRenderer, CSS2DObject } from "./CSS2DRenderer.js";
 /**
  * This class represents a scene that is displayed on the HTML element 
  * with the id: "#scene-container". It handles the contents of the scene,
@@ -97,6 +97,7 @@ class DemoScene {
      */
     #measurement_objects;
 
+    #labelRenderer;
     /**
      * Calls for the initialization the DemoScene object and then
      * calls the animation loop when initialization is completed.
@@ -152,11 +153,97 @@ class DemoScene {
         this.#measurement_objects.vertices.name = "vertices";
         this.#measurement_objects.edges.name = "edges";
         this.#scene.add(this.#measurement_objects.vertices);
-        this.#scene.add(this.#measurement_objects.edges); 
+        this.#scene.add(this.#measurement_objects.edges);
+
+        this.isFullScreen = false;
+        this.#initListeners();
+
+        this.#labelRenderer = new CSS2DRenderer();
+        this.#labelRenderer.setSize(this.#canvas.offsetWidth, this.#canvas.offsetHeight );
+        this.#labelRenderer.domElement.style.position = 'absolute';
+        this.#labelRenderer.domElement.style.top = '0px';
+        this.#labelRenderer.domElement.style.pointerEvents = 'none';
+        this.#canvas.appendChild( this.#labelRenderer.domElement );
         
         this.guiControls();
+
     }
 
+    #initListeners() {
+        $('#inside-view').off('click');
+        $('#outside-view').off('click');
+        $('#ortho-view').off('click');
+        $('#fullscreen-button').off('click');
+
+        $('#inside-view').on('click', () => {
+            this.setInsideViewMode();
+        })
+        $('#outside-view').on('click', () => {
+            this.setOutsideViewMode();
+        })
+        $('#ortho-view').on('click', () => {
+            this.setOrthoViewMode();
+        })
+
+        $('#m').on('click', () => {
+            if (this.#controls.mode != "measure") {
+                this.#controls.mode = "measure";
+            } else {
+                this.#controls.mode = "regular";
+            }
+        })
+        
+        $(document).on('keydown', (event)  => {
+            if (event.key == "Escape") {
+                event.preventDefault();
+                this.isFullScreen = false;
+                document.exitFullscreen();
+            }
+        });
+        window.addEventListener("fullscreenchange", (event) => {
+            if (this.isFullScreen) {
+                this.isFullScreen = false;
+            }
+        });
+        $('#fullscreen-button').on('click', () => {
+            // Clear event listeners
+            this.#renderer.domElement.removeEventListener( 'mousemove', this.#controls.getLock());
+
+            if (!this.isFullScreen) {
+                // set dom element
+                let domElement;
+                if (this.#camera.name == "inside") {
+                    domElement = this.#renderer.domElement;
+                } else {
+                    domElement = this.#canvas;
+                }
+
+                // trigger full screen
+                console.log("full screen")
+                if (domElement.requestFullscreen){
+                    domElement.requestFullscreen();
+                } else if (domElement.webkitRequestFullscreen){
+                    domElement.webkitRequestFullscreen();
+                } else if (domElement.msRequestFullscreen){
+                    domElement.msRequestFullscreen();
+                }
+
+                if (this.#camera.name == "inside") {
+                    this.#controls.hideBlocker();
+                    this.#controls.getPointerLock().isLocked = true;
+                    domElement.addEventListener( 'mousemove', this.#controls.getLock());
+                }
+                console.log("set full screen")
+                this.isFullScreen = true;
+            } else {
+                this.isFullScreen = false;
+                document.exitFullscreen();
+            }
+
+
+            
+        });
+    }
     // shifted up
     openPosition = (obj) => {
         let bbox = new THREE.Box3().setFromObject(obj);
@@ -197,9 +284,24 @@ class DemoScene {
             newObject.position.set(openPos.x, openPos.y, openPos.z);
             console.log(newObject)
 
+            // add label
+            const text = document.createElement( 'div' );
+            text.style.backgroundColor = 'red';
+            text.style.color = 'white';
+            text.className = 'label';
+            text.textContent = addedObject.name;
+    
+            const label = new CSS2DObject( text );
+            console.log(label);
+            newObject.add(label)
+
             this.#objects.uploaded.push(newObject);
             this.#controls.updateObjects(this.#objects);
+
             });
+
+
+        // root.add( label );
     }
     // #updateObjects () {
     //     const addedObjects = JSON.parse(document.querySelector('.object-data').dataset.objects);
@@ -419,6 +521,7 @@ class DemoScene {
             this.#updateScene();
             this.#controls.updateControls(this.#camera);           
             this.#renderer.render(this.#scene, this.#current_camera);
+            this.#labelRenderer.render(this.#scene, this.#current_camera);
             this.#animate();
         });
     }
@@ -429,15 +532,15 @@ class DemoScene {
      */
     #onWindowResize(camera){            
         console.log("window resized");
+        this.#renderer.setSize(this.#canvas.offsetWidth, this.#canvas.offsetHeight, false);
+        this.#labelRenderer.setSize(this.#canvas.offsetWidth, this.#canvas.offsetHeight, false);
         if (this.#camera.name == "ortho") {
             console.log("ortho camera")
-            this.#renderer.setSize(this.#canvas.offsetWidth, this.#canvas.offsetHeight, false);
             this.#camera.setOrthoCamera(this.#canvas, this.#modelSize, 2 );
             this.#current_camera = this.#camera.ortho;
         } else {
             camera.aspect = this.#canvas.offsetWidth / this.#canvas.offsetHeight;
             camera.updateProjectionMatrix();
-            this.#renderer.setSize(this.#canvas.offsetWidth, this.#canvas.offsetHeight, false);
         }
 
     }
@@ -524,12 +627,12 @@ class DemoScene {
         gui.close();
     }
 
-    /**
-     * 
-     * @returns 
-     */
-    getControlsMode() {
-        return this.#controls.mode;
+    getControls() {
+        return this.#controls;
+    }
+
+    getRenderer() {
+        return this.#renderer;
     }
     getHemiLight(){
         return this.#scene.children[0];
@@ -542,18 +645,6 @@ class DemoScene {
     }
     getSpotLight(){
         return this.#scene.children[3];
-    }
-
-    /**
-     * 
-     * @param {*} mode 
-     */
-    setControlsMode(mode) {
-        this.#controls.mode = mode;
-    }
-
-    getRenderer() {
-        return this.#renderer;
     }
     clear() {
         // unimplemented
