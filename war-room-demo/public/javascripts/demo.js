@@ -284,11 +284,11 @@ class DemoScene {
         };
 
         const gui = new GUI();
-
-        gui.add( params, 'toggleHemisphereLight' ).name( 'toggle hemisphere light' );
-        gui.add( params, 'toggleAmbientLight' ).name( 'toggle ambient light' );
-        gui.add( params, 'toggleDirectionalLight' ).name( 'toggle directional light' );
-        gui.add( params, 'toggleSpotLight' ).name( 'toggle spot light' );
+        const folderLight = gui.addFolder('Light');
+        folderLight.add( params, 'toggleHemisphereLight' ).name( 'toggle hemisphere light' );
+        folderLight.add( params, 'toggleAmbientLight' ).name( 'toggle ambient light' );
+        folderLight.add( params, 'toggleDirectionalLight' ).name( 'toggle directional light' );
+        folderLight.add( params, 'toggleSpotLight' ).name( 'toggle spot light' );
 
         gui.open();
 
