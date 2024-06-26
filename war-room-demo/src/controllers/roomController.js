@@ -1,5 +1,5 @@
 
-const cloudinary = require('../cloudinaryConfig');
+const cloudinary = require('../config/cloudinaryConfig');
 const asyncHandler = require("express-async-handler");
 const {body, validationResult} = require("express-validator");
 

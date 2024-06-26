@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 /**
  * Represents a dynamic camera setup for a 3D scene with multiple camera views.
  * Provides methods to initialize and manage orthographic, inside perspective, 

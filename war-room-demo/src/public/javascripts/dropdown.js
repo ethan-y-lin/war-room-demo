@@ -1,3 +1,5 @@
+import $ from 'jquery';
+
 $("#column1").removeClass("hidden");
 //need to refresh the menu when hidden later
 $("#menu-toggle").on('click', function(){
