@@ -1,6 +1,4 @@
 node_modules
-cloudinaryConfig.js 
-mongodbConfig.js 
 package-lock.json 
 dist/public/js
 .env
