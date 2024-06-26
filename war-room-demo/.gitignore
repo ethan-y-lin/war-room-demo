@@ -3,5 +3,5 @@ cloudinaryConfig.js
 mongodbConfig.js 
 package-lock.json 
 package.json
-dist
+dist/public/js
 .env
