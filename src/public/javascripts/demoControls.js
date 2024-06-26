@@ -245,6 +245,7 @@ class DemoControls {
         this.#measureGroup = new THREE.Group();
         this.#scene.add(this.#measureGroup);
         this.switchControls("ortho", camera.ortho, canvas);
+        this.units;
     }
 
     /**
@@ -906,8 +907,16 @@ class DemoControls {
                 cube.position.set(point.x, point.y, point.z);
                 this.#measureGroup.add(cube);
                 this.#measureGroup.add(line);
-                const dist = Math.round(this.#measure_points[0].distanceTo(point) * 100) / 100;
-                displayDistanceElement.textContent = dist + " meters";
+                const dist = this.#measure_points[0].distanceTo(point);
+                if (this.units == "meters") {
+                    const roundDist = Math.round(dist * 100) / 100;
+                    displayDistanceElement.textContent = roundDist + " " + this.units;
+                } else if (this.units == "feet") {
+                    const feet = dist * 3.281;
+                    const flooredFeet = Math.floor(feet);
+                    const inches = Math.round((feet - flooredFeet) * 12);  
+                    displayDistanceElement.textContent = flooredFeet + " ft. " + inches + " in.";
+                }
             }
         }
     }
@@ -923,9 +932,11 @@ class DemoControls {
     getMeasurePoints() {
         return this.#measure_points;
     }
+
     setControlMode(string){
         return this.#gumball.setMode(string);
     }
+
 }
 
 export {DemoControls};
