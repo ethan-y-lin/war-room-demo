@@ -3,4 +3,5 @@ cloudinaryConfig.js
 mongodbConfig.js 
 package-lock.json 
 package.json
-demoControls3.js
+dist
+.env

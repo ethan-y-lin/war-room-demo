@@ -1,7 +1,10 @@
+import $ from 'jquery';
 import { DynamicCamera } from "./dynamicCamera.js";
 import { DemoControls } from "./demoControls.js";
-import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.19/+esm';
-import { CSS2DRenderer, CSS2DObject } from "./CSS2DRenderer.js";
+import GUI from 'lil-gui';
+import * as THREE from 'three';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 /**
  * This class represents a scene that is displayed on the HTML element 
  * with the id: "#scene-container". It handles the contents of the scene,
@@ -255,7 +258,7 @@ class DemoScene {
     addObject (object) {
 
         const addedObject = object;
-        const loader = new THREE.GLTFLoader();
+        const loader = new GLTFLoader();
         loader.load(addedObject.obj_url, (gltf) => {
             const newObject = gltf.scene;
             newObject.name = addedObject.name;
@@ -285,9 +288,11 @@ class DemoScene {
 
             // add label
             const text = document.createElement( 'div' );
-            text.style.backgroundColor = 'red';
+            text.style.backgroundColor = 'rgba(50,50,50,0.5)';
             text.style.color = 'white';
             text.className = 'label';
+            text.style.borderRadius = '5px';
+            text.style.padding = '5px';
             text.textContent = addedObject.name;
     
             const label = new CSS2DObject( text );
@@ -306,7 +311,7 @@ class DemoScene {
     //     const addedObjects = JSON.parse(document.querySelector('.object-data').dataset.objects);
     //     addedObjects.forEach((object) => {
     //         if (! (object.obj_url == '' || this.#uploaded_objects_url.includes(object.obj_url))) {      
-    //             const loader = new THREE.GLTFLoader();
+    //             const loader = new GLTFLoader();
     //             loader.load(object.obj_url, (gltf) => {
     //                 const newObject = gltf.scene;
     //                 newObject.name = object.name;
@@ -412,7 +417,7 @@ class DemoScene {
 
         // const axesHelper = new THREE.AxesHelper( 100 );
         // scene.add( axesHelper );
-        const assetLoader = new THREE.GLTFLoader();
+        const assetLoader = new GLTFLoader();
 
         return new Promise((resolve, reject) => {
             assetLoader.load(this.#roomURL.href, (gltf) => {
@@ -454,6 +459,7 @@ class DemoScene {
      */
     #organizeObjects (objects) {
         objects.forEach((obj) =>  {
+
             if (obj.children.length > 0) {
                 this.#organizeObjects(obj.children);
                 return;

@@ -1,3 +1,7 @@
+import * as THREE from 'three';
+import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js';
+import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
+import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
 /**
  * This class contains the control logic for each of the views and modes. 
  * Using ThreeJS add-on controls, this class supports "drag controls" for 
@@ -86,14 +90,14 @@ class DemoControls {
     // one time.
     /**
      * The orbit controls object.
-     * @type {THREE.OrbitControls}
+     * @type {OrbitControls}
      * @private
      */
     #orbit;
 
     /**
      * The transform controls object.
-     * @type {THREE.TransformControls}
+     * @type {TransformControls}
      * @private
      */
     #gumball;
@@ -108,7 +112,7 @@ class DemoControls {
 
     /**
      * The pointer lock controls object.
-     * @type {THREE.PointerLockControls}
+     * @type {PointerLockControls}
      * @private
      */
     #pointerLock;
@@ -221,12 +225,12 @@ class DemoControls {
         this.#measure_points = [];
 
     
-        this.#orbit = new THREE.OrbitControls(camera.outside, canvas);
+        this.#orbit = new OrbitControls(camera.outside, canvas);
 
         this.#gumball = null;
         this.#gumballState = {mode: 'translate'}
 
-        this.#pointerLock = new THREE.PointerLockControls(camera.inside, canvas);
+        this.#pointerLock = new PointerLockControls(camera.inside, canvas);
         this.#prev_time = performance.now();
         this.#velocity = new THREE.Vector3();
         this.#direction = new THREE.Vector3();
@@ -308,13 +312,13 @@ class DemoControls {
             this.#boundingBoxes = this.#getBoundingBoxes(this.#objects);
             document.addEventListener('click', this.#outsideOnClick);
             document.addEventListener('keydown', this.#toggleGumball);
-            this.#orbit = new THREE.OrbitControls(camera, canvas);
+            this.#orbit = new OrbitControls(camera, canvas);
             this.#orbit.enabled = true;
             this.hideBlocker();
         } else if (newControl == "inside"){
             this.#reset();
             this.#boundingBoxes = this.#getBoundingBoxes(this.#objects);
-            this.#pointerLock = new THREE.PointerLockControls(camera, canvas);
+            this.#pointerLock = new PointerLockControls(camera, canvas);
             this.#pointerLock.enabled = true;
             const instructions = document.getElementById( 'instructions' );
             instructions.addEventListener( 'click', this.#lock);
@@ -441,8 +445,7 @@ class DemoControls {
      * @private
      */
     #createGumball (object, camera) {
-        this.#gumball = new THREE.TransformControls(camera, this.#canvas);
-        
+        this.#gumball = new TransformControls(camera, this.#canvas);
         this.#gumball.setMode(this.#gumballState.mode)
         if (this.#gumball.getMode() == 'rotate') {
             this.#gumball.showX = false;
@@ -462,11 +465,21 @@ class DemoControls {
                 this.#orbit.enabled = true;
         });
 
-
         this.#gumball.attach(object);
+
         this.#scene.add(this.#gumball);
+        
+        // this.#updateGumballRotation(object);
     }
 
+    #updateGumballRotation(object) {
+        // Update gumball rotation based on the object's current rotation
+        object.updateMatrixWorld();
+        const localQuaternionRotation = object.quaternion.clone();
+        this.#gumball.setSpace("local");
+        this.#gumball.setRotationFromQuaternion(localQuaternionRotation.invert());
+        this.#gumball.setSpace("global");
+    }
     /**
      * Resets the gumball.
      * @private
@@ -493,7 +506,7 @@ class DemoControls {
      * If no gumball control is active, creates a new gumball control for the clicked object.
      * 
      * @param {THREE.Object3D} object - The object that was clicked.
-     * @returns {THREE.TransformControls | null} Returns the gumball control associated with the clicked object,
+     * @returns {TransformControls | null} Returns the gumball control associated with the clicked object,
      * or null if no gumball control is active.
      */
     #clickObject(object, camera) {
@@ -504,7 +517,7 @@ class DemoControls {
                 this.#clearGumball();
             }
         }
-        
+
         this.#createGumball(object, camera);
         return this.#gumball;
     }
@@ -713,8 +726,13 @@ class DemoControls {
                 this.#gumball.showY = true;
                 break;
             case 'Backspace':
-                this.#scene.remove(this.#gumball.object)
-                this.#clearGumball();
+                if (this.#gumball != null) {
+                    const object = this.#gumball.object
+                    object.clear();
+                    this.#clearGumball();
+                    this.#scene.remove(object)
+                }
+
             }
         };
     

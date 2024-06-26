@@ -1,7 +1,7 @@
 import {DemoScene} from "./demo.js"
-
+import $ from 'jquery'
+console.log("INIT")
 const startModel = new URL('../assets/warroom1.glb', import.meta.url);
-const secondModel = new URL('../assets/roommodemodel.glb', import.meta.url);
 
 let APP;
 let start = true;
@@ -10,10 +10,11 @@ function init(model) {
     console.log(model);
 
     APP = new DemoScene(model);
-    const objectLinks = document.querySelectorAll('#column3 a[data-url]');
+    const objectLinks = document.querySelectorAll('.add-object-to-scene');
     
     objectLinks.forEach(link => {
         link.addEventListener('click', function(event) {
+            console.log("hi")
             event.preventDefault(); // Prevent default link behavior
             
             const url = this.dataset.url; // Get the URL from data-url attribute

@@ -122,7 +122,7 @@ block content
                                             if obj == object.id
                                                 li
                                                     div.deletion
-                                                        a(href="#" data-url=`${object.url}`) #{object.name}
+                                                        a(class="add-object-to-scene" href="#" data-url=`${object.url}`) #{object.name}
                                                         form(method='POST' action="/delete-object/" + object._id)
                                                             div.form-group
                                                                 input#objectid.form-control(type='hidden', name='objectid', value=object._id )
@@ -137,7 +137,8 @@ block content
                     ul
                         each object in objects
                             li 
-                                a(href=object.url)= object.name 
+                                a(class="add-object-to-scene" href="#" data-url=`${object.url}`) #{object.name}
+                                
      
     main#scene
         div.title
@@ -170,20 +171,21 @@ block content
             button#outside-view.button Outside
             button#inside-view.button Inside
 
-    script(src="./javascripts/jquery-3.7.1.min.js")
-    script(src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js")
-    script(src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js")
-    script(src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js")
-    script(src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js")
-    script(src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/TransformControls.js")
-    script(src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/renderers/CSS2DRenderer.js")
-    script(src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r154/three.min.js")
+    //- script(src="./javascripts/jquery-3.7.1.min.js")
+    //- script(src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js")
+    //- script(src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js")
+    //- script(src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js")
+    //- script(src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js")
+    //- script(src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/TransformControls.js")
+    //- script(src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/renderers/CSS2DRenderer.js")
+    //- script(src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r154/three.min.js")
 
-    script(src="./javascripts/CSS2DRenderer.js" type="module")
-    script(src="./javascripts/dynamicCamera.js" type="module")
-    script(src="./javascripts/demoControls.js" type="module")
-    script(src="./javascripts/demo.js" type="module")
-    script(src="./javascripts/script.js" type="module")
-    script(src="./javascripts/dropdown.js", type="module")
-    script(src="./javascripts/modal.js", type="module")
-    script(src="./javascripts/listeners.js")
+    //- script(src="./javascripts/CSS2DRenderer.js" type="module")
+    //- script(src="./javascripts/dynamicCamera.js" type="module")
+    //- script(src="./javascripts/demoControls.js" type="module")
+    //- script(src="./javascripts/demo.js" type="module")
+    //- script(src="./javascripts/script.js" type="module")
+    //- script(src="./javascripts/dropdown.js", type="module")
+    //- script(src="./javascripts/modal.js", type="module")
+    //- script(src="./javascripts/listeners.js")
+    script(src="./app.bundle.js", type="module")
