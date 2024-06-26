@@ -268,7 +268,7 @@ class DemoScene {
             newObject.traverse(function(node){
                 if (node.isMesh){
                     node.castShadow = true;
-                    node.recieveShadow = true;}
+                    node.receiveShadow = true;}
             })
             // Compute the bounding box of the object
             const box = new THREE.Box3().setFromObject(newObject, true);
@@ -354,19 +354,21 @@ class DemoScene {
      * @returns {Promise<void>} A promise that resolves when the geometries and model have been added to the scene.
      */
     async #initGeometries(scene) {
-        const hemiLight = new THREE.HemisphereLight(0x87ceeb, 0x392b1b, 0.6);
+        const hemiLight = new THREE.HemisphereLight(0x87ceeb, 0x392b1b, 5);
         hemiLight.position.set(0, 50, 0);
         scene.add(hemiLight);
 
-        const ambientLight = new THREE.AmbientLight(0x7c7c7c);
+        const ambientLight = new THREE.AmbientLight(0x7c7c7c, 2);
         scene.add(ambientLight);
     
-        const directionalLight = new THREE.DirectionalLight(0xFDFBD3, 1.5);
-        directionalLight.color.setHSL(0.1, 1, 0.95);
+        const directionalLight = new THREE.DirectionalLight(0xfdfbfd3, 10);
         directionalLight.castShadow = true;
         directionalLight.position.set(-20, 70, 100);
         directionalLight.shadow.camera.bottom = -12;
         scene.add(directionalLight);
+        
+        const dLightHelper = new THREE.DirectionalLightHelper(directionalLight);
+        scene.add(dLightHelper);
 
         const spotLight = new THREE.SpotLight(0xFFFFFF);
         spotLight.position.set(15, 100, 10);

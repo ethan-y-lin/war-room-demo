@@ -18,6 +18,7 @@ body {
 .tutorials{
   position: absolute;
   margin-left: 10px;
+  z-index: 2;
 }
 .tutorial-button:hover{
   color: #384c44;
@@ -26,20 +27,10 @@ body {
 }
 
 
-/* .main-section{
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  margin-left: 360px;
-} */
-
 
 #menu{
   display: flex;
-  width: 360px;
+  width: 300px;
   position: fixed;
   height: 100%;
   padding: 10px;
@@ -51,7 +42,8 @@ body {
 #scene{
   display: flex;
   flex-direction: column;
-  margin-left: 360px;
+  margin-left: 290px;
+  margin-right: 110px;
   height: 100%;
   align-items: center;
   position: relative;
@@ -291,12 +283,15 @@ nav a{
   background: linear-gradient(to right, #171717, #58585800);
   padding: 5px 25px 5px 10px;
 }
-
-#measurement-display p{
+#measurement-display{
+  display: flex;
+  flex-direction: row;
   background: linear-gradient(to right, #171717, #58585800);
+}
+#measurement-display p{
   padding: 5px 25px 5px 10px;
   font-weight: bold;
-  margin-bottom: 5px;
+  margin: 5px 0px 5px 0px;
 }
 
 #scene-left h2{
@@ -577,11 +572,21 @@ nav a{
 }
 
 .lil-gui { 
-	--background-color: #000;
+	/* background-color: #000; */
 	--widget-color:#384c44;
-	--padding: 5px;
-  --width: 150px;
-  --right: 0px;
+	padding: 5px;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+.lil-gui.autoPlace{
+  right: 0px;
+  width: 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.root > .title{
+  font-size: 16px;
 }
 
 #back-to-index{
