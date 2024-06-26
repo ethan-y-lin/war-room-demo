@@ -1,36 +1,56 @@
-# war-room-demo
+# 3D Furniture Planner Demo
 
-# Demo of 3D Room Reconstruction GUI for Cornell PCG Summer Research 2024. 
+This project is a 3D furniture planner that allows a user to upload 3D models of a room and objects 
+and view how the objects in the room look in 3D. It is designed to be used in conjunction with 3D
+room scanning applications like [Polycam](https://poly.cam/). It supports several view modes including
+orthographic, perspective, and first-person. It also implements features like measuring distance and 
+[unimplemented] exporting the 3D models.
 
-# Description of Tech Stack
+## Tech Stack
 
-# Installation Instructions
+- Webpack: Module bundler
+- Babel: JavaScript compiler
+- Node.js: JavaScript runtime
+- Express.js: Web framework
+- MongoDB: NoSQL database
+- Mongoose: MongoDB ORM
+- Cloudinary: Media management
+- Pug: Template engine
+- Three.js: 3D graphics library
+  
+## Installation Instructions
 
-Use npm: This command should install all of the dependencies described in package.json. 
-1. npm install 
+If you would like to try out this project, the deployed version will be coming soon.
+If you want to run this project with your own database, follow these steps. 
 
-If that does not work, then you can install each one individually.
+### 1. Clone this repository
+```
+git clone 
+cd war-room-demo
+```
 
-## Install Database Dependencies
+### 2. Install dependencies
+```
+npm install
+```
 
-...
+### 3. Copy the example .env file
+```
+cp .env.example .env
+```
 
-## Install Bundler Dependencies
+### 4. Create MongoDB account and Cloudinary accounts and update .env file
 
-# Install webpack
-npm install --save-dev webpack webpack-cli
+## How to run locally
 
-# Install babel
-npm install --save-dev @babel/core @babel/preset-env babel-loader
+### 1. Run the app
+```
+npm start
+```
 
-# Optional: Use nodemon to restart the server automatically whenever a file changes
-npm install --save-dev nodemon
+### 2. Open http://localhost:3000 in your browser
+```
+open http://localhost:3000
+```
 
-## Install Imported Modules
 
-1. npm install three
-2. npm install jquery
-
-# How to run locally
-
-1. 
