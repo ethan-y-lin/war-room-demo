@@ -268,7 +268,7 @@ class DemoScene {
             newObject.traverse(function(node){
                 if (node.isMesh){
                     node.castShadow = true;
-                    node.recieveShadow = true;}
+                    node.receiveShadow = true;}
             })
             // Compute the bounding box of the object
             const box = new THREE.Box3().setFromObject(newObject, true);
@@ -354,19 +354,21 @@ class DemoScene {
      * @returns {Promise<void>} A promise that resolves when the geometries and model have been added to the scene.
      */
     async #initGeometries(scene) {
-        const hemiLight = new THREE.HemisphereLight(0x87ceeb, 0x392b1b, 0.6);
+        const hemiLight = new THREE.HemisphereLight(0x87ceeb, 0x392b1b, 5);
         hemiLight.position.set(0, 50, 0);
         scene.add(hemiLight);
 
-        const ambientLight = new THREE.AmbientLight(0x7c7c7c);
+        const ambientLight = new THREE.AmbientLight(0x7c7c7c, 2);
         scene.add(ambientLight);
     
-        const directionalLight = new THREE.DirectionalLight(0xFDFBD3, 1.5);
-        directionalLight.color.setHSL(0.1, 1, 0.95);
+        const directionalLight = new THREE.DirectionalLight(0xfdfbfd3, 10);
         directionalLight.castShadow = true;
         directionalLight.position.set(-20, 70, 100);
         directionalLight.shadow.camera.bottom = -12;
         scene.add(directionalLight);
+        
+        const dLightHelper = new THREE.DirectionalLightHelper(directionalLight);
+        scene.add(dLightHelper);
 
         const spotLight = new THREE.SpotLight(0xFFFFFF);
         spotLight.position.set(15, 100, 10);
@@ -587,7 +589,7 @@ class DemoScene {
 
     guiControls(){
         const gui = new GUI();
-        console.log(this.#scene);
+        // console.log(this.#scene);
         
         // toggling light sources
         const hLight = this.getHemiLight();
@@ -595,7 +597,7 @@ class DemoScene {
         const dLight = this.getDirectionalLight();
         const sLight = this.getSpotLight();
         const folderLights = gui.addFolder('Light');
-        folderLights.close();
+        //folderLights.close();
 
         const lights = {
             toggleHemisphereLight: function() {
@@ -612,31 +614,58 @@ class DemoScene {
                 sLight.visible = ! sLight.visible;
             }
         };
-        folderLights.add( lights, 'toggleHemisphereLight' ).name( 'toggle hemisphere light' );
-        folderLights.add( lights, 'toggleAmbientLight' ).name( 'toggle ambient light' );
-        folderLights.add( lights, 'toggleDirectionalLight' ).name( 'toggle directional light' );
-        folderLights.add( lights, 'toggleSpotLight' ).name( 'toggle spot light' );
+        folderLights.add( lights, 'toggleHemisphereLight' ).name( 'Hemisphere light' );
+        folderLights.add( lights, 'toggleAmbientLight' ).name( 'Ambient light' );
+        folderLights.add( lights, 'toggleDirectionalLight' ).name( 'Directional light' );
+        folderLights.add( lights, 'toggleSpotLight' ).name( 'Spot light' );
 
         //toggling object controls (translate/rotate)
         const folderControls = gui.addFolder('Controls');
-        folderControls.close();
-
+        //folderControls.close();
+        const control = this.#controls;
+        const controlToggle = {
+            translate: function(){
+                control.setControlMode('translate');
+            },
+            rotate: function(){
+                control.setControlMode('rotate');
+            }
+        }
+        
+        folderControls.add(controlToggle, 'translate').name('Translate');
+        folderControls.add(controlToggle, 'rotate').name('Rotate');
         
         //changing material color?
         const folderColors = gui.addFolder('Change Colors');
-        folderColors.close();
+        //folderColors.close();
         
         //changing measurement units
-        const measurements = gui.addFolder('Measurement Units');
-        measurements.close();
+        const folderMeasurements = gui.addFolder('Measurement Units');
+        const measurementUnits = {
+            meter: function(){
 
-        gui.close();
+            },
+            feet: function(){
+
+            }
+        }
+        folderMeasurements.add(measurementUnits, 'meter').name('Meters');
+        folderMeasurements.add(measurementUnits, 'feet').name("Feet");
+        //folderMeasurements.close();
+
+        //changing the display of bounding boxes around furnitures
+        
+
+        gui.open();
     }
+
+    // getBoundingBox(){
+    //     return this.#objects.boundingBox;
+    // }
 
     getControls() {
         return this.#controls;
     }
-
     getRenderer() {
         return this.#renderer;
     }

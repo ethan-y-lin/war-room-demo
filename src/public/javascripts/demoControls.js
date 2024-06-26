@@ -923,6 +923,9 @@ class DemoControls {
     getMeasurePoints() {
         return this.#measure_points;
     }
+    setControlMode(string){
+        return this.#gumball.setMode(string);
+    }
 }
 
 export {DemoControls};
