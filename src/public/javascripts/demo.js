@@ -5,6 +5,7 @@ import GUI from 'lil-gui';
 import * as THREE from 'three';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { round } from 'three/examples/jsm/nodes/Nodes.js';
 /**
  * This class represents a scene that is displayed on the HTML element 
  * with the id: "#scene-container". It handles the contents of the scene,
@@ -101,6 +102,10 @@ class DemoScene {
     #measurement_objects;
 
     #labelRenderer;
+    #grid_scale;
+    #lights;
+    #units;
+
     /**
      * Calls for the initialization the DemoScene object and then
      * calls the animation loop when initialization is completed.
@@ -112,7 +117,8 @@ class DemoScene {
         });
     }
 
-    #grid_scale;
+
+
     /**
      * Initializes the DemoScene object given the room URL.  
      * @param {URL} roomURL 
@@ -124,6 +130,7 @@ class DemoScene {
                         doors: [],
                         windows: [],
                         uploaded: []};
+        this.#lights = {};
         this.#uploaded_objects_url = [];
         this.#scene = new THREE.Scene();
         // this.roomURL = new URL('../assets/warroom1.glb', import.meta.url);
@@ -168,6 +175,8 @@ class DemoScene {
         this.#labelRenderer.domElement.style.pointerEvents = 'none';
         this.#canvas.appendChild( this.#labelRenderer.domElement );
         
+        this.#units = "feet";
+        this.#controls.units = this.#units;
         this.guiControls();
 
     }
@@ -354,30 +363,43 @@ class DemoScene {
      * @returns {Promise<void>} A promise that resolves when the geometries and model have been added to the scene.
      */
     async #initGeometries(scene) {
-        const hemiLight = new THREE.HemisphereLight(0x87ceeb, 0x392b1b, 5);
+        const hemiLight = new THREE.HemisphereLight(0xffffff, 2);
         hemiLight.position.set(0, 50, 0);
+        this.#lights.hemi = hemiLight;
         scene.add(hemiLight);
 
-        const ambientLight = new THREE.AmbientLight(0x7c7c7c, 2);
+        const ambientLight = new THREE.AmbientLight(0x7c7c7c, 8);
+        this.#lights.ambi = ambientLight;
         scene.add(ambientLight);
     
-        const directionalLight = new THREE.DirectionalLight(0xfdfbfd3, 10);
+        const directionalLight = new THREE.DirectionalLight(0xfdfbd3, 10);
+        directionalLight.color.setHSL(0.1, 1, 0.95);
         directionalLight.castShadow = true;
         directionalLight.position.set(-20, 70, 100);
         directionalLight.shadow.camera.bottom = -12;
+        this.#lights.direct = directionalLight;
         scene.add(directionalLight);
         
         const dLightHelper = new THREE.DirectionalLightHelper(directionalLight);
         scene.add(dLightHelper);
 
-        const spotLight = new THREE.SpotLight(0xFFFFFF);
-        spotLight.position.set(15, 100, 10);
-        // spotLight.castShadow = true;
-        // spotLight.shadow.camera.near = 10;
-        // spotLight.shadow.camera.far = 1000;
-        // spotLight.shadow.camera.fov = 30;
+        const spotLight = new THREE.SpotLight(0xFFFFFF, 10000);
         spotLight.angle = 0.2;
-        scene.add(spotLight);
+        spotLight.position.set( 0, 80, 0 );
+        spotLight.penumbra = 1;
+        spotLight.decay = 2;
+        spotLight.distance = 0;
+        spotLight.castShadow = true;
+        spotLight.shadow.mapSize.width = 1024;
+        spotLight.shadow.mapSize.height = 1024;
+        spotLight.shadow.camera.near = 1;
+        spotLight.shadow.camera.far = 10;
+        spotLight.shadow.focus = 1;
+        this.#lights.spot = spotLight;
+        scene.add( spotLight );
+
+        const lightHelper = new THREE.SpotLightHelper( spotLight );
+        scene.add( lightHelper );
         
         //ground
         const groundGeo = new THREE.PlaneGeometry(1000, 1000);
@@ -501,8 +523,18 @@ class DemoScene {
                 return;
             }
             if (measure_points.length == 2) {
-                const dist = Math.round(measure_points[0].distanceTo(measure_points[1])*100) / 100;
-                displayDistanceElement.textContent = dist + " meters";
+                const dist = measure_points[0].distanceTo(measure_points[1]);
+                if (this.#units == "meters") {
+                    const roundDist = Math.round(dist * 100) / 100;
+                    displayDistanceElement.textContent = roundDist + " " + this.#units;
+                } else if (this.#units == "feet") {
+                    const feet = dist * 3.281;
+                    const flooredFeet = Math.floor(feet);
+                    const inches = Math.round((feet - flooredFeet) * 12);  
+                    displayDistanceElement.textContent = flooredFeet + " ft. " + inches + " in.";
+                }
+
+
             }
         } else {
             const displayModeElement = document.getElementById("display-mode");
@@ -642,11 +674,13 @@ class DemoScene {
         //changing measurement units
         const folderMeasurements = gui.addFolder('Measurement Units');
         const measurementUnits = {
-            meter: function(){
-
+            meter: () => {
+                this.#units = "meters";
+                this.#controls.units = "meters";
             },
-            feet: function(){
-
+            feet: () => {
+                this.#units = "feet";
+                this.#controls.units = "feet";
             }
         }
         folderMeasurements.add(measurementUnits, 'meter').name('Meters');
@@ -670,16 +704,16 @@ class DemoScene {
         return this.#renderer;
     }
     getHemiLight(){
-        return this.#scene.children[0];
+        return this.#lights.hemi;
     }
     getAmbientLight(){
-        return this.#scene.children[1];
+        return this.#lights.ambi;
     }
     getDirectionalLight(){
-        return this.#scene.children[2];
+        return this.#lights.direct;
     }
     getSpotLight(){
-        return this.#scene.children[3];
+        return this.#lights.spot;
     }
     clear() {
         // unimplemented
