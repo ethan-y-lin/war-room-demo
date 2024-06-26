@@ -30,7 +30,7 @@ body {
 
 #menu{
   display: flex;
-  width: 360px;
+  width: 300px;
   position: fixed;
   height: 100%;
   padding: 10px;
@@ -42,7 +42,8 @@ body {
 #scene{
   display: flex;
   flex-direction: column;
-  margin-left: 380px;
+  margin-left: 290px;
+  margin-right: 110px;
   height: 100%;
   align-items: center;
   position: relative;
@@ -571,11 +572,21 @@ nav a{
 }
 
 .lil-gui { 
-	--background-color: #000;
+	/* background-color: #000; */
 	--widget-color:#384c44;
-	--padding: 5px;
-  --width: 150px;
-  --right: 0px;
+	padding: 5px;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+.lil-gui.autoPlace{
+  right: 0px;
+  width: 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.root > .title{
+  font-size: 16px;
 }
 
 #back-to-index{

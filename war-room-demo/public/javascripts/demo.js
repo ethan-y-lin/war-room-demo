@@ -581,7 +581,7 @@ class DemoScene {
 
     guiControls(){
         const gui = new GUI();
-        console.log(this.#scene);
+        // console.log(this.#scene);
         
         // toggling light sources
         const hLight = this.getHemiLight();
@@ -589,7 +589,7 @@ class DemoScene {
         const dLight = this.getDirectionalLight();
         const sLight = this.getSpotLight();
         const folderLights = gui.addFolder('Light');
-        folderLights.close();
+        //folderLights.close();
 
         const lights = {
             toggleHemisphereLight: function() {
@@ -606,31 +606,58 @@ class DemoScene {
                 sLight.visible = ! sLight.visible;
             }
         };
-        folderLights.add( lights, 'toggleHemisphereLight' ).name( 'toggle hemisphere light' );
-        folderLights.add( lights, 'toggleAmbientLight' ).name( 'toggle ambient light' );
-        folderLights.add( lights, 'toggleDirectionalLight' ).name( 'toggle directional light' );
-        folderLights.add( lights, 'toggleSpotLight' ).name( 'toggle spot light' );
+        folderLights.add( lights, 'toggleHemisphereLight' ).name( 'Hemisphere light' );
+        folderLights.add( lights, 'toggleAmbientLight' ).name( 'Ambient light' );
+        folderLights.add( lights, 'toggleDirectionalLight' ).name( 'Directional light' );
+        folderLights.add( lights, 'toggleSpotLight' ).name( 'Spot light' );
 
         //toggling object controls (translate/rotate)
         const folderControls = gui.addFolder('Controls');
-        folderControls.close();
-
+        //folderControls.close();
+        const control = this.#controls;
+        const controlToggle = {
+            translate: function(){
+                control.setControlMode('translate');
+            },
+            rotate: function(){
+                control.setControlMode('rotate');
+            }
+        }
+        
+        folderControls.add(controlToggle, 'translate').name('Translate');
+        folderControls.add(controlToggle, 'rotate').name('Rotate');
         
         //changing material color?
         const folderColors = gui.addFolder('Change Colors');
-        folderColors.close();
+        //folderColors.close();
         
         //changing measurement units
-        const measurements = gui.addFolder('Measurement Units');
-        measurements.close();
+        const folderMeasurements = gui.addFolder('Measurement Units');
+        const measurementUnits = {
+            meter: function(){
 
-        gui.close();
+            },
+            feet: function(){
+
+            }
+        }
+        folderMeasurements.add(measurementUnits, 'meter').name('Meters');
+        folderMeasurements.add(measurementUnits, 'feet').name("Feet");
+        //folderMeasurements.close();
+
+        //changing the display of bounding boxes around furnitures
+        
+
+        gui.open();
     }
+
+    // getBoundingBox(){
+    //     return this.#objects.boundingBox;
+    // }
 
     getControls() {
         return this.#controls;
     }
-
     getRenderer() {
         return this.#renderer;
     }
