@@ -589,6 +589,16 @@ nav a{
   font-size: 16px;
 }
 
+/*-- ABOUT page --*/
+
 #back-to-index{
   margin-left: 10px;
+}
+.pictures img{
+  width: 30vw;
+  margin: 5px;
+}
+.body-content{
+  background-color:#a4c3b230;
+  padding: 20px;
 }
