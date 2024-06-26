@@ -907,7 +907,7 @@ class DemoControls {
                 this.#measureGroup.add(cube);
                 this.#measureGroup.add(line);
                 const dist = Math.round(this.#measure_points[0].distanceTo(point) * 100) / 100;
-                displayDistanceElement.textContent = "Measurement: " + dist + " meters";
+                displayDistanceElement.textContent = dist + " meters";
             }
         }
     }
