@@ -381,7 +381,7 @@ class DemoScene {
         scene.add(directionalLight);
         
         const dLightHelper = new THREE.DirectionalLightHelper(directionalLight);
-        scene.add(dLightHelper);
+        //scene.add(dLightHelper);
 
         const spotLight = new THREE.SpotLight(0xFFFFFF, 10000);
         spotLight.angle = 0.2;

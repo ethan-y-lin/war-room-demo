@@ -608,7 +608,7 @@ nav a{
 }
 
 .description{
-  margin: 0px 50px 20px 50px;
+  margin: 0px 120px 20px 120px;
   text-align: justify;
   font-size: large;
   line-height: 1.5;
@@ -643,9 +643,16 @@ nav a{
   justify-content: center;
 }
 .step-description p{
-  width: 30%;
+  width: 25%;
   margin-right: 10px;
+  line-height: 1.5;
 }
 .step-description img{
   margin-left: 10px;
+}
+
+.body-content h3{
+  font-size: 28px;
+  font-weight: lighter;
+  margin-top: 20px;
 }
