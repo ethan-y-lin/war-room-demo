@@ -105,6 +105,7 @@ class DemoScene {
     #grid_scale;
     #lights;
     #units;
+    #showBoundingBoxes;
 
     /**
      * Calls for the initialization the DemoScene object and then
@@ -177,6 +178,7 @@ class DemoScene {
         
         this.#units = "feet";
         this.#controls.units = this.#units;
+        this.#showBoundingBoxes = false;
         this.guiControls();
 
     }
@@ -289,6 +291,7 @@ class DemoScene {
 
             boundingBox.position.set((box.max.x + box.min.x) / 2, (box.max.y + box.min.y) / 2, (box.max.z + box.min.z) / 2)
             boundingBox.name = "bounding_box";
+            boundingBox.visible = this.#showBoundingBoxes;
             newObject.add(boundingBox);
 
             const openPos = this.openPosition(newObject); // find an open position to display the box
@@ -669,11 +672,11 @@ class DemoScene {
         // Moving Controls
         const folderMoving = gui.addFolder('Moving Controls');
         const controlMoving = {
-            keyboard: function(){
-
+            keyboard: () => {
+                this.#controls.setMode("regular");
             },
-            teleport: function(){
-
+            teleport: () => {
+                this.#controls.setMode("teleport");
             }
         }
         folderMoving.add(controlMoving, 'keyboard').name('WASD');
@@ -681,6 +684,20 @@ class DemoScene {
         
         //toggling bounding boxes
         const folderBoundingBox = gui.addFolder('Bounding Box');
+        const boundingBoxToggle = {
+            toggle: false
+        }
+        folderBoundingBox.add(boundingBoxToggle, 'toggle').name('Show bounding boxes').onChange(value => {
+            this.#objects.uploaded.forEach( (obj) => {
+                obj.children.forEach( (child) => {
+                    if (child.name == "bounding_box") {
+                        child.visible = value;
+                    }
+                })
+            });
+            this.#showBoundingBoxes = value;
+        });
+
 
         //changing material color?
         const folderColors = gui.addFolder('Change Colors');
