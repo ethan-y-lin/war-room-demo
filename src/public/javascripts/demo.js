@@ -681,6 +681,7 @@ class DemoScene {
         
         //toggling bounding boxes
         const folderBoundingBox = gui.addFolder('Bounding Box');
+        
 
         //changing material color?
         const folderColors = gui.addFolder('Change Colors');
