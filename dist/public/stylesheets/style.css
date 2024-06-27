@@ -592,13 +592,60 @@ nav a{
 /*-- ABOUT page --*/
 
 #back-to-index{
-  margin-left: 10px;
+  margin-left: 30px;
+  float: left;
+  position: fixed;
 }
-.pictures img{
+.about-title{
+  text-align: center;
+  margin: 50px 30px 10px 30px;
+}
+
+.about-title>h1{
+  margin-bottom: 10px;
+  border-bottom: 3px solid #a4c3b2;
+  
+}
+
+.description{
+  margin: 0px 50px 20px 50px;
+  text-align: justify;
+  font-size: large;
+  line-height: 1.5;
+  color:rgb(70, 70, 70);
+}
+.pictures{
   width: 30vw;
   margin: 5px;
 }
 .body-content{
-  background-color:#a4c3b230;
-  padding: 20px;
+  background-color:#a4c3b220;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0px 20px 0px 20px;
+}
+
+.body-content h2{
+  font-size: 48px;
+  text-align: center;
+  font-weight: lighter;
+  padding-top: 30px;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.step-description{
+  display: flex;
+  flex-direction: row;
+  padding: 0px 100px 10px 100px;
+  align-items: center;
+  justify-content: center;
+}
+.step-description p{
+  width: 30%;
+  margin-right: 10px;
+}
+.step-description img{
+  margin-left: 10px;
 }
