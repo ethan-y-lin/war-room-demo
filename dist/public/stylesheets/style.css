@@ -37,6 +37,7 @@ body {
   justify-content: center;
   background-color: #a4c3b26a;
   left: 0;
+  z-index: 1;
 }
 
 #scene{
@@ -110,7 +111,7 @@ nav a{
   flex-direction: column;
   margin: 0px;
   padding: 0px;
-  text-align: center;
+  /* text-align: center; */
 }
 
 .layer1 ul{
@@ -129,7 +130,49 @@ nav a{
   margin-left: 0px;
   width: 100%;
 }
+.tooltip{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
 
+.tooltip-icon{
+  z-index: 2;
+  border-radius: 18px;
+  border:1px solid #384c449a;
+  height: 16px;
+  width: 16px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #384c449a;
+}
+.tooltip-icon:hover{
+  color: white;
+  background-color:#445c52;
+  border-color:#445c52;
+  cursor: pointer;
+}
+.tooltip-icon:hover+.tooltip-text{
+  display: block;
+}
+.tooltip-section{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  position: relative;
+}
+.tooltip-text{
+  position: absolute;
+  margin-left: 30px;
+  background-color:#445c52;
+  z-index: auto;
+  color: white;
+  display: none;
+  padding: 5px;
+  border-radius: 3px;
+}
 .dropdown-menu ul a{
   display: block;
   padding: 10px 10px;
@@ -256,6 +299,7 @@ nav a{
   flex-direction: row;
   position: relative;
   justify-content: space-between;
+  z-index: 0;
 }
 
 #hud{
@@ -265,6 +309,7 @@ nav a{
   height: 100%;
   justify-content: space-between;
   position: absolute;
+  z-index: 9;
 }
 
 #scene-left{
@@ -350,7 +395,7 @@ nav a{
   height: 40px;
   width: 40px;
   cursor: pointer;
-  z-index: 999;
+  z-index: 99;
 }
 
 #fullscreen-button:hover{
@@ -646,6 +691,7 @@ nav a{
   width: 25%;
   margin-right: 10px;
   line-height: 1.5;
+  text-align: justify;
 }
 .step-description img{
   margin-left: 10px;

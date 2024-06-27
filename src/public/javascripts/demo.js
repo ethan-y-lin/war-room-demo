@@ -652,7 +652,7 @@ class DemoScene {
         folderLights.add( lights, 'toggleSpotLight' ).name( 'Spot light' );
 
         //toggling object controls (translate/rotate)
-        const folderControls = gui.addFolder('Controls');
+        const folderControls = gui.addFolder('Object Controls');
         //folderControls.close();
         const control = this.#controls;
         const controlToggle = {
@@ -666,7 +666,22 @@ class DemoScene {
         
         folderControls.add(controlToggle, 'translate').name('Translate');
         folderControls.add(controlToggle, 'rotate').name('Rotate');
+        // Moving Controls
+        const folderMoving = gui.addFolder('Moving Controls');
+        const controlMoving = {
+            keyboard: function(){
+
+            },
+            teleport: function(){
+
+            }
+        }
+        folderMoving.add(controlMoving, 'keyboard').name('WASD');
+        folderMoving.add(controlMoving, 'teleport').name('Teleport');
         
+        //toggling bounding boxes
+        const folderBoundingBox = gui.addFolder('Bounding Box');
+
         //changing material color?
         const folderColors = gui.addFolder('Change Colors');
         //folderColors.close();

@@ -14,16 +14,27 @@ block content
                     h2 Menu
                 ul.layer1
                     li
-                        a.menu-unit#fp FLOOR PLANS
+                        div.tooltip
+                            a.menu-unit#fp FLOOR PLANS
+                            div.tooltip-section
+                                div.tooltip-icon &quest;                               
+                                p.tooltip-text something
                     li
-                        a.menu-unit#f FURNITURES
+                        div.tooltip
+                            a.menu-unit#f FURNITURES
+                            span.tooltip-icon &quest;
                     li
-                        a.menu-unit#m MEASUREMENT
+                        div.tooltip
+                            a.menu-unit#m MEASUREMENT
+                            span.tooltip-icon &quest;
                     li
-                        a.menu-unit#sp SAVED PLANS
+                        div.tooltip
+                            a.menu-unit#sp SAVED PLANS
+                            span.tooltip-icon &quest;
                     li                     
-                        div.object-button
+                        div.object-button.tooltip
                             a UPLOAD
+                            span.tooltip-icon &quest;
                     form(id="object-form" method='POST' enctype='multipart/form-data' action= "/upload-object")
                         div.form-flex-col
                             div.form-group.form-input
