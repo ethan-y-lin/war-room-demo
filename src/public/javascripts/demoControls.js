@@ -185,6 +185,10 @@ class DemoControls {
     #dragOrigin;
     
     #measureGroup;
+    #floorObject;
+    #insidePointer;
+    #moveToPoint;
+    #moving;
 
     ////// ////// ////// //////
 
@@ -246,6 +250,13 @@ class DemoControls {
         this.#scene.add(this.#measureGroup);
         this.switchControls("ortho", camera.ortho, canvas);
         this.units;
+        this.#floorObject = null;
+        const sphereGeometry = new THREE.SphereGeometry( 0.1, 32, 16 ); 
+        const sphereMaterial = new THREE.MeshBasicMaterial( {color: 0x0000ff} ); 
+        const sphere = new THREE.Mesh( sphereGeometry, sphereMaterial ); 
+        this.#insidePointer = sphere;
+        this.#moveToPoint = null;
+        this.#moving = false;
     }
 
     /**
@@ -276,6 +287,9 @@ class DemoControls {
      */
     #reset() {
         // this.#drag.dispose();
+        if (this.#floorObject != null) {
+            this.#colorObject(this.#floorObject, 0x000000);
+        }
         this.#pointerLock.dispose();
         this.#orbit.dispose();
         this.#clearGumball();
@@ -283,13 +297,16 @@ class DemoControls {
         instructions.removeEventListener( 'click', this.#lock);
         this.#pointerLock.removeEventListener('lock', this.hideBlocker);
         this.#pointerLock.removeEventListener('unlock', this.#showBlocker);
+        
         document.removeEventListener('keydown', this.#insideOnKeyDown);
         document.removeEventListener('keyup',this.#insideOnKeyUp);
         document.removeEventListener('click', this.#orthoOnClick);
         document.removeEventListener('click', this.#outsideOnClick);
+        document.removeEventListener('click', this.#insideOnClick);
         this.#canvas.removeEventListener('mousemove', this.#orthoOnMove);
         this.#pointerLock.enabled = false;
         this.#orbit.enabled = false;
+        this.#scene.remove(this.#insidePointer);
     }
 
     /**
@@ -318,6 +335,7 @@ class DemoControls {
             this.hideBlocker();
         } else if (newControl == "inside"){
             this.#reset();
+            this.#scene.add(this.#insidePointer);
             this.#boundingBoxes = this.#getBoundingBoxes(this.#objects);
             this.#pointerLock = new PointerLockControls(camera, canvas);
             this.#pointerLock.enabled = true;
@@ -328,6 +346,7 @@ class DemoControls {
             this.#pointerLock.addEventListener( 'unlock', this.#showBlocker);
             document.addEventListener('keydown', this.#insideOnKeyDown);
             document.addEventListener('keyup',this.#insideOnKeyUp);
+            document.addEventListener('click', this.#insideOnClick);
         }
     }
 
@@ -352,33 +371,74 @@ class DemoControls {
     updateControls(camera) {
         if (this.#view == "inside") {
             const time = performance.now();
-            if ( this.#pointerLock.isLocked === true ) {
-                const delta = ( time - this.#prev_time ) / 1000;
+            if (this.mode == "regular") {
 
-                this.#velocity.x -= this.#velocity.x * 20.0 * delta;
-                this.#velocity.z -= this.#velocity.z * 20.0 * delta;
-
-                this.#direction.z = Number( this.#moveForward ) - Number( this.#moveBackward );
-                this.#direction.x = Number( this.#moveRight ) - Number( this.#moveLeft );
-                this.#direction.normalize(); // this ensures consistent movements in all directions
-
-                if ( this.#moveForward || this.#moveBackward ) this.#velocity.z -= this.#direction.z * 50.0 * delta;
-                if ( this.#moveLeft || this.#moveRight ) this.#velocity.x -= this.#direction.x * 50.0 * delta;
-                this.#pointerLock.moveRight( - this.#velocity.x * delta );
-                this.#pointerLock.moveForward( - this.#velocity.z * delta );
-                this.#setCameraBB(this.#insideCameraBB, camera.inside);
-                let collision = this.#checkCollisions(this.#insideCameraBB, this.#boundingBoxes)
-                if (collision.hasCollision && collision.collidedBox.name != "wall_11_3" && collision.collidedBox.name != "wall_11_4" ) {
-                    console.log(collision.collidedBox)
-                    this.#pointerLock.moveRight(this.#velocity.x * delta );
-                    this.#pointerLock.moveForward(this.#velocity.z * delta );
-                    console.log("collision")
+                if ( this.#pointerLock.isLocked) {
+                    const delta = ( time - this.#prev_time ) / 1000;
+    
+                    this.#velocity.x -= this.#velocity.x * 20.0 * delta;
+                    this.#velocity.z -= this.#velocity.z * 20.0 * delta;
+    
+                    this.#direction.z = Number( this.#moveForward ) - Number( this.#moveBackward );
+                    this.#direction.x = Number( this.#moveRight ) - Number( this.#moveLeft );
+                    this.#direction.normalize(); // this ensures consistent movements in all directions
+    
+                    if ( this.#moveForward || this.#moveBackward ) this.#velocity.z -= this.#direction.z * 50.0 * delta;
+                    if ( this.#moveLeft || this.#moveRight ) this.#velocity.x -= this.#direction.x * 50.0 * delta;
+                    this.#pointerLock.moveRight( - this.#velocity.x * delta );
+                    this.#pointerLock.moveForward( - this.#velocity.z * delta );
                     this.#setCameraBB(this.#insideCameraBB, camera.inside);
-                    this.#velocity.x = 0;
-                    this.#velocity.z = 0;
+                    let collision = this.#checkCollisions(this.#insideCameraBB, this.#boundingBoxes)
+                    if (collision.hasCollision && collision.collidedBox.name != "wall_11_3" && collision.collidedBox.name != "wall_11_4" ) {
+                        console.log(collision.collidedBox)
+                        this.#pointerLock.moveRight(this.#velocity.x * delta );
+                        this.#pointerLock.moveForward(this.#velocity.z * delta );
+                        console.log("collision")
+                        this.#setCameraBB(this.#insideCameraBB, camera.inside);
+                        this.#velocity.x = 0;
+                        this.#velocity.z = 0;
+                    }
+                }
+            } else if (this.mode == "teleport"){
+                if (this.#pointerLock.isLocked) {
+                    if (this.#moving) {
+                        console.log("moving")
+                        this.#pointerLock.pointerSpeed = 0;
+                        const delta = ( time - this.#prev_time ) / 1000;
+                        this.#moveToPoint.velocity += 5 * delta;
+                        if (this.#moveToPoint.velocity * delta * 10 < this.#moveToPoint.distance) {
+                            this.#pointerLock.moveForward(this.#moveToPoint.velocity * delta * 10);
+                            this.#moveToPoint.distance -= this.#moveToPoint.velocity * delta * 10;
+                        } else {
+                            this.#pointerLock.moveForward (this.#moveToPoint.distance);
+                            this.#moving = false;
+                            this.#pointerLock.pointerSpeed = 1;
+                        }
+                    } else {
+                        
+                        const newRaycaster = new THREE.Raycaster();
+                        newRaycaster.setFromCamera(new THREE.Vector2(), this.#camera.inside);
+                        const intersects = newRaycaster.intersectObjects(this.#objects, true);
+                        if (intersects.length > 0) {
+                            const firstObject = intersects[0].object;
+                            this.#insidePointer.position.x = intersects[0].point.x;
+                            this.#insidePointer.position.y = intersects[0].point.y;
+                            this.#insidePointer.position.z = intersects[0].point.z;
+
+                            if (firstObject.name.includes("floor")) {
+                                this.#colorObject(firstObject, 0xFF0000);
+                                this.#floorObject = firstObject;
+                            } else {
+                                if (this.#floorObject != null) {
+                                    this.#colorObject(this.#floorObject, 0x000000);
+                                }
+                            }
+                        }
+                    }
                 }
             }
             this.#prev_time = time;
+
         } else if(this.#view == "outside" || this.#view == "ortho") {
             this.#orbit.update();
             if (this.#gumball != null) {
@@ -552,6 +612,27 @@ class DemoControls {
             this.#clearGumball();
             this.#orbit.enabled = true;
         }  
+    }
+
+    #insideOnClick = (event) => {
+        if (true) {
+            if (this.#pointerLock.isLocked) {
+                const newRaycaster = new THREE.Raycaster();
+                newRaycaster.setFromCamera(new THREE.Vector2(), this.#camera.inside);
+                const intersects = newRaycaster.intersectObjects(this.#objects, true);
+                if (intersects.length > 0) {
+                    const firstObject = intersects[0].object;
+                    if (firstObject.name.includes("floor")) {
+                        this.#moving = true;
+                        const totalDistance = intersects[0].distance;
+                        const heightDiff = intersects[0].point.y - this.#camera.inside.position.y;
+                        const forwardDist = Math.sqrt(totalDistance * totalDistance - heightDiff * heightDiff);
+                        this.#moveToPoint = {distance: forwardDist, velocity: 0};
+                        this.#colorObject(firstObject, 0x000000);
+                    }
+                }
+            }
+        }
     }
 
     /**
