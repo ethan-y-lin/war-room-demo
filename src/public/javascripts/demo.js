@@ -424,7 +424,7 @@ class DemoScene {
         const skyMat = new THREE.MeshLambertMaterial({color: 0x87ceeb, side: THREE.BackSide});
         const sky = new THREE.Mesh(skyGeo, skyMat);
         scene.add(sky);
-
+        
         // const axesHelper = new THREE.AxesHelper( 100 );
         // scene.add( axesHelper );
         const assetLoader = new GLTFLoader();
@@ -604,12 +604,12 @@ class DemoScene {
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.ortho)} );
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.outside)} );
         window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.inside)} );
-
         const ceilingGeo = new THREE.BoxGeometry(this.#modelSize.x, 0.1, this.#modelSize.z,);
         const ceilingMat = new THREE.MeshBasicMaterial({color: 0xedeae5});
         const ceiling = new THREE.Mesh(ceilingGeo, ceilingMat);
         ceiling.position.y = this.#modelSize.y;
         ceiling.castShadow = true;
+        this.#objects.ceiling = ceiling;
         this.#scene.add(ceiling);
     }
     /**
@@ -622,6 +622,7 @@ class DemoScene {
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.ortho)} );
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.inside)} );
         window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.outside)} );
+        this.#scene.remove(this.#objects.ceiling);
     }
     /**
      * Sets the scene view to ortho mode by updating camera, controls, and objects.
@@ -633,6 +634,7 @@ class DemoScene {
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.outside)} );
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.inside)} );
         window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.ortho)} );
+        this.#scene.remove(this.#objects.ceiling);
     }
 
     guiControls(){
