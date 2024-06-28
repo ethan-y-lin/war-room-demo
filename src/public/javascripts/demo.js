@@ -5,6 +5,7 @@ import GUI from 'lil-gui';
 import * as THREE from 'three';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
 import { round } from 'three/examples/jsm/nodes/Nodes.js';
 /**
  * This class represents a scene that is displayed on the HTML element 
@@ -207,6 +208,11 @@ class DemoScene {
             }
         })
         
+        $('#p3').on('click', () => {
+            console.log("exporting");
+            this.downloadScene();
+        });
+
         $(document).on('keydown', (event)  => {
             if (event.key == "Escape") {
                 event.preventDefault();
@@ -274,7 +280,7 @@ class DemoScene {
         loader.load(addedObject.obj_url, (gltf) => {
             const newObject = gltf.scene;
             newObject.name = addedObject.name;
-            this.#scene.add(newObject);
+            this.#model.add(newObject);
             
             newObject.traverse(function(node){
                 if (node.isMesh){
@@ -315,7 +321,7 @@ class DemoScene {
             this.#objects.uploaded.push(newObject);
             this.#controls.updateObjects(this.#objects);
 
-            });
+        });
 
 
         // root.add( label );
@@ -728,6 +734,24 @@ class DemoScene {
     // getBoundingBox(){
     //     return this.#objects.boundingBox;
     // }
+    downloadScene() {
+        const exporter = new GLTFExporter();
+        this.#model.position.set(0,0,0);
+        this.#model.updateMatrixWorld(true);
+        exporter.parse(this.#model, function(result) {
+            const output = JSON.stringify(result, null, 2);
+            const blob = new Blob([output], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.style.display = 'none';
+            link.href = url;
+            link.download = 'scene.glb';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }, { binary: true });
+        this.#model.position.set(0, this.#modelSize.y / 2, 0);
+    }
 
     getControls() {
         return this.#controls;
