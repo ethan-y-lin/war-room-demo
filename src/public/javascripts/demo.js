@@ -181,7 +181,7 @@ class DemoScene {
         this.#controls.units = this.#units;
         this.#showBoundingBoxes = false;
         this.guiControls();
-
+        console.log(this.#modelSize);
     }
 
     #initListeners() {
@@ -604,9 +604,13 @@ class DemoScene {
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.ortho)} );
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.outside)} );
         window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.inside)} );
-        const ceilingGeo = new THREE.BoxGeometry(this.#modelSize.x, 0.1, this.#modelSize.z,);
+        //add ceiling to the inside view
+        const ceilingGeo = new THREE.BoxGeometry(this.#modelSize.x, 0.1, this.#modelSize.z);
         const ceilingMat = new THREE.MeshBasicMaterial({color: 0xedeae5});
         const ceiling = new THREE.Mesh(ceilingGeo, ceilingMat);
+        if (this.#modelSize.x < this.#modelSize.z) {
+            ceiling.rotateOnAxis(new THREE.Vector3(0,1,0), Math.PI / 2);
+        }
         ceiling.position.y = this.#modelSize.y;
         ceiling.castShadow = true;
         this.#objects.ceiling = ceiling;
