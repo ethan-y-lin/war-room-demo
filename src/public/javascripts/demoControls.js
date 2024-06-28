@@ -287,9 +287,7 @@ class DemoControls {
      */
     #reset() {
         // this.#drag.dispose();
-        if (this.#floorObject != null) {
-            this.#colorObject(this.#floorObject, 0x000000);
-        }
+        this.setToWASD();
         this.#pointerLock.dispose();
         this.#orbit.dispose();
         this.#clearGumball();
@@ -306,9 +304,19 @@ class DemoControls {
         this.#canvas.removeEventListener('mousemove', this.#orthoOnMove);
         this.#pointerLock.enabled = false;
         this.#orbit.enabled = false;
-        this.#scene.remove(this.#insidePointer);
+
     }
 
+    setToWASD() {
+        if (this.#floorObject != null) {
+            this.#colorObject(this.#floorObject, 0x000000);
+            this.#scene.remove(this.#insidePointer);
+        }
+    }
+    
+    setToTeleport() {
+        this.#scene.add(this.#insidePointer);
+    }
     /**
      * Assumes that this.objects and this.draggableObjects are up to date.
      * @param {*} newControl The control type to switch to. Requires either: "ortho", "inside", or "outside"
@@ -335,7 +343,6 @@ class DemoControls {
             this.hideBlocker();
         } else if (newControl == "inside"){
             this.#reset();
-            this.#scene.add(this.#insidePointer);
             this.#boundingBoxes = this.#getBoundingBoxes(this.#objects);
             this.#pointerLock = new PointerLockControls(camera, canvas);
             this.#pointerLock.enabled = true;
@@ -571,6 +578,7 @@ class DemoControls {
      * or null if no gumball control is active.
      */
     #clickObject(object, camera) {
+        console.log(object)
         if (this.#gumball != null) {
             if (object == this.#gumball.object) {
                 return this.#gumball;
@@ -796,13 +804,13 @@ class DemoControls {
     #toggleGumball = (event) =>{
         switch(event.code){
             case 'KeyT':
-                this.#gumball.setMode('translate');
+                this.#gumball.mode = 'translate';
                 this.#gumball.showX = true;
                 this.#gumball.showZ = true;
                 this.#gumball.showY = false;
                 break;
             case 'KeyR':
-                this.#gumball.setMode('rotate');
+                this.#gumball.mode = 'rotate';
                 this.#gumball.showX = false;
                 this.#gumball.showZ = false;
                 this.#gumball.showY = true;
@@ -1014,8 +1022,8 @@ class DemoControls {
         return this.#measure_points;
     }
 
-    setControlMode(string){
-        return this.#gumball.setMode(string);
+    setGumballMode(mode){
+        this.#gumball.mode = mode;
     }
 
 }

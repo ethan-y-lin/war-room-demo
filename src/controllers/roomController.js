@@ -6,17 +6,17 @@ const {body, validationResult} = require("express-validator");
 const Room = require("../models/room");
 
 
-// Handle Room open on GET
-exports.room_open_get = asyncHandler(async (req, res, next) => {
-  const room = await Room.findById(req.params.id).exec();
-  req.session.roomURL = room.room_url;
-  req.session.save((err) => {
-    if (err) {
-      return res.status(500).send('Failed to save session');
-    }
-    res.redirect("/");
-  });
-});
+// // Handle Room open on GET
+// exports.room_open_get = asyncHandler(async (req, res, next) => {
+//   const room = await Room.findById(req.params.id).exec();
+//   req.session.roomURL = room.room_url;
+//   req.session.save((err) => {
+//     if (err) {
+//       return res.status(500).send('Failed to save session');
+//     }
+//     res.redirect("/");
+//   });
+// });
 
 // Handle Room create on POST.
 exports.room_upload_post = [
@@ -90,3 +90,16 @@ exports.room_upload_post = [
     }),
   ];
 
+// Display detail page for a specific Room.
+exports.room_detail = asyncHandler(async (req, res, next) => {
+  // // Get details of room and all their books (in parallel)
+    const room = await Room.findById(req.params.id).exec();
+    if (room === null) {
+      // No results.
+      const err = new Error("Room not found");
+      err.status = 404;
+      return next(err);
+    }
+    console.log(room);
+    res.json(room);
+});

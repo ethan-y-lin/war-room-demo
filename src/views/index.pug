@@ -1,8 +1,6 @@
 extends layout
 
 block content
-    div.object-data(data-object=addObject)
-    div.room-data(data-room=current_room)
     div.tutorials 
         p
             a.tutorial-button &#9432; Tutorials
@@ -29,7 +27,7 @@ block content
                             span.tooltip-icon &quest;
                     li
                         div.tooltip
-                            a.menu-unit#sp SAVED PLANS
+                            a.menu-unit#sp SAVED DESIGNS
                             span.tooltip-icon &quest;
                     li                     
                         div.object-button.tooltip
@@ -66,7 +64,7 @@ block content
                     div.layerx
                         each room in rooms
                             li
-                                a.room-link(href="room"+room.url)= room.name
+                                a(class="open-room-link" href="#" data-url=`${room.url}`) #{room.name}
                         li
                             div#room-button.dropdown-button  
                                 a &#43; Add new floor plan
@@ -112,14 +110,11 @@ block content
                 ul#saved-plans.layer2.hidden
                     div.back-button1 &lt; back
                     div.menu-title
-                        h2 SAVED PLANS
+                        h2 SAVED Designs
                     div.layerx
-                        li
-                            a Plan 1
-                        li
-                            a Plan 2
-                        li
-                            a Plan 3
+                        each design in designs 
+                            li
+                                a(class="open-design-link" href="#" data-url=`${design.url}`) #{design.name}
             div#column3.hidden
                 each category in categories
                     ul(id= "category-"+category.name.replaceAll(' ', '-'), class= "layer3 hidden")
@@ -177,7 +172,7 @@ block content
                         button#fullscreen-button ⛶
                     div#scene-options
                         button#reset Reset
-                        button Save
+                        button#save-design Save
         div.view-buttons
             button#ortho-view.button Orthographic
             button#outside-view.button Outside

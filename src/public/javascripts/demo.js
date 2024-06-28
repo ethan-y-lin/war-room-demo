@@ -52,18 +52,12 @@ class DemoScene {
     #objects; // objects in the scene
 
     /**
-     * The url of objects uploaded from MongoDB.
-     * @type {Array.<String>}
+     * An object containing information about the room
+     * including, _id, url, and name.
+     * @type {Object}
      * @private
      */
-    #uploaded_objects_url; 
-
-    /**
-     * URL object linking to the room/model .glb/obj file.
-     * @type {URL}
-     * @private
-     */
-    #roomURL; 
+    #room; 
     
     /**
      * The loaded .glb/obj room/model.
@@ -111,10 +105,11 @@ class DemoScene {
     /**
      * Calls for the initialization the DemoScene object and then
      * calls the animation loop when initialization is completed.
-     * @param {URL} roomURL 
+     * @param {Object} room 
      */
-    constructor(roomURL) {
-        this.#initialize(roomURL).then(() => {
+    constructor(room, objects) {
+        console.log(objects)
+        this.#initialize(room, objects).then(() => {
             this.#animate();
         });
     }
@@ -123,9 +118,9 @@ class DemoScene {
 
     /**
      * Initializes the DemoScene object given the room URL.  
-     * @param {URL} roomURL 
+     * @param {URL} room 
      */
-    async #initialize(roomURL) {
+    async #initialize(room, objects) {
         this.#canvas = document.getElementById("scene-container");
         this.#objects = {walls: [], 
                         furniture: [],
@@ -133,11 +128,10 @@ class DemoScene {
                         windows: [],
                         uploaded: []};
         this.#lights = {};
-        this.#uploaded_objects_url = [];
         this.#scene = new THREE.Scene();
-        // this.roomURL = new URL('../assets/warroom1.glb', import.meta.url);
-        this.#roomURL = roomURL;
-
+        // this.room = new URL('../assets/warroom1.glb', import.meta.url);
+        this.#room = room;
+        console.log(room);
         // initialize geometries
         this.#grid_scale = 0.1; // meter
         await this.#initGeometries(this.#scene);
@@ -148,6 +142,7 @@ class DemoScene {
         this.#renderer.setSize(this.#canvas.offsetWidth, this.#canvas.offsetHeight);
         this.#renderer.shadowMap.enabled = true;
         this.#renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        this.#renderer.domElement.id = "3js-scene"
         this.#renderer.domElement.style = "";
         this.#canvas.appendChild( this.#renderer.domElement );
 
@@ -182,6 +177,9 @@ class DemoScene {
         this.#showBoundingBoxes = false;
         this.guiControls();
 
+        for (let objData of objects) {
+            this.addObject(objData.object, objData.position, objData.rotation);
+        }
     }
 
     #initListeners() {
@@ -211,6 +209,11 @@ class DemoScene {
         $('#p3').on('click', () => {
             console.log("exporting");
             this.downloadScene();
+        });
+
+        $('#reset').on('click', () => {
+            console.log("reset")
+            this.reset();
         });
 
         $(document).on('keydown', (event)  => {
@@ -273,7 +276,7 @@ class DemoScene {
     }
 
     // PROBABLY WILL HAVE TO CHANGE DRASTICALLY
-    addObject (object) {
+    addObject (object, position = null, rotation = null) {
 
         const addedObject = object;
         const loader = new GLTFLoader();
@@ -287,6 +290,22 @@ class DemoScene {
                     node.castShadow = true;
                     node.receiveShadow = true;}
             })
+
+            if (position == null) {
+                const openPos = this.openPosition(newObject); // find an open position to display the box
+                console.log(newObject.position)
+                newObject.position.set(openPos.x, openPos.y, openPos.z);
+                console.log(newObject)
+            } else {
+                newObject.position.set(position.x, position.y, position.z);
+            }   
+
+            if (rotation != null) {
+                newObject.rotation.x = rotation.x;
+                newObject.rotation.y = rotation.y;
+                newObject.rotation.z = rotation.z;
+            }
+
             // Compute the bounding box of the object
             const box = new THREE.Box3().setFromObject(newObject, true);
 
@@ -299,11 +318,6 @@ class DemoScene {
             boundingBox.name = "bounding_box";
             boundingBox.visible = this.#showBoundingBoxes;
             newObject.add(boundingBox);
-
-            const openPos = this.openPosition(newObject); // find an open position to display the box
-            console.log(newObject.position)
-            newObject.position.set(openPos.x, openPos.y, openPos.z);
-            console.log(newObject)
 
             // add label
             const text = document.createElement( 'div' );
@@ -322,44 +336,7 @@ class DemoScene {
             this.#controls.updateObjects(this.#objects);
 
         });
-
-
-        // root.add( label );
     }
-    // #updateObjects () {
-    //     const addedObjects = JSON.parse(document.querySelector('.object-data').dataset.objects);
-    //     addedObjects.forEach((object) => {
-    //         if (! (object.obj_url == '' || this.#uploaded_objects_url.includes(object.obj_url))) {      
-    //             const loader = new GLTFLoader();
-    //             loader.load(object.obj_url, (gltf) => {
-    //                 const newObject = gltf.scene;
-    //                 newObject.name = object.name;
-    //                 this.#scene.add(newObject);
-
-    //                 // Compute the bounding box of the object
-    //                 const box = new THREE.Box3().setFromObject(newObject, true);
-
-    //                 // Create a box helper
-    //                 const boxGeometry = new THREE.BoxGeometry(box.max.x - box.min.x, box.max.y - box.min.y, box.max.z - box.min.z);
-    //                 const boxMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.5 });
-    //                 const boundingBox = new THREE.Mesh(boxGeometry, boxMaterial);
-
-    //                 boundingBox.position.set((box.max.x + box.min.x) / 2, (box.max.y + box.min.y) / 2, (box.max.z + box.min.z) / 2)
-    //                 boundingBox.name = "bounding_box";
-    //                 newObject.add(boundingBox);
-
-    //                 const openPos = this.openPosition(newObject); // find an open position to display the box
-    //                 console.log(openPos);
-    //                 newObject.position.set(openPos.x, openPos.y, openPos.z);
-    //                 console.log(newObject)
-
-    //                 this.#objects.uploaded.push(newObject);
-    //                 this.#uploaded_objects_url.push(object.obj_url);
-    //                 this.#controls.updateObjects(this.#objects);
-    //             });
-    //         }
-    //     });
-    // }
 
     /**
      * Initializes the geometries and lights in the given scene.
@@ -430,7 +407,7 @@ class DemoScene {
         const assetLoader = new GLTFLoader();
 
         return new Promise((resolve, reject) => {
-            assetLoader.load(this.#roomURL.href, (gltf) => {
+            assetLoader.load(this.#room.room_url.href, (gltf) => {
                 console.log("loading model");
                 this.#model = gltf.scene; // model
 
@@ -663,13 +640,12 @@ class DemoScene {
         //toggling object controls (translate/rotate)
         const folderControls = gui.addFolder('Object Controls');
         //folderControls.close();
-        const control = this.#controls;
         const controlToggle = {
-            translate: function(){
-                control.setControlMode('translate');
+            translate: () => {
+                this.#controls.setGumballMode('translate');
             },
-            rotate: function(){
-                control.setControlMode('rotate');
+            rotate: () => {
+                this.#controls.setGumballMode('rotate');
             }
         }
         
@@ -679,10 +655,12 @@ class DemoScene {
         const folderMoving = gui.addFolder('Moving Controls');
         const controlMoving = {
             keyboard: () => {
-                this.#controls.setMode("regular");
+                this.#controls.setToWASD();
+                this.#controls.mode = "regular";
             },
             teleport: () => {
-                this.#controls.setMode("teleport");
+                this.#controls.setToTeleport();
+                this.#controls.mode = "teleport";
             }
         }
         folderMoving.add(controlMoving, 'keyboard').name('WASD');
@@ -753,6 +731,44 @@ class DemoScene {
         this.#model.position.set(0, this.#modelSize.y / 2, 0);
     }
 
+    reset () {
+        this.#objects.uploaded.forEach( (obj) => {
+            obj.clear();
+            this.#model.remove(obj);
+        });
+        this.#objects.uploaded = [];
+        if (this.#camera.name == "inside") {
+            this.#camera.setInsideCamera();
+        } else if (this.#camera.name == "outside") {
+            this.#camera.setOutsideCamera();
+        }
+    }
+
+    getSceneData() {
+        const objectsData = []
+        this.#objects.uploaded.forEach( (obj) => {
+            const objData = {};
+            objData.name = obj.name;
+            objData.position = {};
+            objData.position.x = obj.position.x;
+            objData.position.y = obj.position.y;
+            objData.position.z = obj.position.z;
+
+            objData.rotation = {};
+            objData.rotation.x = obj.rotation.x;
+            objData.rotation.y = obj.rotation.y;
+            objData.rotation.z = obj.rotation.z;
+            objectsData.push(objData);
+        });
+        let roomID;
+        if ("_id" in this.#room) {
+            roomID = this.#room._id;
+        } else {
+            roomID = null;
+        }
+        return {objectsData: objectsData, roomID: roomID};
+    }
+
     getControls() {
         return this.#controls;
     }
@@ -772,7 +788,10 @@ class DemoScene {
         return this.#lights.spot;
     }
     clear() {
-        // unimplemented
+        this.#objects.uploaded.forEach( (obj) => {
+            obj.clear();
+            this.#model.remove(obj);
+        });
     }
 }
 

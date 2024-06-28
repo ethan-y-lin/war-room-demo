@@ -52,11 +52,6 @@ $(".back-button2").on('click', function(){
     $("#furnitures").removeClass("hidden");
 })
 
-//temporary refresh the whole page
-$("#reset").on('click', function(){
-    history.go(0);
-})
-
 $("#category-button").on('click', function(){
     $("#category-form").slideToggle("slow");
 })

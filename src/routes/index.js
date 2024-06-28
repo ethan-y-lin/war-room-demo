@@ -10,6 +10,7 @@ const object_controller = require("../controllers/objectController");
 const app_controller = require("../controllers/appController");
 const category_controller = require('../controllers/categoryController');
 const room_controller = require("../controllers/roomController");
+const design_controller = require("../controllers/designController");
 
 // Routes
 router.get('/', app_controller.index);
@@ -44,10 +45,21 @@ router.post('/delete-category/:id', category_controller.category_delete_post);
 
 // ROOM ROUTES 
 
-// GET request for opening a Room.
-router.get('/room/:id', room_controller.room_open_get);
+// // GET request for opening a Room.
+// router.get('/room/:id', room_controller.room_open_get);
 
 // POST request for creating a Room.
 router.post('/upload-room', upload.single('room'), room_controller.room_upload_post);
+
+// GET request for one Room.
+router.get("/room/:id", room_controller.room_detail);
+
+/// DESIGN ROUTES
+
+// GET request for one Design.
+router.get("/design/:id", design_controller.design_detail);
+
+// POST request for uploading a Design.
+router.post('/upload-design', design_controller.design_upload_post);
 
 module.exports = router;
