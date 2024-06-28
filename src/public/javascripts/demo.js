@@ -604,6 +604,13 @@ class DemoScene {
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.ortho)} );
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.outside)} );
         window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.inside)} );
+
+        const ceilingGeo = new THREE.BoxGeometry(this.#modelSize.x, 0.1, this.#modelSize.z,);
+        const ceilingMat = new THREE.MeshBasicMaterial({color: 0xedeae5});
+        const ceiling = new THREE.Mesh(ceilingGeo, ceilingMat);
+        ceiling.position.y = this.#modelSize.y;
+        ceiling.castShadow = true;
+        this.#scene.add(ceiling);
     }
     /**
      * Sets the scene view to outside mode by updating camera, controls, and objects.
@@ -707,10 +714,10 @@ class DemoScene {
 
         //changing material color?
         const folderColors = gui.addFolder('Change Colors');
-        //folderColors.close();
+        folderColors.close();
         
         //changing measurement units
-        const folderMeasurements = gui.addFolder('Measurement Units');
+        const folderMeasurements = gui.addFolder('Units');
         const measurementUnits = {
             meter: () => {
                 this.#units = "meters";
