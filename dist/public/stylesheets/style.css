@@ -154,25 +154,68 @@ nav a{
   border-color:#445c52;
   cursor: pointer;
 }
-.tooltip-icon:hover+.tooltip-text{
-  display: block;
+
+.tooltip-icon-vertical{
+  z-index: 3;
+  border-radius: 18px;
+  border:1px solid rgba(255, 255, 255, 0.5);
+  height: 16px;
+  width: 16px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  margin-left: 10px;
 }
+
+.tooltip-icon-vertical:hover{
+  color: #445c52;
+  background-color:white;
+  border-color:#445c52;
+  cursor: pointer;
+}
+
 .tooltip-section{
   display: flex;
   flex-direction: row;
   align-items: center;
   position: relative;
 }
+
+.tooltip-section-vertical{
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
 .tooltip-text{
   position: absolute;
-  margin-left: 30px;
   background-color:#445c5290;
   z-index: auto;
   color: white;
-  display: none;
-  padding: 5px;
+  padding: 15px;
   border-radius: 3px;
+  width: 180px;
+  font-size: 14px;
+  margin-left: 30px;
+  height: 35px;
+  text-align: center;
 }
+.tooltip-text-vertical{
+  position: absolute;
+  background-color:#445c5290;
+  z-index: auto;
+  color: white;
+  /* display: none; */
+  padding: 15px;
+  border-radius: 3px;
+  width: 130px;
+  text-align: start;
+  font-size: 14px;
+  margin-bottom: 30px;
+}
+
 .dropdown-menu ul a{
   display: block;
   padding: 10px 10px;
@@ -253,14 +296,37 @@ nav a{
 .view-buttons{
   display: flex;
   flex-direction: row;
+  align-items: center;
   justify-content: center;
+}
+
+.view{
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-size: 16px;
+  width: 180px;
+  height: 40px;
+  margin: 5px;
+  background-color: #384c44;
+  color: white;
+  border: 1px solid white;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: row;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+}
+
+.view:hover{
+  cursor: pointer;
+  background: #a4c3b2;
 }
 
 .button{
   font-family: Georgia, 'Times New Roman', Times, serif;
-  font-size: 14px;
-  width: 100px;
-  height: 30px;
+  font-size: 16px;
+  width: 120px;
+  height: 40px;
   margin: 5px;
   background-color: #384c44;
   color: white;
