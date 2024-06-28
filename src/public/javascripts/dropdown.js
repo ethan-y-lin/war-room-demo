@@ -64,3 +64,20 @@ $(".object-button").on('click', function(){
     console.log("object-button clicked");
     $("#object-form").slideToggle("slow");
 })
+
+//tooltips click and hover
+$(".tooltip-icon").on('mouseenter',function(){
+    $(this).next(".tooltip-text").toggleClass("hidden");
+})
+$(".tooltip-icon").on('mouseleave',function(){
+    $(this).next(".tooltip-text").toggleClass("hidden");
+})
+$(".tooltip-icon-vertical").on('mouseenter',function(){
+    $(this).next(".tooltip-text-vertical").toggleClass("hidden");
+})
+$(".tooltip-icon-vertical").on('mouseleave',function(){
+    $(this).next(".tooltip-text-vertical").toggleClass("hidden");
+})
+$(".tutorial-button").on('click', function(){
+    $(".tooltip-text, .tooltip-text-vertical").toggleClass("hidden");
+})

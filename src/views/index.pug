@@ -16,23 +16,31 @@ block content
                             a.menu-unit#fp FLOOR PLANS
                             div.tooltip-section
                                 div.tooltip-icon &quest;                               
-                                p.tooltip-text something
+                                p.tooltip-text.hidden See all your uploaded floor plans here
                     li
                         div.tooltip
                             a.menu-unit#f FURNITURES
-                            span.tooltip-icon &quest;
+                            div.tooltip-section
+                                div.tooltip-icon &quest;                               
+                                p.tooltip-text.hidden See all your uploaded furnitures here
                     li
                         div.tooltip
                             a.menu-unit#m MEASUREMENT
-                            span.tooltip-icon &quest;
+                            div.tooltip-section
+                                div.tooltip-icon &quest;                               
+                                p.tooltip-text.hidden Toggle between viewing and measuring the dimension of the room and furnitures
                     li
                         div.tooltip
-                            a.menu-unit#sp SAVED DESIGNS
-                            span.tooltip-icon &quest;
+                            a.menu-unit#sp SAVED PLANS
+                            div.tooltip-section
+                                div.tooltip-icon &quest;                               
+                                p.tooltip-text.hidden See your saved floor plans with furnitures
                     li                     
                         div.object-button.tooltip
                             a UPLOAD
-                            span.tooltip-icon &quest;
+                            div.tooltip-section
+                                div.tooltip-icon &quest;                               
+                                p.tooltip-text.hidden Upload your scanned furniture models here
                     form(id="object-form" method='POST' enctype='multipart/form-data' action= "/upload-object")
                         div.form-flex-col
                             div.form-group.form-input
@@ -174,9 +182,19 @@ block content
                         button#reset Reset
                         button#save-design Save
         div.view-buttons
-            button#ortho-view.button Orthographic
-            button#outside-view.button Outside
-            button#inside-view.button Inside
+            button#ortho-view.view
+                p Orthographic
+                div.tooltip-section-vertical
+                    div.tooltip-icon-vertical &quest;                               
+                    p.tooltip-text-vertical.hidden Move furnitures around in a top-down view without moving the floor plan
+            button#outside-view.view Outside
+                div.tooltip-section-vertical
+                    div.tooltip-icon-vertical &quest;                               
+                    p.tooltip-text-vertical.hidden Move furnitures using more flexible controls that allows you to move around the whole room as well.
+            button#inside-view.view Inside
+                div.tooltip-section-vertical
+                    div.tooltip-icon-vertical &quest;                               
+                    p.tooltip-text-vertical.hidden Walk inside the room in the first-person view
 
     //- script(src="./javascripts/jquery-3.7.1.min.js")
     //- script(src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js")

@@ -401,7 +401,7 @@ class DemoScene {
         const skyMat = new THREE.MeshLambertMaterial({color: 0x87ceeb, side: THREE.BackSide});
         const sky = new THREE.Mesh(skyGeo, skyMat);
         scene.add(sky);
-
+        
         // const axesHelper = new THREE.AxesHelper( 100 );
         // scene.add( axesHelper );
         const assetLoader = new GLTFLoader();
@@ -581,6 +581,26 @@ class DemoScene {
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.ortho)} );
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.outside)} );
         window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.inside)} );
+        //add ceiling to the inside view
+        const ceilingGeo = new THREE.BoxGeometry(this.#modelSize.x, 0.1, this.#modelSize.z);
+        const ceilingMat = new THREE.MeshBasicMaterial({color: 0xedeae5});
+        const ceiling = new THREE.Mesh(ceilingGeo, ceilingMat);
+        if (this.#modelSize.x < this.#modelSize.z) {
+            ceiling.rotateOnAxis(new THREE.Vector3(0,1,0), Math.PI / 2);
+        }
+        ceiling.position.y = this.#modelSize.y;
+        ceiling.castShadow = true;
+        this.#objects.ceiling = ceiling;
+        this.#scene.add(ceiling);
+
+        const roomLight = new THREE.DirectionalLight(0xe0f1ff, 2);
+        roomLight.position.set(0, ceiling.position.y, 0);
+        //const roomLightHelper = new THREE.DirectionalLightHelper(roomLight);
+        roomLight.castShadow = true;
+        // roomLight.lookAt(2, 0, 1);
+        this.#scene.add(roomLight);
+        this.#lights.room = roomLight;
+        //this.#scene.add(roomLightHelper);
     }
     /**
      * Sets the scene view to outside mode by updating camera, controls, and objects.
@@ -592,6 +612,8 @@ class DemoScene {
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.ortho)} );
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.inside)} );
         window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.outside)} );
+        this.#scene.remove(this.#objects.ceiling);
+        this.#scene.remove(this.#lights.room);
     }
     /**
      * Sets the scene view to ortho mode by updating camera, controls, and objects.
@@ -603,6 +625,8 @@ class DemoScene {
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.outside)} );
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.inside)} );
         window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.ortho)} );
+        this.#scene.remove(this.#objects.ceiling);
+        this.#scene.remove(this.#lights.room);
     }
 
     guiControls(){
@@ -685,10 +709,10 @@ class DemoScene {
 
         //changing material color?
         const folderColors = gui.addFolder('Change Colors');
-        //folderColors.close();
+        folderColors.close();
         
         //changing measurement units
-        const folderMeasurements = gui.addFolder('Measurement Units');
+        const folderMeasurements = gui.addFolder('Units');
         const measurementUnits = {
             meter: () => {
                 this.#units = "meters";
