@@ -618,11 +618,12 @@ class DemoScene {
 
         const roomLight = new THREE.DirectionalLight(0xe0f1ff, 2);
         roomLight.position.set(0, ceiling.position.y, 0);
-        const roomLightHelper = new THREE.DirectionalLightHelper(roomLight);
+        //const roomLightHelper = new THREE.DirectionalLightHelper(roomLight);
         roomLight.castShadow = true;
         // roomLight.lookAt(2, 0, 1);
         this.#scene.add(roomLight);
-        this.#scene.add(roomLightHelper);
+        this.#lights.room = roomLight;
+        //this.#scene.add(roomLightHelper);
     }
     /**
      * Sets the scene view to outside mode by updating camera, controls, and objects.
@@ -635,6 +636,7 @@ class DemoScene {
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.inside)} );
         window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.outside)} );
         this.#scene.remove(this.#objects.ceiling);
+        this.#scene.remove(this.#lights.room);
     }
     /**
      * Sets the scene view to ortho mode by updating camera, controls, and objects.
@@ -647,6 +649,7 @@ class DemoScene {
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.inside)} );
         window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.ortho)} );
         this.#scene.remove(this.#objects.ceiling);
+        this.#scene.remove(this.#lights.room);
     }
 
     guiControls(){
