@@ -94,13 +94,9 @@ block content
                         h2 FURNITURES
                     div.layerx
                         each category in categories 
-                            li
-                                div.deletion
-                                    a.menu-header(id= category.name.replaceAll(' ', '-'))= category.name
-                                    form(method='POST' action="/delete-category/" + category._id)
-                                        div.form-group
-                                            input#categoryid.form-control(type='hidden', name='categoryid', value=category._id )
-                                        button.delete-hover(type='submit') 
+                            li(data-url=`${category.url}`)
+                                a.menu-header(id= category.name.replaceAll(' ', '-') class="open-category-link" href="#" data-url=`${category.url}`) #{category.name}
+                                button.delete-hover(class="delete-category" data-url=`${category.url}`) 
                         li
                             a#list.menu-header Full List        
                         li
@@ -121,8 +117,9 @@ block content
                         h2 SAVED Designs
                     div.layerx
                         each design in designs 
-                            li
+                            li(data-url=`${design.url}`)
                                 a(class="open-design-link" href="#" data-url=`${design.url}`) #{design.name}
+                                button.delete-hover(class="delete-design" data-url=`${design.url}`) 
             div#column3.hidden
                 each category in categories
                     ul(id= "category-"+category.name.replaceAll(' ', '-'), class= "layer3 hidden")
@@ -134,13 +131,9 @@ block content
                                 each obj in category.objects
                                     each object in objects  
                                             if obj == object.id
-                                                li
-                                                    div.deletion
-                                                        a(class="add-object-to-scene" href="#" data-url=`${object.url}`) #{object.name}
-                                                        form(method='POST' action="/delete-object/" + object._id)
-                                                            div.form-group
-                                                                input#objectid.form-control(type='hidden', name='objectid', value=object._id )
-                                                            button.delete-hover(type='submit') 
+                                                li(data-url=`${object.url}`)
+                                                    a(class="add-object-to-scene" href="#" data-url=`${object.url}`) #{object.name}
+                                                    button.delete-hover(class="delete-object" data-url=`${object.url}`) 
                             else    
                                 p There are no objects.
                             

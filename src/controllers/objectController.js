@@ -172,11 +172,11 @@ exports.object_delete_post = asyncHandler(async (req, res, next) => {
     });
 
     // Delete the item from the database
-    await Object.findByIdAndDelete(req.body.objectid);
-    res.redirect("/");
+    await Object.findByIdAndDelete(req.params.id);
+    res.status(200).send({ success: true });
   } catch (error) {
     console.error('Error deleting item:', error);
-    next(error);
+    res.status(500).send({ success: false });
   }
 });
 

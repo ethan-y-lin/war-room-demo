@@ -50,7 +50,7 @@ $(window).on('load', function() {
     });
 
     const designLinks = document.querySelectorAll('.open-design-link');
-        designLinks.forEach(link => {
+    designLinks.forEach(link => {
         link.addEventListener('click', function(event) {
             if (APP != null) {
                 APP.clear();
@@ -62,6 +62,31 @@ $(window).on('load', function() {
             fetchAndInitDesign(url); // Call the fetchAndAddObject function with the URL
         });
     });
+
+    const deleteDesignButtons = document.querySelectorAll('.delete-design');
+    deleteDesignButtons.forEach(button => {
+        button.addEventListener('click', function (event) {
+            event.preventDefault();
+            const url = this.dataset.url
+            deleteDesign(url);
+        })
+    });
+    const deleteCategoryButtons = document.querySelectorAll('.delete-category');
+    deleteCategoryButtons.forEach(button => {
+        button.addEventListener('click', function (event) {
+            event.preventDefault();
+            const url = this.dataset.url
+            deleteCategory(url);
+        })
+    });
+    const deleteObjectButtons = document.querySelectorAll('.delete-object');
+    deleteObjectButtons.forEach(button => {
+        button.addEventListener('click', function (event) {
+            event.preventDefault();
+            const url = this.dataset.url
+            deleteObject(url);
+        })
+    })
 });
 
 
@@ -107,7 +132,6 @@ async function fetchAndInitRoom(roomURL) {
     }
 }
 
-
 async function saveDesign() {
     const data = APP.getSceneData();
     fetch('/upload-design', {
@@ -120,6 +144,20 @@ async function saveDesign() {
       .then(response => response.json())
       .then(data => console.log('Success:', data))
       .catch(error => console.error('Error:', error));
+}
+
+async function deleteDesign(designURL) {
+    fetch(`/delete-design` + designURL, {
+        method: 'DELETE',
+    }).then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.querySelector(`li[data-url="${designURL}"]`).remove();
+        } else {
+            alert('Error deleting item')
+        }
+    })
+    .catch(error => console.error('Error: ', error))
 }
 
 async function fetchAndInitDesign(designURL) {
@@ -138,4 +176,32 @@ async function fetchAndInitDesign(designURL) {
     } catch (error) {
         console.error('Error fetching object:', error);
     }
+}
+
+async function deleteCategory(categoryURL) {
+    fetch(`/delete-category` + categoryURL, {
+        method: 'DELETE',
+    }).then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.querySelector(`li[data-url="${categoryURL}"]`).remove();
+        } else {
+            alert('Error deleting item')
+        }
+    })
+    .catch(error => console.error('Error: ', error))
+}
+
+async function deleteObject(objectURL) {
+    fetch(`/delete-object` + objectURL, {
+        method: 'DELETE',
+    }).then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.querySelector(`li[data-url="${objectURL}"]`).remove();
+        } else {
+            alert('Error deleting item')
+        }
+    })
+    .catch(error => console.error('Error: ', error))
 }
