@@ -111,7 +111,7 @@ nav a{
   flex-direction: column;
   margin: 0px;
   padding: 0px;
-  /* text-align: center; */
+  list-style: none;
 }
 
 .layer1 ul{
@@ -232,6 +232,7 @@ nav a{
   margin: 0px;
   position: absolute;
 }
+
 
 .layer2{
   display: flex;
