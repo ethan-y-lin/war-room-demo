@@ -50,7 +50,7 @@ $(window).on('load', function() {
     });
 
     const designLinks = document.querySelectorAll('.open-design-link');
-        designLinks.forEach(link => {
+    designLinks.forEach(link => {
         link.addEventListener('click', function(event) {
             if (APP != null) {
                 APP.clear();
@@ -62,6 +62,15 @@ $(window).on('load', function() {
             fetchAndInitDesign(url); // Call the fetchAndAddObject function with the URL
         });
     });
+
+    const deleteDesignButtons = document.querySelectorAll('.delete-design');
+    deleteDesignButtons.forEach(button => {
+        button.addEventListener('click', function (event) {
+            event.preventDefault();
+            const url = this.dataset.url
+            deleteDesign(url);
+        })
+    })
 });
 
 
@@ -120,6 +129,20 @@ async function saveDesign() {
       .then(response => response.json())
       .then(data => console.log('Success:', data))
       .catch(error => console.error('Error:', error));
+}
+
+async function deleteDesign(designURL) {
+    fetch(`/delete-design` + designURL, {
+        method: 'DELETE',
+    }).then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.querySelector(`li[data-url="${designURL}"]`).remove();
+        } else {
+            alert('Error deleting item')
+        }
+    })
+    .catch(error => console.error('Error: ', error))
 }
 
 async function fetchAndInitDesign(designURL) {

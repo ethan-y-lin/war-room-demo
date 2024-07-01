@@ -59,6 +59,9 @@ router.get("/room/:id", room_controller.room_detail);
 // GET request for one Design.
 router.get("/design/:id", design_controller.design_detail);
 
+// DELETE request for one Design
+router.delete("/delete-design/:id", design_controller.design_delete_post)
+
 // POST request for uploading a Design.
 router.post('/upload-design', design_controller.design_upload_post);
 

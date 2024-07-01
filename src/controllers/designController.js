@@ -35,10 +35,15 @@ exports.design_detail = asyncHandler(async (req, res, next) => {
   exports.design_upload_post = asyncHandler(async (req, res, next) => {
     const objectsData = req.body.objectsData;
     const roomID = req.body.roomID;
-    console.log(req.body);
     
     try {
-      const room = await Room.findById(roomID).exec();
+      let room;
+      if (roomID != null) {
+        room = await Room.findById(roomID).exec();
+      } else {
+        room = await Room.findOne({name: "War Room"});
+      }
+
       if (!room) {
         res.status(404).json({ message: 'Room not found' });
         return;
@@ -84,3 +89,15 @@ exports.design_detail = asyncHandler(async (req, res, next) => {
       res.status(400).json({ message: error.message });
     }
   });
+
+// Handle Design delete on POST
+exports.design_delete_post = asyncHandler(async (req, res, next) => {
+  console.log("Design delete");
+    // Get details of design
+  try {
+    await Design.findByIdAndDelete(req.params.id)
+    res.status(200).send({ success: true });
+  } catch (error) {
+    res.status(500).send({ success: false });
+  }
+});

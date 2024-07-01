@@ -121,8 +121,9 @@ block content
                         h2 SAVED Designs
                     div.layerx
                         each design in designs 
-                            li
+                            li(data-url=`${design.url}`)
                                 a(class="open-design-link" href="#" data-url=`${design.url}`) #{design.name}
+                                button.delete-hover(class="delete-design" data-url=`${design.url}`) 
             div#column3.hidden
                 each category in categories
                     ul(id= "category-"+category.name.replaceAll(' ', '-'), class= "layer3 hidden")
