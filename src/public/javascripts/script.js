@@ -1,3 +1,4 @@
+import category from "../../models/category.js";
 import {DemoScene} from "./demo.js"
 import $ from 'jquery'
 console.log("INIT")
@@ -38,6 +39,9 @@ $(window).on('load', function() {
         init(startModel);
         start = false;
     }
+
+    const uploadCategoryForm = document.getElementById("c-form");
+    uploadCategoryForm.addEventListener('submit', uploadCategory);
     const roomLinks = document.querySelectorAll('.open-room-link');
     roomLinks.forEach(link => {
         link.addEventListener('click', function(event) {
@@ -178,6 +182,91 @@ async function fetchAndInitDesign(designURL) {
     }
 }
 
+async function uploadCategory(e) {
+    e.preventDefault();
+    const categoryName = document.getElementById('category-name').value;
+    console.log(categoryName)
+    fetch('/upload-category', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            name: categoryName
+        })
+    }).then(response => response.json())
+    .then(data => {
+        console.log(data)
+        if (data.success) {
+
+            const layerX = document.querySelector("#furnitures .layerx");
+            layerX.appendChild(addCategoryToDOM(categoryName, data.url));
+
+            // ADD NEW COLUMN FOR WHEN CATEGORY IS CLICKED
+            const column = document.getElementById('column3');
+            const newCategoryDom = document.createElement('ul');
+            newCategoryDom.setAttribute('id', `category-${categoryName.replaceAll(' ', '-')}`);
+            newCategoryDom.setAttribute('class', 'layer3 hidden');
+
+            // Create div.back-button2
+            const backButtonDiv = document.createElement('div');
+            backButtonDiv.className = 'back-button2';
+            backButtonDiv.textContent = '< back';
+
+            // Create div.menu-title and its child h2
+            const menuTitleDiv = document.createElement('div');
+            menuTitleDiv.className = 'menu-title';
+            const h2Element = document.createElement('h2');
+            h2Element.textContent = categoryName; // Set category name as text content of h2
+            menuTitleDiv.appendChild(h2Element);
+
+            // Create div.layerx (replace x with appropriate number or identifier)
+            const layerDiv = document.createElement('div');
+            layerDiv.className = 'layerx'; // Replace x with appropriate class identifier
+
+            newCategoryDom.appendChild(backButtonDiv);
+            newCategoryDom.appendChild(menuTitleDiv);
+            newCategoryDom.appendChild(layerDiv);
+
+            column.appendChild(newCategoryDom);
+        } else {
+            alert("Error adding item");
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function addCategoryToDOM (name, url) {
+    // Create li element with data-url attribute
+    const liElement = document.createElement('li');
+    liElement.setAttribute('data-url', url);
+
+    // Create a element with class and id attributes
+    const aElement = document.createElement('a');
+    aElement.setAttribute('id', name.replaceAll(' ', '-'));
+    aElement.setAttribute('class', 'open-category-link');
+    aElement.setAttribute('href', '#');
+    aElement.setAttribute('data-url', url);
+    aElement.textContent = name;
+
+    // Create button element with class and data-url attributes
+    const buttonElement = document.createElement('button');
+    buttonElement.setAttribute('class', 'delete-hover delete-category');
+    buttonElement.setAttribute('data-url', url);
+
+    buttonElement.addEventListener('click', function (event) {
+        event.preventDefault();
+        const url = this.dataset.url
+        deleteCategory(url);
+    })
+    // Append elements to a parent element (e.g., ul)
+    const ulElement = document.createElement('ul');
+    ulElement.appendChild(liElement);
+    liElement.appendChild(aElement);
+    liElement.appendChild(buttonElement);
+
+    return liElement;
+}
 async function deleteCategory(categoryURL) {
     fetch(`/delete-category` + categoryURL, {
         method: 'DELETE',

@@ -102,7 +102,7 @@ block content
                         li
                             div#category-button.dropdown-button  
                                 a &#43; Add new category
-                            form(method='POST' action = "/upload-category" id = "c-form")
+                            form(id = "c-form")
                                 div#category-form.form-group
                                     div.form-flex
                                         input#category-name.form-control(type='text', placeholder='Category Name' name='name' value=(undefined===new_category ? '' : new_category.name) required)

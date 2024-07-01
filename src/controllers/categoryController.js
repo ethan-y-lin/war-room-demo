@@ -20,21 +20,8 @@ exports.category_upload_post = [
 
         if (!errors.isEmpty()) {
             // There are errors. Go back to home page
-            console.log(errors);
-
-            const objects = await Object.find().exec();
-            const categories = await Category.find().exec();
-
-            res.render("index", {
-                title: "War Room Demo",
-                modal: false,
-                modal_title: "",
-                objects: objects,
-                categories: categories,
-                errors: errors.array(),
-                new_category: req.body
-              });
-            return;
+            console.error('Errors:', errors);
+            res.status(500).json({ success: false, error: 'Failed to add item' });
         }
   
       
@@ -51,14 +38,15 @@ exports.category_upload_post = [
   
         if (categoryExists) {
           // Category exists, redirect to its detail page.
-          res.redirect('/');
+          res.status(500).json({ success: false, error: 'Category already exists' });
         } else {
           
           // Save the new category and redirect to its detail page.
           await category.save();
           
           console.log("uploaded category");
-          res.redirect('/');
+          // Send the generated URL back to the client
+          res.status(200).json({ success: true, url: category.url });
         }
     }),
   ];
