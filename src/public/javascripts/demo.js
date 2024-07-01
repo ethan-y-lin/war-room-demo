@@ -199,10 +199,10 @@ class DemoScene {
         })
 
         $('#m').on('click', () => {
-            if (this.#controls.mode != "measure") {
-                this.#controls.mode = "measure";
+            if (this.#controls.orthoMode != "measure") {
+                this.#controls.orthoMode = "measure";
             } else {
-                this.#controls.mode = "regular";
+                this.#controls.orthoMode = "drag";
             }
         })
         
@@ -383,8 +383,8 @@ class DemoScene {
         this.#lights.spot = spotLight;
         scene.add( spotLight );
 
-        const lightHelper = new THREE.SpotLightHelper( spotLight );
-        scene.add( lightHelper );
+        // const lightHelper = new THREE.SpotLightHelper( spotLight );
+        // scene.add( lightHelper );
         
         //ground
         const groundGeo = new THREE.PlaneGeometry(1000, 1000);
@@ -484,7 +484,7 @@ class DemoScene {
     #updateScene() {
         const displayModeElement = document.getElementById("display-mode");
         const displayDistanceElement = document.getElementById("measure-distance");
-        if (this.#controls.mode == "measure") {            
+        if (this.#controls.orthoMode == "measure") {            
             displayModeElement.textContent = "Measurement: ";
             const measure_points = this.#controls.getMeasurePoints();
             if (measure_points.length > this.#measurement_objects.vertices.children.length) {
@@ -671,19 +671,42 @@ class DemoScene {
         folderControls.add(controlToggle, 'translate').name('Translate');
         folderControls.add(controlToggle, 'rotate').name('Rotate');
         // Moving Controls
-        const folderMoving = gui.addFolder('Moving Controls');
-        const controlMoving = {
+        const folderMoving = gui.addFolder('View Controls');
+        const setOrthoMode = {
+            drag: () => {
+                this.#controls.orthoMode = "drag";
+            },
+            measure: () => {
+                this.#controls.orthoMode = "measure";
+            }
+        }
+        folderMoving.add({selectedFunction: 'drag'}, 'selectedFunction', Object.keys(setOrthoMode))
+        .name('Controls')
+        .onChange((selectedFunction) => {
+            if (setOrthoMode[selectedFunction]) {
+                setOrthoMode[selectedFunction]();
+            }
+        });
+        const setInsideMode = {
             keyboard: () => {
                 this.#controls.setToWASD();
-                this.#controls.mode = "regular";
+                this.#controls.insideMode = "keyboard";
+
             },
             teleport: () => {
                 this.#controls.setToTeleport();
-                this.#controls.mode = "teleport";
+                this.#controls.insideMode = "teleport";
+
             }
         }
-        folderMoving.add(controlMoving, 'keyboard').name('WASD');
-        folderMoving.add(controlMoving, 'teleport').name('Teleport');
+        folderMoving.add({selectedFunction: 'keyboard'}, 'selectedFunction', Object.keys(setInsideMode))
+        .name('Controls')
+        .onChange((selectedFunction) => {
+            if (setInsideMode[selectedFunction]) {
+                setInsideMode[selectedFunction]();
+            }
+        });
+        
         
         //toggling bounding boxes
         const folderBoundingBox = gui.addFolder('Bounding Box');
@@ -709,20 +732,23 @@ class DemoScene {
         //changing measurement units
         const folderMeasurements = gui.addFolder('Units');
         const measurementUnits = {
-            meter: () => {
+            'meter': () => {
                 this.#units = "meters";
                 this.#controls.units = "meters";
             },
-            feet: () => {
+            'feet': () => {
                 this.#units = "feet";
                 this.#controls.units = "feet";
             }
         }
-        folderMeasurements.add(measurementUnits, 'meter').name('Meters');
-        folderMeasurements.add(measurementUnits, 'feet').name("Feet");
-        
-        // not working rn oops...
-        folderMeasurements.add(measurementUnits, 'meter', measurementUnits).name('unit');
+
+        folderMeasurements.add({selectedFunction: 'feet'}, 'selectedFunction', Object.keys(measurementUnits))
+            .name('unit')
+            .onChange((selectedFunction) => {
+                if (measurementUnits[selectedFunction]) {
+                    measurementUnits[selectedFunction]();
+                }
+            });
         console.log(measurementUnits);
         
         //folderMeasurements.close();
