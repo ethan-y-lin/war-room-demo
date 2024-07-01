@@ -641,25 +641,21 @@ class DemoScene {
         const folderLights = gui.addFolder('Light');
         //folderLights.close();
 
-        const lights = {
-            toggleHemisphereLight: function() {
-                hLight.visible = ! hLight.visible;
-            },
-            toggleAmbientLight: function() {
-                aLight.visible = ! aLight.visible;
-            },
-            toggleDirectionalLight: function() {
-                dLight.visible = ! dLight.visible;
-                console.log("toggling");
-            },
-            toggleSpotLight: function (){
-                sLight.visible = ! sLight.visible;
-            }
+        const lightsToggle = {
+            toggle: true
         };
-        folderLights.add( lights, 'toggleHemisphereLight' ).name( 'Hemisphere light' );
-        folderLights.add( lights, 'toggleAmbientLight' ).name( 'Ambient light' );
-        folderLights.add( lights, 'toggleDirectionalLight' ).name( 'Directional light' );
-        folderLights.add( lights, 'toggleSpotLight' ).name( 'Spot light' );
+        folderLights.add(lightsToggle, 'toggle').name('Hemisphere light').onChange(value =>{
+            hLight.visible = value;
+        });
+        folderLights.add(lightsToggle, 'toggle').name('Ambient light').onChange(value =>{
+            aLight.visible = value;
+        });
+        folderLights.add(lightsToggle, 'toggle').name('Directional light').onChange(value =>{
+            dLight.visible = value;
+        });
+        folderLights.add(lightsToggle, 'toggle').name('Spot light').onChange(value =>{
+            sLight.visible = value;
+        });
 
         //toggling object controls (translate/rotate)
         const folderControls = gui.addFolder('Object Controls');
@@ -725,6 +721,11 @@ class DemoScene {
         }
         folderMeasurements.add(measurementUnits, 'meter').name('Meters');
         folderMeasurements.add(measurementUnits, 'feet').name("Feet");
+        
+        // not working rn oops...
+        folderMeasurements.add(measurementUnits, 'meter', measurementUnits).name('unit');
+        console.log(measurementUnits);
+        
         //folderMeasurements.close();
 
         //changing the display of bounding boxes around furnitures
