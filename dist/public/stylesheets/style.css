@@ -410,7 +410,7 @@ nav a{
 #measurement-display p{
   padding: 5px 25px 5px 10px;
   font-weight: bold;
-  margin: 5px 0px 5px 0px;
+  margin: 5px 0px 10px 0px;
 }
 
 #scene-left h2{
@@ -666,15 +666,13 @@ nav a{
 }
 
 #design-save-form{
-  left: 25%;
-  width: 50%;
+  width: 100%;
   height: 100%;
   color: #ffffff;
   z-index: 10;
   position: absolute;
   background: #171717da;
   display: none;
-  
 }
 .design-flex{
   display: flex;
@@ -684,12 +682,18 @@ nav a{
   align-items: center;
   height: 100%;
 }
+
+#design-form input{
+  height: 35px;
+  width: 60%;
+}
 #close-button{
   position: absolute;
   margin: 20px;
 }
 #close-button:hover{
   cursor: pointer;
+  color:#888;
 }
 
 #design-save-form p{
