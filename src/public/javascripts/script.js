@@ -199,7 +199,7 @@ async function uploadCategory(e) {
         console.log(data)
         if (data.success) {
 
-            const layerX = document.querySelector("#furnitures .layerx");
+            const layerX = document.querySelector("#furnitures .layerxx");
             layerX.appendChild(addCategoryToDOM(categoryName, data.url));
 
             // ADD NEW COLUMN FOR WHEN CATEGORY IS CLICKED

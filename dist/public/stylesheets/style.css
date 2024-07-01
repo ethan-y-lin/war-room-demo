@@ -123,8 +123,6 @@ nav a{
 }
 
 .dropdown-menu ul li{
-  display: block;
-  float: left;
   position: relative;
   border-bottom: 1px solid #445c524a;
   margin-left: 0px;
@@ -254,10 +252,23 @@ nav a{
   flex-direction: row;
   position: relative;
   align-items: center;
+  justify-content: space-between;
 }
 
 .layerx li a{
   margin: 5px 0px 5px 0px;
+  width: 80%;
+}
+
+.layerx .add-category{
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+}
+.layerx .add-category a{
+  width: 100%;
+}
+.layerx .add-category form{
   width: 100%;
 }
 
@@ -419,7 +430,8 @@ nav a{
   color: white;
   display: flex;
   flex-direction: column;
-  margin: 3px;
+  margin: 5px;
+  align-items: end;
 }
 
 #scene-options button{
@@ -440,6 +452,14 @@ nav a{
 
 #scene-options button:hover{
   background-color:#a4c3b2;
+}
+#scene-options a{
+  font-size: 12px;
+  margin: 5px 3px 5px 0px;
+}
+#scene-options a:hover{
+  cursor: pointer;
+  text-decoration-line:underline;
 }
 
 #full-screen{
@@ -525,13 +545,6 @@ nav a{
   font-size: 12px;
 }
 
-
-#c-form{
-  margin: 0;
-  position: relative;
-  display: flex;
-}
-
 #object-form, #category-form, #room-form{
   display: none;
   position: relative;
@@ -614,10 +627,6 @@ nav a{
 }
 
 
-#category-button form{
-  margin-right: 0;
-}
-
 .delete-hover{
   margin-top:10px;
   width: 24px;
@@ -656,21 +665,37 @@ nav a{
   padding: 10px;
 }
 
-#toggle-control{
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-  text-align: center;
-  color: white;
-  align-items: center;
-  justify-content: center;
-  z-index: 99;
+#design-save-form{
+  left: 25%;
+  width: 50%;
+  height: 100%;
+  color: #ffffff;
+  z-index: 10;
   position: absolute;
+  background: #171717da;
+  display: none;
+  
 }
-#toggle-control p{
-  padding: 3px;
-  background:  #171717b0;
+.design-flex{
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 }
+#close-button{
+  position: absolute;
+  margin: 20px;
+}
+#close-button:hover{
+  cursor: pointer;
+}
+
+#design-save-form p{
+  font-size: 26px;
+}
+
 
 #floorplan-name h2{
   font-size: 28px;

@@ -81,3 +81,10 @@ $(".tooltip-icon-vertical").on('mouseleave',function(){
 $(".tutorial-button").on('click', function(){
     $(".tooltip-text, .tooltip-text-vertical").toggleClass("hidden");
 })
+
+$("#save-as").on('click', function(){
+    $("#design-save-form").slideDown('slow');
+})
+$("#close-button").on('click', function(){
+    $("#design-save-form").slideUp('slow');
+})
