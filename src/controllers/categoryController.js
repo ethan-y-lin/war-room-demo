@@ -78,15 +78,14 @@ exports.category_delete_post = asyncHandler(async (req, res, next) => {
     }
 
     if (category.objects.length > 0) {
-      res.redirect("/");
-      return;
+      return res.status(404).send('There are objects in this category');
     }
     // Delete the item from the database
-    await Category.findByIdAndDelete(req.body.categoryid);
-    res.redirect("/");
+    await Category.findByIdAndDelete(req.params.id);
+    res.status(200).send({ success: true });
   } catch (error) {
     console.error('Error deleting item:', error);
-    next(error);
+    res.status(500).send({ success: false });
   }
 });
 

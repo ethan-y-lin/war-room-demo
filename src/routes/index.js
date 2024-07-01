@@ -32,7 +32,7 @@ router.get('/list', object_controller.object_list);
 router.get("/object/:id", object_controller.object_detail);
 
 // POST request for deleting a Object.
-router.post('/delete-object/:id', object_controller.object_delete_post);
+router.delete('/delete-object/:id', object_controller.object_delete_post);
 
 
 // CATEGORY ROUTES
@@ -40,8 +40,8 @@ router.post('/delete-object/:id', object_controller.object_delete_post);
 // POST request for creating Category.
 router.post('/upload-category', category_controller.category_upload_post);
 
-// POST request for deleting a Category.
-router.post('/delete-category/:id', category_controller.category_delete_post);
+// DELETE request for deleting a Category.
+router.delete('/delete-category/:id', category_controller.category_delete_post);
 
 // ROOM ROUTES 
 
