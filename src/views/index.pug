@@ -93,16 +93,17 @@ block content
                     div.menu-title
                         h2 FURNITURES
                     div.layerx
-                        each category in categories 
-                            li(data-url=`${category.url}`)
-                                a.menu-header(id= category.name.replaceAll(' ', '-') class="open-category-link" href="#" data-url=`${category.url}`) #{category.name}
-                                button.delete-hover(class="delete-category" data-url=`${category.url}`) 
+                        div.layerxx
+                            each category in categories 
+                                li(data-url=`${category.url}`)
+                                    a.menu-header(id= category.name.replaceAll(' ', '-') class="open-category-link" href="#" data-url=`${category.url}`) #{category.name}
+                                    button.delete-hover(class="delete-category" data-url=`${category.url}`) 
                         li
                             a#list.menu-header Full List        
-                        li
+                        li.add-category
                             div#category-button.dropdown-button  
                                 a &#43; Add new category
-                            form(id= "c-form")
+                            form#c-form
                                 div#category-form.form-group
                                     div.form-flex
                                         input#category-name.form-control(type='text', placeholder='Category Name' name='name' value=(undefined===new_category ? '' : new_category.name) required)
@@ -158,8 +159,15 @@ block content
                     p Move: WASD
                     p Look: MOUSE
             div#hud
-                div#toggle-control 
-                    p " R " Rotate | " T " Translate
+                div#design-save-form 
+                    p#close-button &#x2715;
+                    div.design-flex     
+                        p Save the current design as: 
+                        div#design-form
+                            input#design-name.form-control(type='text', placeholder='Design Name' name='name' value=(undefined===new_category ? '' : new_category.name) required)
+                            button.button.submit-button(type='submit') Submit
+                //- div#toggle-control 
+                //-     p " R " Rotate | " T " Translate
                 div#scene-left
                     div#floorplan-name
                         p
@@ -172,9 +180,9 @@ block content
                     div#full-screen
                         button#fullscreen-button ⛶
                     div#scene-options
-                        button#reset Reset
                         button#save-design Save
                         button#save-as Save as...
+                        a Discard all changes
         div.view-buttons
             button#ortho-view.view
                 p Orthographic
