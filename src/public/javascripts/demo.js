@@ -276,26 +276,27 @@ class DemoScene {
     }
 
     // PROBABLY WILL HAVE TO CHANGE DRASTICALLY
-    addObject (object, position = null, rotation = null) {
+    addObject (object, position = null, rotation = null, extras = true) {
 
         const addedObject = object;
         const loader = new GLTFLoader();
         loader.load(addedObject.obj_url, (gltf) => {
+            
             const newObject = gltf.scene;
             newObject.name = addedObject.name;
             this.#model.add(newObject);
             
             newObject.traverse(function(node){
-                if (node.isMesh){
+                if (node.isMesh) {
                     node.castShadow = true;
-                    node.receiveShadow = true;}
+                    node.receiveShadow = true;
+                }
             })
 
+ 
             if (position == null) {
                 const openPos = this.openPosition(newObject); // find an open position to display the box
-                console.log(newObject.position)
                 newObject.position.set(openPos.x, openPos.y, openPos.z);
-                console.log(newObject)
             } else {
                 newObject.position.set(position.x, position.y, position.z);
             }   
@@ -306,19 +307,16 @@ class DemoScene {
                 newObject.rotation.z = rotation.z;
             }
 
-            // Compute the bounding box of the object
             const box = new THREE.Box3().setFromObject(newObject, true);
-
+  
             // Create a box helper
             const boxGeometry = new THREE.BoxGeometry(box.max.x - box.min.x, box.max.y - box.min.y, box.max.z - box.min.z);
             const boxMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
             const boundingBox = new THREE.Mesh(boxGeometry, boxMaterial);
-
-            boundingBox.position.set((box.max.x + box.min.x) / 2, (box.max.y + box.min.y) / 2, (box.max.z + box.min.z) / 2)
             boundingBox.name = "bounding_box";
             boundingBox.visible = this.#showBoundingBoxes;
             newObject.add(boundingBox);
-
+            boundingBox.position.set(0, (box.max.y + box.min.y) / 2, 0)
             // add label
             const text = document.createElement( 'div' );
             text.style.backgroundColor = 'rgba(50,50,50,0.5)';
@@ -327,14 +325,15 @@ class DemoScene {
             text.style.borderRadius = '5px';
             text.style.padding = '5px';
             text.textContent = addedObject.name;
-    
-            const label = new CSS2DObject( text );
-            console.log(label);
-            newObject.add(label)
 
+            const label = new CSS2DObject( text );
+            label.name = "label";
+            newObject.add(label)
+            
             this.#objects.uploaded.push(newObject);
             this.#controls.updateObjects(this.#objects);
-
+            console.log("After")
+            console.log(newObject)
         });
     }
 
