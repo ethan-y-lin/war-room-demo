@@ -48,10 +48,10 @@ block content
                                 input#object-name.form-control(type='text', placeholder='Name' name='name' required value=(undefined===object ? '' : object.name) )
                             div.form-group.form-input
                                 label(for='object') Upload:  
-                                input(type='file' name='object' accept="object/glb, object/obj" required)
+                                input#object-file(type='file' name='object' accept="object/glb, object/obj" required)
                             div.form-group.form-input
                                 label(for='category') Category: 
-                                select#category.form-control(name='category' required)
+                                select#object-category.form-control(name='category' required)
                                     each category in categories
                                         option(value= category._id)= category.name
                             button.button.submit-button(type='submit') Submit
@@ -102,7 +102,7 @@ block content
                         li
                             div#category-button.dropdown-button  
                                 a &#43; Add new category
-                            form(id = "c-form")
+                            form(id= "c-form")
                                 div#category-form.form-group
                                     div.form-flex
                                         input#category-name.form-control(type='text', placeholder='Category Name' name='name' value=(undefined===new_category ? '' : new_category.name) required)

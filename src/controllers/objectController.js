@@ -80,21 +80,8 @@ exports.object_upload_post = [
     
     if (!errors.isEmpty()) {
       //default categories for form dropdown and layer 2 menu
-      const objects = await Object.find().exec();
-      const categories = await Category.find().exec();
-      // There are errors. Render the form again with sanitized values/error messages.
-      // Get all categories, which we can use for adding to our item.
-      console.log("render modal")
-      res.render("index", {
-        title: "War Room Demo",
-        modal_title: "Upload Object",
-        modal: true,
-        object: req.body, // Use req.body instead of item object since it doesn't exist yet
-        errors: errors.array(),
-        objects: objects,
-        categories: categories,
-      });
-      return;
+      console.error('Errors:', errors);
+      res.status(500).json({ success: false, error: 'Failed to add item' });
     }
 
     // No errors, proceed with Cloudinary upload and item creation
@@ -130,8 +117,8 @@ exports.object_upload_post = [
         .exec();
 
       if (objectExists) {
-        // Item exists, redirect to its detail page.
-        res.redirect('/');
+        // Item exists
+        res.status(500).json({ success: false, error: 'Object already exists' });
       } else {
         const objectCategory = await Category.findById(req.body.category).exec();
         console.log(objectCategory.objects);
@@ -140,11 +127,12 @@ exports.object_upload_post = [
         await Category.findByIdAndUpdate(req.body.category, {objects: update}, {});
         // Save the new item and redirect to its detail page.
         await object.save();
-        res.redirect('/');
+        // Send the generated URL back to the client
+        res.redirect("/");
       }
     } catch (error) {
       console.error('Error uploading to Cloudinary:', error);
-      next(error);
+      res.status(500).json({ success: false, error: error });
     }
   }),
 ];
