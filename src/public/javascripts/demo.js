@@ -658,15 +658,23 @@ class DemoScene {
         //toggling object controls (translate/rotate)
         const folderControls = gui.addFolder('Object Controls');
         const controlToggle = {
-            translate: () => {
+            'translate': () => {
                 this.#controls.setGumballMode('translate');
             },
-            rotate: () => {
+            'rotate': () => {
                 this.#controls.setGumballMode('rotate');
             }
         }
-        folderControls.add(controlToggle, 'translate').name('Translate');
-        folderControls.add(controlToggle, 'rotate').name('Rotate');
+
+        folderControls.add({selectedFunction: 'translate'}, 'selectedFunction', Object.keys(controlToggle))
+        .name('Mode')
+        .onChange((selectedFunction) => {
+            if (controlToggle[selectedFunction]) {
+                controlToggle[selectedFunction]();
+            }
+        });
+        // folderControls.add(controlToggle, 'translate').name('Translate');
+        // folderControls.add(controlToggle, 'rotate').name('Rotate');
         
         //toggling bounding boxes
         const boundingBoxToggle = {

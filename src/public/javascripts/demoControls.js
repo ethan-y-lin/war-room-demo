@@ -296,11 +296,11 @@ class DemoControls {
         instructions.removeEventListener( 'click', this.#lock);
         this.#pointerLock.removeEventListener('lock', this.hideBlocker);
         this.#pointerLock.removeEventListener('unlock', this.#showBlocker);
-        
+        document.removeEventListener('keydown', this.#toggleGumball);
         document.removeEventListener('keydown', this.#insideOnKeyDown);
         document.removeEventListener('keyup',this.#insideOnKeyUp);
-        document.removeEventListener('click', this.#orthoOnClick);
-        document.removeEventListener('click', this.#outsideOnClick);
+        this.#canvas.removeEventListener('click', this.#orthoOnClick);
+        this.#canvas.removeEventListener('click', this.#outsideOnClick);
         document.removeEventListener('click', this.#insideOnClick);
         this.#canvas.removeEventListener('mousemove', this.#orthoOnMove);
         this.#pointerLock.enabled = false;
@@ -332,13 +332,13 @@ class DemoControls {
             this.#reset();
             this.#boundingBoxes = this.#getBoundingBoxes(this.#objects);
             document.addEventListener('keydown', this.#toggleGumball);
-            document.addEventListener('click', this.#orthoOnClick);
+            this.#canvas.addEventListener('click', this.#orthoOnClick);
             this.#canvas.addEventListener('mousemove', this.#orthoOnMove);
             this.hideBlocker();
         } else if (newControl == "outside") {
             this.#reset();
             this.#boundingBoxes = this.#getBoundingBoxes(this.#objects);
-            document.addEventListener('click', this.#outsideOnClick);
+            this.#canvas.addEventListener('click', this.#outsideOnClick);
             document.addEventListener('keydown', this.#toggleGumball);
             this.#orbit = new OrbitControls(camera, canvas);
             this.#orbit.enabled = true;
@@ -519,7 +519,7 @@ class DemoControls {
      */
     #createGumball (object, camera) {
         this.#gumball = new TransformControls(camera, this.#canvas);
-        this.#gumball.setMode(this.#gumballState.mode)
+        this.#gumball.mode = this.#gumballState.mode;
         if (this.#gumball.getMode() == 'rotate') {
             this.#gumball.showX = false;
             this.#gumball.showZ = false;
@@ -945,7 +945,10 @@ class DemoControls {
     }
 
     setGumballMode(mode){
-        this.#gumball.mode = mode;
+        this.#gumballState.mode = mode;
+        if (this.#gumball != null) {
+            this.#gumball.mode = mode;
+        }
     }
 
 }
