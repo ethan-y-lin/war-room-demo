@@ -698,7 +698,7 @@ class DemoScene {
             }
         }
         folderMoving.add({selectedFunction: 'drag'}, 'selectedFunction', Object.keys(setOrthoMode))
-        .name('Top-Down')
+        .name('Orthographic')
         .onChange((selectedFunction) => {
             if (setOrthoMode[selectedFunction]) {
                 setOrthoMode[selectedFunction]();
