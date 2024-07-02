@@ -225,7 +225,8 @@ class DemoControls {
         this.#pass_through_objects = objects.doors.concat(objects.windows);
         this.#draggableObjects = objects.furniture.concat(objects.uploaded);
         this.#modelSize = modelSize;
-        this.mode = "regular";
+        this.orthoMode = "drag";
+        this.insideMode = "keyboard";
         this.#measure_points = [];
 
     
@@ -315,7 +316,9 @@ class DemoControls {
     }
     
     setToTeleport() {
-        this.#scene.add(this.#insidePointer);
+        if (this.#view == "inside") {
+            this.#scene.add(this.#insidePointer);       
+        }
     }
     /**
      * Assumes that this.objects and this.draggableObjects are up to date.
@@ -331,7 +334,6 @@ class DemoControls {
             document.addEventListener('keydown', this.#toggleGumball);
             document.addEventListener('click', this.#orthoOnClick);
             this.#canvas.addEventListener('mousemove', this.#orthoOnMove);
-
             this.hideBlocker();
         } else if (newControl == "outside") {
             this.#reset();
@@ -343,6 +345,9 @@ class DemoControls {
             this.hideBlocker();
         } else if (newControl == "inside"){
             this.#reset();
+            if (this.insideMode == "teleport") {
+                this.setToTeleport();
+            }
             this.#boundingBoxes = this.#getBoundingBoxes(this.#objects);
             this.#pointerLock = new PointerLockControls(camera, canvas);
             this.#pointerLock.enabled = true;
@@ -378,7 +383,7 @@ class DemoControls {
     updateControls(camera) {
         if (this.#view == "inside") {
             const time = performance.now();
-            if (this.mode == "regular") {
+            if (this.insideMode == "keyboard") {
 
                 if ( this.#pointerLock.isLocked) {
                     const delta = ( time - this.#prev_time ) / 1000;
@@ -406,7 +411,7 @@ class DemoControls {
                         this.#velocity.z = 0;
                     }
                 }
-            } else if (this.mode == "teleport"){
+            } else if (this.insideMode == "teleport"){
                 if (this.#pointerLock.isLocked) {
                     if (this.#moving) {
                         console.log("moving")
@@ -623,7 +628,7 @@ class DemoControls {
     }
 
     #insideOnClick = (event) => {
-        if (true) {
+        if (this.insideMode == "teleport") {
             if (this.#pointerLock.isLocked) {
                 const newRaycaster = new THREE.Raycaster();
                 newRaycaster.setFromCamera(new THREE.Vector2(), this.#camera.inside);
@@ -641,89 +646,6 @@ class DemoControls {
                 }
             }
         }
-    }
-
-    /**
-     * Event handler for the 'dragstart' event.
-     * 
-     * Sets the this.#dragOrigin based on the 
-     * clicked objects position.
-     * @param {Event} event 
-     */
-    #dragStartCallback = (event) => {
-        console.log("drag start");
-        const object = event.object;
-        this.#dragOrigin = object.position.clone();
-    }
-
-    /**
-     * Event handler for the 'drag' event.
-     * 
-     * First ensures there is no bottom collision by raising
-     * the object above the one below it.
-     * 
-     * Then if there is still a collision, it turns the 
-     * dragged object red.
-     * @param {Event} event 
-     */
-    #dragCallback = (event) => {
-        console.log("drag");
-        if (this.mode == "regular"){
-            const object = event.object;
-            let boundingBox = new THREE.Box3().setFromObject( object);
-            const newRaycaster = new THREE.Raycaster(object.position, new THREE.Vector3(0,-1,0), object.position.y - boundingBox.min.y);
-            const intersects = newRaycaster.intersectObjects(this.#objects,true);
-            console.log(intersects)
-            if (intersects.length > 0) {
-                const firstObject = intersects[0].object;
-                const firstObjectBB = new THREE.Box3().setFromObject( firstObject);
-                object.position.set(object.position.x, 
-                    firstObjectBB.max.y + (object.position.y - boundingBox.min.y) + 0.01,
-                    object.position.z);
-                this.#colorObject(object, 0x000000);
-            }
-
-            boundingBox = new THREE.Box3().setFromObject( object);
-            const isCollided = this.#checkCollisions(boundingBox, this.#boundingBoxes);
-            if (isCollided.hasCollision && isCollided.collidedBox.name != object.name) {
-                if (!isCollided.collidedBox.name.includes("wall")) {
-                    console.log("raise")
-                    // raise object above collidedBox
-                    object.position.set(object.position.x, 
-                                        isCollided.collidedBox.box.max.y + (object.position.y - boundingBox.min.y) + 0.01,
-                                        object.position.z);
-                } else {
-                    console.log("Collision!");
-                    this.#colorObject(object, 0xff0000);
-                }
-            } else {
-                this.#colorObject(object, 0x000000);
-            }
-        }
-    }
-
-    /**
-     * Event handler for 'dragend' event.
-     * 
-     * If there is a collision, resets the dragged object 
-     * back to its origin, otherwise does nothing.
-     * Also updates the boundingBoxes.
-     * @param {*} event 
-     */
-    #dragEndCallback = (event) => {
-        console.log("drag end");
-        const object = event.object;
-        const boundingBox = new THREE.Box3().setFromObject( object);
-        const isCollided = this.#checkCollisions(boundingBox, this.#boundingBoxes);
-        
-        if (isCollided.hasCollision && isCollided.collidedBox.name != object.name) {
-            console.log("Collision!");
-            object.position.set(this.#dragOrigin.x, this.#dragOrigin.y, this.#dragOrigin.z);
-            this.#colorObject(object, 0x000000);
-        } else {
-            console.log("Successful drag")
-        }
-        this.#boundingBoxes = this.#getBoundingBoxes(this.#objects); // update boundingBoxes
     }
 
 
@@ -906,7 +828,7 @@ class DemoControls {
         
         this.#raycaster.setFromCamera( mouse, this.#camera.ortho );
 
-        if (this.mode == "regular") {
+        if (this.orthoMode == "drag") {
             const rect = this.#canvas.getBoundingClientRect();
             const mouse = new THREE.Vector2();
             mouse.x = ( event.clientX - rect.left ) / rect.width * 2 - 1;
@@ -922,7 +844,7 @@ class DemoControls {
             } else {
                 this.#clearGumball();
             } 
-        } else if (this.mode == "measure") {
+        } else if (this.orthoMode == "measure") {
             if (this.#measure_points.length > 0) {
                 for (let i = 0 ; i < this.#measure_points.length; i++) {
                     let closestPoint = new THREE.Vector3();
@@ -958,7 +880,7 @@ class DemoControls {
     }
 
     #orthoOnMove = (event) => {
-        if (this.mode == "measure") {
+        if (this.orthoMode == "measure") {
             console.log("drag measure");
             this.#measureGroup.clear();
             if (this.#measure_points.length == 1) {

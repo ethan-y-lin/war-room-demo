@@ -42,6 +42,11 @@ $(window).on('load', function() {
 
     const uploadCategoryForm = document.getElementById("c-form");
     uploadCategoryForm.addEventListener('submit', uploadCategory);
+
+    // const uploadObjectForm = document.getElementById("object-form");
+    // uploadObjectForm.addEventListener('submit', uploadObject);
+
+
     const roomLinks = document.querySelectorAll('.open-room-link');
     roomLinks.forEach(link => {
         link.addEventListener('click', function(event) {
@@ -184,7 +189,8 @@ async function fetchAndInitDesign(designURL) {
 
 async function uploadCategory(e) {
     e.preventDefault();
-    const categoryName = document.getElementById('category-name').value;
+    const categoryNameElement = document.getElementById('category-name');
+    const categoryName = categoryNameElement.value;
     console.log(categoryName)
     fetch('/upload-category', {
         method: 'POST',
@@ -234,6 +240,7 @@ async function uploadCategory(e) {
         }
     })
     .catch(error => console.error('Error:', error));
+    categoryNameElement.value = "";
 }
 
 function addCategoryToDOM (name, url) {
@@ -267,6 +274,7 @@ function addCategoryToDOM (name, url) {
 
     return liElement;
 }
+
 async function deleteCategory(categoryURL) {
     fetch(`/delete-category` + categoryURL, {
         method: 'DELETE',
@@ -279,6 +287,56 @@ async function deleteCategory(categoryURL) {
         }
     })
     .catch(error => console.error('Error: ', error))
+}
+
+async function uploadObject(e) {
+    e.preventDefault();
+    const objectNameInput = document.getElementById('object-name');
+    
+    const objectFileInput = document.getElementById('object-file');
+
+    const objectCategoryInput = document.getElementById('object-category');
+
+    const formData = new FormData();
+    formData.append('name', objectNameInput.value);
+    formData.append('file', objectFileInput.files[0]);
+    formData.append('category', objectCategoryInput.value);
+    addObjectToDOM(objectCategoryInput.value, objectNameInput.value, "");
+
+    objectNameInput.value = "";
+    objectFileInput.value = "";
+    objectCategoryInput.value = "";
+}
+
+async function addObjectToDOM(categoryName, name, url) {
+    const categoryID = "#category-"+ categoryName.replaceAll(' ', '-') + " layerx";
+    console.log(categoryID)
+    const categoryElement = document.querySelector(categoryID);
+    // Create elements
+    const li = document.createElement('li');
+    li.setAttribute('data-url', url);
+
+    const a = document.createElement('a');
+    a.classList.add('add-object-to-scene');
+    a.href = '#';
+    a.setAttribute('data-url', url);
+    a.textContent = name;
+    a.addEventListener('click', addObjectListenerFunction);
+
+    const button = document.createElement('button');
+    button.classList.add('delete-hover');
+    button.classList.add('delete-object');
+    button.setAttribute('data-url', url);
+    button.addEventListener('click', function (event) {
+        event.preventDefault();
+        const url = this.dataset.url
+        deleteObject(url);
+    })
+    // Append elements
+    li.appendChild(a);
+    li.appendChild(button);
+
+    categoryElement.appendChild(li);
 }
 
 async function deleteObject(objectURL) {
