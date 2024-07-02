@@ -258,7 +258,6 @@ nav a{
 
 .layerx li a{
   margin: 5px 0px 5px 0px;
-  width: 80%;
 }
 
 .layerx .add-category{
@@ -626,7 +625,6 @@ nav a{
 
 .dropdown-button{
   display: flex;
-  flex-direction: column;
   justify-content: end;
   text-align: end;
 }
