@@ -52,12 +52,14 @@ $(window).on('load', function() {
 
     const roomLinks = document.querySelectorAll('.open-room-link');
     roomLinks.forEach(link => {
-        link.addEventListener('click', function(event) {
+        link.addEventListener('click', async function(event) {
             event.preventDefault(); // Prevent default link behavior
             
             const url = this.dataset.url; // Get the URL from data-url attribute
             console.log(url)
-            fetchAndInitRoom(url); // Call the fetchAndAddObject function with the URL
+            const roomName = await fetchAndInitRoom(url); // Call the fetchAndAddObject function with the URL
+            const roomTitle = document.getElementById("floorplan-title");
+            roomTitle.textContent = roomName;
         });
     });
 
@@ -139,6 +141,7 @@ async function fetchAndInitRoom(roomURL) {
         const room = await response.json(); // Await parsing the JSON response
         room.room_url = new URL(room.room_url);
         init(room); 
+        return room.name;
     } catch (error) {
         console.error('Error fetching object:', error);
     }
