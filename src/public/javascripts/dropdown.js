@@ -88,3 +88,5 @@ $("#save-as").on('click', function(){
 $("#close-button").on('click', function(){
     $("#design-save-form").slideUp('slow');
 })
+
+

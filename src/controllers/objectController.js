@@ -3,9 +3,11 @@ const fs = require('fs')
 const cloudinary = require('../config/cloudinaryConfig');
 const asyncHandler = require("express-async-handler");
 const {body, validationResult} = require("express-validator");
+const mongoose = require('mongoose');
 
 const Object = require("../models/object");
 const Category = require("../models/category");
+const Design = require('../models/design');
 
 // Display list of all Objects.
 exports.object_list = asyncHandler(async (req, res, next) => {
@@ -139,7 +141,17 @@ exports.object_upload_post = [
 
 // Handle Object delete on POST
 exports.object_delete_post = asyncHandler(async (req, res, next) => {
+
   try {
+    console.log(req.params.id)
+      // Check if objectId is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ error: 'Invalid ObjectId' });
+    }
+    const designs = await Design.find({'objects.object' : req.params.id}).exec();
+    if (designs.length > 0) {
+      return res.status(500).send({ success: false, message: "Object is used in designs." });
+    }
     const object = await Object.findById(req.params.id);
 
     if (!object) {
@@ -161,10 +173,10 @@ exports.object_delete_post = asyncHandler(async (req, res, next) => {
 
     // Delete the item from the database
     await Object.findByIdAndDelete(req.params.id);
-    res.status(200).send({ success: true });
+    return res.status(200).send({ success: true });
   } catch (error) {
     console.error('Error deleting item:', error);
-    res.status(500).send({ success: false });
+    return res.status(500).send({ success: false });
   }
 });
 

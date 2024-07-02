@@ -314,7 +314,7 @@ class DemoScene {
             const boxMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
             const boundingBox = new THREE.Mesh(boxGeometry, boxMaterial);
 
-            boundingBox.position.set((box.max.x + box.min.x) / 2, (box.max.y + box.min.y) / 2, (box.max.z + box.min.z) / 2)
+            boundingBox.position.set(0, (box.max.y + box.min.y) / 2, 0);
             boundingBox.name = "bounding_box";
             boundingBox.visible = this.#showBoundingBoxes;
             newObject.add(boundingBox);

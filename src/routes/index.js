@@ -65,4 +65,7 @@ router.delete("/delete-design/:id", design_controller.design_delete_post)
 // POST request for uploading a Design.
 router.post('/upload-design', design_controller.design_upload_post);
 
+// PUT request for updating a Design.
+router.put('/update-design/:name', design_controller.design_update);
+
 module.exports = router;

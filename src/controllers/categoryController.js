@@ -56,10 +56,8 @@ exports.category_delete_post = asyncHandler(async (req, res, next) => {
   console.log("Category delete");
     // Get details of book and all their book instances (in parallel)
   try {
-    const [category, categories, objects] = await Promise.all([
-      Category.findById(req.params.id).populate("objects").exec(),
-      Category.find().exec(),
-      Object.find().exec()]);
+    const category = await Category.findById(req.params.id).populate("objects").exec();
+
 
     if (!category) {
       return res.status(404).send('Item not found');
