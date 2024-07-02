@@ -18,7 +18,10 @@ function init(model, objects = []) {
         link.addEventListener('click', addObjectListenerFunction);
     });
 
-    const saveDesignButton = document.getElementById("save-design");
+    const updateDesignButton = document.getElementById("save-design");
+    updateDesignButton.addEventListener('click', updateDesign);
+
+    const saveDesignButton = document.getElementById("save-as-design");
 
     saveDesignButton.removeEventListener('click', saveDesign);
     saveDesignButton.addEventListener('click', saveDesign);
@@ -142,17 +145,65 @@ async function fetchAndInitRoom(roomURL) {
 }
 
 async function saveDesign() {
+    const name = document.getElementById("design-name").value;
     const data = APP.getSceneData();
     fetch('/upload-design', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify({sceneData: data, name: name})
       })
       .then(response => response.json())
-      .then(data => console.log('Success:', data))
+      .then(data => {
+        console.log('Success:', data);
+        addDesignToDOM(data.design);
+        document.getElementById("design-name").value = "";
+        document.getElementById("design-title").textContent = data.design.name;
+        $("#design-save-form").slideUp('slow');
+      })
       .catch(error => console.error('Error:', error));
+
+}
+
+function addDesignToDOM(design){
+    const designsContainer = document.querySelector("#saved-plans .layerx");
+    // Create list item element
+    const li = document.createElement('li');
+    li.setAttribute('data-url', `${design.url}`);
+
+    // Create anchor element
+    const a = document.createElement('a');
+    a.className = 'open-design-link';
+    a.href = '#';
+    a.setAttribute('data-url', `${design.url}`);
+    a.textContent = design.name;
+    a.addEventListener('click', function(event) {
+        if (APP != null) {
+            APP.clear();
+        }
+        event.preventDefault(); // Prevent default link behavior
+        
+        const url = this.dataset.url; // Get the URL from data-url attribute
+        console.log(url)
+        fetchAndInitDesign(url); // Call the fetchAndAddObject function with the URL
+    });
+
+    // Create delete button element
+    const button = document.createElement('button');
+    button.className = 'delete-hover delete-design';
+    button.setAttribute('data-url', `${design.url}`);
+    button.addEventListener('click', function (event) {
+        event.preventDefault();
+        const url = this.dataset.url
+        deleteDesign(url);
+    })
+    // Append anchor and button to list item
+    li.appendChild(a);
+    li.appendChild(button);
+
+    designsContainer.appendChild(li);
+   
 }
 
 async function deleteDesign(designURL) {
@@ -162,11 +213,45 @@ async function deleteDesign(designURL) {
     .then(data => {
         if (data.success) {
             document.querySelector(`li[data-url="${designURL}"]`).remove();
+            const designTitle = document.getElementById("design-title");
+            console.log(designTitle.textContent);
+            console.log(data.name)
+            if (designTitle.textContent == data.name ) {
+                designTitle.textContent = "Unsaved Plan";
+            }
         } else {
             alert('Error deleting item')
         }
     })
     .catch(error => console.error('Error: ', error))
+}
+
+async function updateDesign() {
+    const name = document.getElementById("design-title").textContent;
+    if (name == "Unsaved plan") {
+        alert('Please "Save as" before saving. ')
+        return;
+    }
+    const data = APP.getSceneData();
+    fetch(`/update-design/${name}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({sceneData: data, name: name})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Item updated successfully');
+        } else {
+            alert('Error updating item: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error updating item');
+    });
 }
 
 async function fetchAndInitDesign(designURL) {
@@ -182,6 +267,9 @@ async function fetchAndInitDesign(designURL) {
         design.room.room_url = new URL(design.room.room_url);
         console.log(design.objects);
         init(design.room, design.objects); 
+
+        const designTitle = document.getElementById("design-title");
+        designTitle.textContent = design.name;
     } catch (error) {
         console.error('Error fetching object:', error);
     }
@@ -346,6 +434,8 @@ async function deleteObject(objectURL) {
     .then(data => {
         if (data.success) {
             document.querySelector(`li[data-url="${objectURL}"]`).remove();
+        } else if (data.message){
+            alert (data.message);
         } else {
             alert('Error deleting item')
         }

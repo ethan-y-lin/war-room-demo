@@ -29,13 +29,13 @@ exports.design_detail = asyncHandler(async (req, res, next) => {
         newObjectsData.push(newObjectData);
       }
 
-      res.json({room: room, objects: newObjectsData});
+      res.json({room: room, objects: newObjectsData, name: design.name});
   });
 
   exports.design_upload_post = asyncHandler(async (req, res, next) => {
-    const objectsData = req.body.objectsData;
-    const roomID = req.body.roomID;
-    
+    const objectsData = req.body.sceneData.objectsData;
+    const roomID = req.body.sceneData.roomID;
+    const name = req.body.name;
     try {
       let room;
       if (roomID != null) {
@@ -78,13 +78,13 @@ exports.design_detail = asyncHandler(async (req, res, next) => {
       console.log(room);
   
       const design = new Design({
-        name: "test",
+        name: name,
         room: room._id,
         objects: newObjectsData,
       });
   
       await design.save();
-      res.status(200).json({ message: "success!" });
+      res.status(200).json({ message: "success!", design: {name: name, url: design.url}});
     } catch (error) {
       res.status(400).json({ message: error.message });
     }
@@ -95,9 +95,55 @@ exports.design_delete_post = asyncHandler(async (req, res, next) => {
   console.log("Design delete");
     // Get details of design
   try {
+    const design = await Design.findById(req.params.id).populate("name").exec();
+    const designName = design.name;
     await Design.findByIdAndDelete(req.params.id)
-    res.status(200).send({ success: true });
+    console.log(designName);
+    res.status(200).send({ success: true, name: designName });
   } catch (error) {
     res.status(500).send({ success: false });
   }
+});
+
+// Handle Design update on PUT
+exports.design_update = asyncHandler( async (req, res, _) => {
+    console.log("Design update");
+    const objectsData = req.body.sceneData.objectsData;
+    const newObjectsData = [];
+  
+    for (const objData of objectsData) {
+      try {
+        const newObject = await Object.findOne({ name: objData.name });
+        if (!newObject) {
+          res.status(404).json({ message: `Object with name ${objData.name} not found` });
+          return;
+        }
+
+        const newObjectData = {
+          object: newObject._id, // Assuming you want to store the object's ID
+          position: objData.position,
+          rotation: objData.rotation,
+        };
+
+        console.log("loop");
+        newObjectsData.push(newObjectData);
+        console.log(newObjectsData);
+      } catch (error) {
+        console.log("Object Not Found")
+        res.status(400).json({ message: error.message });
+        return;
+      }
+    }
+
+    try {
+      console.log(req.params.name);
+      const design = await Design.findOneAndUpdate({name: req.params.name}, {objects : newObjectsData}, {new: true});
+      if (design) {
+        res.status(200).send({ success: true, design });
+      } else {
+        res.status(404).send({ success: false, message: 'Item not found' });
+      }
+    } catch (error) {
+      res.status(500).send({ success: false, message: error.message });
+    }
 });

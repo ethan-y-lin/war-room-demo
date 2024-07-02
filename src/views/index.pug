@@ -164,15 +164,15 @@ block content
                     div.design-flex     
                         p Save the current design as: 
                         div#design-form
-                            input#design-name.form-control(type='text', placeholder='Design Name' name='name' value=(undefined===new_category ? '' : new_category.name) required)
-                            button.button.submit-button(type='submit') Submit
+                            input#design-name.form-control(type='text', placeholder='Design Name' name='name' required)
+                            button#save-as-design.button.submit-button(type='submit') Submit
                 //- div#toggle-control 
                 //-     p " R " Rotate | " T " Translate
                 div#scene-left
                     div#floorplan-name
                         p
                             h2 War Room
-                        p.up Unsaved plan
+                        p#design-title.up Unsaved plan
                     div#measurement-display
                         p#display-mode
                         p#measure-distance
