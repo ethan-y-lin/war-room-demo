@@ -189,7 +189,7 @@ nav a{
 }
 .tooltip-text{
   position: absolute;
-  background-color:#445c5290;
+  background-color:#445c52ca;
   z-index: auto;
   color: white;
   padding: 5px;
@@ -201,7 +201,7 @@ nav a{
 }
 .tooltip-text-vertical{
   position: absolute;
-  background-color:#445c5290;
+  background-color:#445c52ca;
   z-index: auto;
   color: white;
   padding: 10px;
@@ -375,6 +375,7 @@ nav a{
   flex-direction: row;
   position: relative;
   justify-content: space-between;
+  margin-top: -20px;
 }
 
 #hud{
@@ -445,10 +446,21 @@ nav a{
   padding: 1px;
   cursor: pointer;
   height: 30px;
-  width: 100px;
+  width: 85px;
   font-family: Georgia, 'Times New Roman', Times, serif;
   font-size: 16px;
   border-radius: 3px;
+}
+#scene-options #reset{
+  background-color:#445c5290;
+  color:#e5e5e5;
+  border-color: transparent;
+  font-size: 12px;
+  height: 25px;
+}
+#scene-options #reset:hover{
+  background-color: #445c52;
+  color: white;
 }
 
 #scene-options button:hover{
@@ -725,6 +737,9 @@ nav a{
 }
 .root > .title{
   font-size: 16px;
+}
+.lil-gui .controller .widget{
+  justify-content: end;
 }
 
 /*-- ABOUT page --*/

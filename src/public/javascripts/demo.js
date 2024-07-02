@@ -359,7 +359,7 @@ class DemoScene {
         scene.add(ambientLight);
     
         const directionalLight = new THREE.DirectionalLight(0xfdfbd3, 10);
-        directionalLight.color.setHSL(0.1, 1, 0.95);
+        // directionalLight.color.setHSL(0.1, 1, 0.95);
         directionalLight.castShadow = true;
         directionalLight.position.set(-20, 70, 100);
         directionalLight.shadow.camera.bottom = -12;
@@ -593,8 +593,8 @@ class DemoScene {
         this.#objects.ceiling = ceiling;
         this.#scene.add(ceiling);
 
-        const roomLight = new THREE.DirectionalLight(0xe0f1ff, 2);
-        roomLight.position.set(0, ceiling.position.y, 0);
+        const roomLight = new THREE.DirectionalLight(0xe0f1ff, 8);
+        roomLight.position.set(0, ceiling.position.y-0.1, 0);
         //const roomLightHelper = new THREE.DirectionalLightHelper(roomLight);
         roomLight.castShadow = true;
         // roomLight.lookAt(2, 0, 1);
@@ -631,7 +631,6 @@ class DemoScene {
 
     guiControls(){
         const gui = new GUI();
-        // console.log(this.#scene);
         
         // toggling light sources
         const hLight = this.getHemiLight();
@@ -639,7 +638,6 @@ class DemoScene {
         const dLight = this.getDirectionalLight();
         const sLight = this.getSpotLight();
         const folderLights = gui.addFolder('Light');
-        //folderLights.close();
 
         const lightsToggle = {
             toggle: true
@@ -659,7 +657,6 @@ class DemoScene {
 
         //toggling object controls (translate/rotate)
         const folderControls = gui.addFolder('Object Controls');
-        //folderControls.close();
         const controlToggle = {
             translate: () => {
                 this.#controls.setGumballMode('translate');
@@ -668,9 +665,28 @@ class DemoScene {
                 this.#controls.setGumballMode('rotate');
             }
         }
-        
         folderControls.add(controlToggle, 'translate').name('Translate');
         folderControls.add(controlToggle, 'rotate').name('Rotate');
+        
+        //toggling bounding boxes
+        const boundingBoxToggle = {
+            toggle: false
+        }
+        folderControls.add(boundingBoxToggle, 'toggle').name('Show bounding boxes').onChange(value => {
+            this.#objects.uploaded.forEach( (obj) => {
+                obj.children.forEach( (child) => {
+                    if (child.name == "bounding_box") {
+                        child.visible = value;
+                    }
+                })
+            });
+            this.#showBoundingBoxes = value;
+        });
+
+        //changing material color?
+        const folderColors = folderControls.addFolder('Furniture Colors');
+        folderColors.close();
+
         // Moving Controls
         const folderMoving = gui.addFolder('View Controls');
         const setOrthoMode = {
@@ -682,7 +698,7 @@ class DemoScene {
             }
         }
         folderMoving.add({selectedFunction: 'drag'}, 'selectedFunction', Object.keys(setOrthoMode))
-        .name('Controls')
+        .name('Top-Down')
         .onChange((selectedFunction) => {
             if (setOrthoMode[selectedFunction]) {
                 setOrthoMode[selectedFunction]();
@@ -692,44 +708,20 @@ class DemoScene {
             keyboard: () => {
                 this.#controls.setToWASD();
                 this.#controls.insideMode = "keyboard";
-
             },
             teleport: () => {
                 this.#controls.setToTeleport();
                 this.#controls.insideMode = "teleport";
-
             }
         }
         folderMoving.add({selectedFunction: 'keyboard'}, 'selectedFunction', Object.keys(setInsideMode))
-        .name('Controls')
+        .name('Inside')
         .onChange((selectedFunction) => {
             if (setInsideMode[selectedFunction]) {
                 setInsideMode[selectedFunction]();
             }
         });
-        
-        
-        //toggling bounding boxes
-        const folderBoundingBox = gui.addFolder('Bounding Box');
-        const boundingBoxToggle = {
-            toggle: false
-        }
-        folderBoundingBox.add(boundingBoxToggle, 'toggle').name('Show bounding boxes').onChange(value => {
-            this.#objects.uploaded.forEach( (obj) => {
-                obj.children.forEach( (child) => {
-                    if (child.name == "bounding_box") {
-                        child.visible = value;
-                    }
-                })
-            });
-            this.#showBoundingBoxes = value;
-        });
-
-
-        //changing material color?
-        const folderColors = gui.addFolder('Change Colors');
-        folderColors.close();
-        
+    
         //changing measurement units
         const folderMeasurements = gui.addFolder('Units');
         const measurementUnits = {
