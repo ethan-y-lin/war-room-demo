@@ -73,21 +73,21 @@ block content
                         each room in rooms
                             li
                                 a(class="open-room-link" href="#" data-url=`${room.url}`) #{room.name}
-                        li
+                        li.add-section
                             div#room-button.dropdown-button  
                                 a &#43; Add new floor plan
-                        form(id="room-form" method='POST' enctype='multipart/form-data' action= "/upload-room")
-                            div.form-group
-                                label(for='name') Name: 
-                                input#room-name.form-control(type='text', placeholder='Floor plan' name='name'  )
-                            div.form-group#room-upload-form
-                                label(for='room') Upload:  
-                                input(type='file' name='room' accept="room/glb, room/obj")
-                            button.button.submit-button(type='submit') Submit
-                            if errors
-                                ul
-                                    for error in errors
-                                        li!= error.msg  
+                            form(id="room-form" method='POST' enctype='multipart/form-data' action= "/upload-room")
+                                div.form-group
+                                    label(for='name') Name: 
+                                    input#room-name.form-control(type='text', placeholder='Floor plan' name='name'  )
+                                div.form-group#room-upload-form
+                                    label(for='room') Upload:  
+                                    input(type='file' name='room' accept="room/glb, room/obj")
+                                button.button.submit-button(type='submit') Submit
+                                if errors
+                                    ul
+                                        for error in errors
+                                            li!= error.msg  
                 ul#furnitures.layer2.hidden
                     div.back-button1 &lt; back
                     div.menu-title
@@ -100,7 +100,7 @@ block content
                                     button.delete-hover(class="delete-category" data-url=`${category.url}`) 
                         li
                             a#list.menu-header Full List        
-                        li.add-category
+                        li.add-section
                             div#category-button.dropdown-button  
                                 a &#43; Add new category
                             form#c-form
