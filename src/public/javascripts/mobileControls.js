@@ -28,6 +28,7 @@ class MobileControls extends EventDispatcher {
 		this.pointerSpeed = 2.0;
 
 		this._onPointerMove = onPointerMove.bind( this );
+        this._onTouchMove = onTouchMove.bind( this );
         this._onDoubleClick = onDoubleClick.bind(this);
 
 		this.connect();
@@ -37,6 +38,7 @@ class MobileControls extends EventDispatcher {
 	connect() {
 
 		this.domElement.addEventListener( 'pointermove', this._onPointerMove );
+        this.domElement.addEventListener( 'touchmove', this._onTouchMove );
         this.domElement.addEventListener('dblclick', this._onDoubleClick );
 
 	}
@@ -44,6 +46,7 @@ class MobileControls extends EventDispatcher {
 	disconnect() {
 
 		this.domElement.removeEventListener( 'pointermove', this._onPointerMove );
+        this.domElement.removeEventListener( 'touchmove', this._onTouchMove );
         this.domElement.removeEventListener('dblclick', this._onDoubleClick );
 	}
 
@@ -110,6 +113,25 @@ function onPointerMove( event ) {
 
 	camera.quaternion.setFromEuler( _euler );
     console.log("on pointer move")
+	this.dispatchEvent( _changeEvent );
+
+}
+
+function onTouchMove( event ) {
+
+	const movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+	const movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+
+	const camera = this.camera;
+	_euler.setFromQuaternion( camera.quaternion );
+
+	_euler.y -= movementX * 0.002 * this.pointerSpeed;
+	_euler.x -= movementY * 0.002 * this.pointerSpeed;
+
+	_euler.x = Math.max( _PI_2 - this.maxPolarAngle, Math.min( _PI_2 - this.minPolarAngle, _euler.x ) );
+
+	camera.quaternion.setFromEuler( _euler );
+    console.log("on touch move")
 	this.dispatchEvent( _changeEvent );
 
 }
