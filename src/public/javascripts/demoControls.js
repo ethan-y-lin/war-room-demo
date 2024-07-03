@@ -308,7 +308,7 @@ class DemoControls {
         this.#canvas.removeEventListener('click', this.#orthoOnClick);
         this.#canvas.removeEventListener('click', this.#outsideOnClick);
         document.removeEventListener('click', this.#insideOnClick);
-        this.#canvas.removeEventListener('dblclick', this.#insideOnDblClick);
+        this.#mobile.removeEventListener('dblclick', this.#insideOnDblClick);
         this.#canvas.removeEventListener('mousemove', this.#orthoOnMove);
         this.#pointerLock.enabled = false;
         this.#orbit.enabled = false;
@@ -319,7 +319,7 @@ class DemoControls {
         console.log("mobile");
         this.#mobile = new MobileControls(camera, canvas);
         this.#scene.add(this.#insidePointer);   
-        this.#canvas.addEventListener('dblclick', this.#insideOnDblClick);
+        this.#mobile.addEventListener('dblclick', this.#insideOnDblClick);
     }
 
     #setToNonMobile(camera, canvas) {

@@ -29,6 +29,7 @@ class MobileControls extends EventDispatcher {
 
 		this.camera = camera;
 		this.domElement = domElement;
+        this.dragged = false;
 
 		// Set to constrain the pitch of the camera
 		// Range is 0 to Math.PI radians
@@ -45,7 +46,7 @@ class MobileControls extends EventDispatcher {
 
 		this.domElement.addEventListener( 'pointerdown', this.onPointerDown );
 		this.domElement.addEventListener( 'pointercancel', this.onPointerUp );
-        this.domElement.addEventListener('dblclick', this.onDoubleClick );
+        this.domElement.addEventListener('touchend', this.detectDoubleTapClosure());
 
 	}
 
@@ -53,7 +54,7 @@ class MobileControls extends EventDispatcher {
 
         this.domElement.removeEventListener( 'pointerdown', this.onPointerDown );
 		this.domElement.removeEventListener( 'pointercancel', this.onPointerUp );
-        this.domElement.removeEventListener('dblclick', this.onDoubleClick );
+        this.domElement.removeEventListener('touchend', this.detectDoubleTapClosure() );
 	}
 
 	dispose() {
@@ -129,7 +130,7 @@ class MobileControls extends EventDispatcher {
     onPointerMove = ( event ) => {
     
         if ( event.pointerType === 'touch' ) {
-    
+            this.dragged = true;
             this.onTouchMove( event );
     
         } 
@@ -216,20 +217,42 @@ class MobileControls extends EventDispatcher {
         this.dispatchEvent( _changeEvent );
     }
     
-    
-    
-    
-    onDoubleClick = (event) => {
-        this.dispatchEvent(_doubleClickEvent);
-        console.log(event);
+    detectDoubleTapClosure() {
+        let lastTap = 0;
+        let timeout;
+        const scope = this;
+        
+        return function detectDoubleTap(event) {
+            if (!scope.dragged) {
+                const curTime = new Date().getTime();
+                const tapLen = curTime - lastTap;
+                
+                if (tapLen < 500 && tapLen > 0) {
+                    console.log('Double tapped!');
+                    event.preventDefault();
+                    console.log('Scope:', scope);
+                    
+                    // Ensure scope is an EventDispatcher
+                    if (typeof scope.dispatchEvent === 'function') {
+                        scope.dispatchEvent(_doubleClickEvent);
+                        console.log('Event dispatched!');
+                    } else {
+                        console.error('Scope is not an EventDispatcher. Current scope:', scope);
+                    }
+                } else {
+                    timeout = setTimeout(() => {
+                        clearTimeout(timeout);
+                    }, 500);
+                }
+                
+                lastTap = curTime;
+            } else {
+                scope.dragged = false;
+            }
+
+        };
     }
-    
-
-    
-
-
 }
-
 // Pointer Functions
 
 function trackPointer( event ) {
