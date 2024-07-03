@@ -329,6 +329,7 @@ class DemoScene {
             text.textContent = addedObject.name;
     
             const label = new CSS2DObject( text );
+            label.name = "label";
             console.log(label);
             newObject.add(label)
 
