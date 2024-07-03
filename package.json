@@ -3,6 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "build-client": "npx webpack --config webpack.config.js",
+    "build": "npm run build-client",
     "start": "node ./src/bin/www",
     "dev": "nodemon ./src/bin/www"
   },
