@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
+import { MobileControls } from './mobileControls';
 /**
  * This class contains the control logic for each of the views and modes. 
  * Using ThreeJS add-on controls, this class supports "drag controls" for 
@@ -190,6 +191,7 @@ class DemoControls {
     #moveToPoint;
     #moving;
 
+    #mobile;
     ////// ////// ////// //////
 
 
@@ -226,7 +228,7 @@ class DemoControls {
         this.#draggableObjects = objects.furniture.concat(objects.uploaded);
         this.#modelSize = modelSize;
         this.orthoMode = "drag";
-        this.insideMode = "keyboard";
+        this.insideMode = "mobile";
         this.#measure_points = [];
 
     
@@ -234,7 +236,7 @@ class DemoControls {
 
         this.#gumball = null;
         this.#gumballState = {mode: 'translate'}
-
+        this.#mobile = new MobileControls(camera.inside, canvas);
         this.#pointerLock = new PointerLockControls(camera.inside, canvas);
         this.#prev_time = performance.now();
         this.#velocity = new THREE.Vector3();
@@ -288,8 +290,12 @@ class DemoControls {
      */
     #reset() {
         // this.#drag.dispose();
-        this.setToWASD();
+        if (this.#floorObject != null) {
+            this.#colorObject(this.#floorObject, 0x000000);
+            this.#scene.remove(this.#insidePointer);
+        }
         this.#pointerLock.dispose();
+        this.#mobile.dispose();
         this.#orbit.dispose();
         this.#clearGumball();
         const instructions = document.getElementById( 'instructions' );
@@ -302,23 +308,36 @@ class DemoControls {
         this.#canvas.removeEventListener('click', this.#orthoOnClick);
         this.#canvas.removeEventListener('click', this.#outsideOnClick);
         document.removeEventListener('click', this.#insideOnClick);
+        this.#canvas.removeEventListener('dblclick', this.#insideOnDblClick);
         this.#canvas.removeEventListener('mousemove', this.#orthoOnMove);
         this.#pointerLock.enabled = false;
         this.#orbit.enabled = false;
-
+        this.hideBlocker();
     }
 
-    setToWASD() {
-        if (this.#floorObject != null) {
-            this.#colorObject(this.#floorObject, 0x000000);
-            this.#scene.remove(this.#insidePointer);
-        }
+    #setToMobile(camera, canvas) {
+        console.log("mobile");
+        this.#mobile = new MobileControls(camera, canvas);
+        this.#scene.add(this.#insidePointer);   
+        this.#canvas.addEventListener('dblclick', this.#insideOnDblClick);
     }
-    
-    setToTeleport() {
-        if (this.#view == "inside") {
-            this.#scene.add(this.#insidePointer);       
+
+    #setToNonMobile(camera, canvas) {
+        if (this.insideMode == "teleport") {
+            this.#scene.add(this.#insidePointer);   
+        } else {
+            this.#boundingBoxes = this.#getBoundingBoxes(this.#objects);
         }
+        this.#pointerLock = new PointerLockControls(camera, canvas);
+        this.#pointerLock.enabled = true;
+        const instructions = document.getElementById( 'instructions' );
+        instructions.addEventListener( 'click', this.#lock);
+        this.#showBlocker();
+        this.#pointerLock.addEventListener( 'lock', this.hideBlocker);
+        this.#pointerLock.addEventListener( 'unlock', this.#showBlocker);
+        document.addEventListener('keydown', this.#insideOnKeyDown);
+        document.addEventListener('keyup',this.#insideOnKeyUp);
+        document.addEventListener('click', this.#insideOnClick);
     }
     /**
      * Assumes that this.objects and this.draggableObjects are up to date.
@@ -345,20 +364,12 @@ class DemoControls {
             this.hideBlocker();
         } else if (newControl == "inside"){
             this.#reset();
-            if (this.insideMode == "teleport") {
-                this.setToTeleport();
+            if (this.insideMode == "mobile") {
+                this.#setToMobile(camera, canvas);
+            } else {
+                this.#setToNonMobile(camera, canvas);
             }
-            this.#boundingBoxes = this.#getBoundingBoxes(this.#objects);
-            this.#pointerLock = new PointerLockControls(camera, canvas);
-            this.#pointerLock.enabled = true;
-            const instructions = document.getElementById( 'instructions' );
-            instructions.addEventListener( 'click', this.#lock);
-            this.#showBlocker();
-            this.#pointerLock.addEventListener( 'lock', this.hideBlocker);
-            this.#pointerLock.addEventListener( 'unlock', this.#showBlocker);
-            document.addEventListener('keydown', this.#insideOnKeyDown);
-            document.addEventListener('keyup',this.#insideOnKeyUp);
-            document.addEventListener('click', this.#insideOnClick);
+
         }
     }
 
@@ -383,7 +394,42 @@ class DemoControls {
     updateControls(camera) {
         if (this.#view == "inside") {
             const time = performance.now();
-            if (this.insideMode == "keyboard") {
+            if (this.insideMode == "mobile") {
+                if (this.#moving) {
+                    console.log("moving")
+                    this.#mobile.pointerSpeed = 0;
+                    const delta = ( time - this.#prev_time ) / 1000;
+                    this.#moveToPoint.velocity += 5 * delta;
+                    if (this.#moveToPoint.velocity * delta * 10 < this.#moveToPoint.distance) {
+                        this.#mobile.moveForward(this.#moveToPoint.velocity * delta * 10);
+                        this.#moveToPoint.distance -= this.#moveToPoint.velocity * delta * 10;
+                    } else {
+                        this.#mobile.moveForward (this.#moveToPoint.distance);
+                        this.#moving = false;
+                        this.#mobile.pointerSpeed = 2;
+                    }
+                } else {
+                    const newRaycaster = new THREE.Raycaster();
+                    newRaycaster.setFromCamera(new THREE.Vector2(), this.#camera.inside);
+                    const intersects = newRaycaster.intersectObjects(this.#objects, true);
+                    if (intersects.length > 0) {
+                        const firstObject = intersects[0].object;
+                        this.#insidePointer.position.x = intersects[0].point.x;
+                        this.#insidePointer.position.y = intersects[0].point.y;
+                        this.#insidePointer.position.z = intersects[0].point.z;
+
+                        if (firstObject.name.includes("floor")) {
+                            this.#colorObject(firstObject, 0xFF0000);
+                            this.#floorObject = firstObject;
+                        } else {
+                            if (this.#floorObject != null) {
+                                this.#colorObject(this.#floorObject, 0x000000);
+                            }
+                        }
+                    }
+                }
+            }
+            else if (this.insideMode == "keyboard") {
 
                 if ( this.#pointerLock.isLocked) {
                     const delta = ( time - this.#prev_time ) / 1000;
@@ -644,6 +690,24 @@ class DemoControls {
                         this.#colorObject(firstObject, 0x000000);
                     }
                 }
+            }
+        }
+    }
+
+    #insideOnDblClick = (event) => {
+        console.log("double click")
+        const newRaycaster = new THREE.Raycaster();
+        newRaycaster.setFromCamera(new THREE.Vector2(), this.#camera.inside);
+        const intersects = newRaycaster.intersectObjects(this.#objects, true);
+        if (intersects.length > 0) {
+            const firstObject = intersects[0].object;
+            if (firstObject.name.includes("floor")) {
+                this.#moving = true;
+                const totalDistance = intersects[0].distance;
+                const heightDiff = intersects[0].point.y - this.#camera.inside.position.y;
+                const forwardDist = Math.sqrt(totalDistance * totalDistance - heightDiff * heightDiff);
+                this.#moveToPoint = {distance: forwardDist, velocity: 0};
+                this.#colorObject(firstObject, 0x000000);
             }
         }
     }
@@ -948,6 +1012,15 @@ class DemoControls {
         this.#gumballState.mode = mode;
         if (this.#gumball != null) {
             this.#gumball.mode = mode;
+            if (mode == "rotate") {
+                this.#gumball.showX = false;
+                this.#gumball.showZ = false;
+                this.#gumball.showY = true;
+            } else {
+                this.#gumball.showX = true;
+                this.#gumball.showZ = true;
+                this.#gumball.showY = false;
+            }
         }
     }
 

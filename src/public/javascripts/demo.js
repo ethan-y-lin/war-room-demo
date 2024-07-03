@@ -575,6 +575,7 @@ class DemoScene {
      * Sets the scene view to inside mode by updating camera, controls, and objects.
      */
     setInsideViewMode() {
+        this.#scene.remove(this.#objects.ceiling);
         this.#camera.setInsideCamera(this.#canvas);
         this.#current_camera = this.#camera.inside;
         this.#controls.switchControls("inside", this.#camera.inside, this.#canvas);
@@ -663,6 +664,7 @@ class DemoScene {
             },
             'rotate': () => {
                 this.#controls.setGumballMode('rotate');
+                
             }
         }
 
@@ -714,15 +716,19 @@ class DemoScene {
         });
         const setInsideMode = {
             keyboard: () => {
-                this.#controls.setToWASD();
                 this.#controls.insideMode = "keyboard";
+                this.#controls.switchControls("inside", this.#camera.inside, this.#canvas);
             },
             teleport: () => {
-                this.#controls.setToTeleport();
                 this.#controls.insideMode = "teleport";
+                this.#controls.switchControls("inside", this.#camera.inside, this.#canvas);
+            },
+            mobile: () => {
+                this.#controls.insideMode = "mobile";
+                this.#controls.switchControls("inside", this.#camera.inside, this.#canvas);
             }
         }
-        folderMoving.add({selectedFunction: 'keyboard'}, 'selectedFunction', Object.keys(setInsideMode))
+        folderMoving.add({selectedFunction: 'mobile'}, 'selectedFunction', Object.keys(setInsideMode))
         .name('Inside')
         .onChange((selectedFunction) => {
             if (setInsideMode[selectedFunction]) {
