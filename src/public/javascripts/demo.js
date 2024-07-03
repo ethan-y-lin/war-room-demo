@@ -637,7 +637,7 @@ class DemoScene {
         const aLight = this.getAmbientLight();
         const dLight = this.getDirectionalLight();
         const sLight = this.getSpotLight();
-        const folderLights = gui.addFolder('Light');
+        const folderLights = gui.addFolder('Light Conditions');
 
         const lightsToggle = {
             toggle: true
@@ -692,11 +692,11 @@ class DemoScene {
         });
 
         //changing material color?
-        const folderColors = folderControls.addFolder('Furniture Colors');
-        folderColors.close();
+        // const folderColors = folderControls.addFolder('Furniture Colors');
+        // folderColors.close();
 
         // Moving Controls
-        const folderMoving = gui.addFolder('View Controls');
+        const folderMoving = gui.addFolder('General Controls');
         const setOrthoMode = {
             drag: () => {
                 this.#controls.orthoMode = "drag";

@@ -22,5 +22,24 @@ module.exports = [
         }
       ]
     }
+  },
+  {
+    mode: 'development',
+    entry: './src/public/javascripts/carousel.js',
+    output: {
+      path: path.resolve(__dirname, 'dist/public/js'),
+      filename: 'carousel.js'
+    },
+    module: {
+      rules: [
+        {
+          test: /\.js$/,
+          exclude: /node_modules/,
+          use: {
+            loader: 'babel-loader'
+          }
+        }
+      ]
+    }
   }
 ];

@@ -260,15 +260,15 @@ nav a{
   margin: 5px 0px 5px 0px;
 }
 
-.layerx .add-category{
+.layerx .add-section{
   display: flex;
   flex-direction: column;
   align-items: end;
 }
-.layerx .add-category a{
+.layerx .add-section a{
   width: 100%;
 }
-.layerx .add-category form{
+.layerx .add-section form{
   width: 100%;
 }
 
@@ -759,7 +759,7 @@ nav a{
 }
 
 .description{
-  margin: 0px 120px 20px 120px;
+  margin: 5px 120px 0px 120px;
   text-align: justify;
   font-size: large;
   line-height: 1.5;
@@ -769,15 +769,12 @@ nav a{
   width: 30vw;
   margin: 5px;
 }
-.body-content{
-  background-color:#a4c3b220;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 0px 20px 0px 20px;
+.pictures-small{
+  width: 15vw;
+  margin: 5px;
 }
 
-.body-content h2{
+.intro h2{
   font-size: 48px;
   text-align: center;
   font-weight: lighter;
@@ -792,19 +789,91 @@ nav a{
   padding: 0px 100px 10px 100px;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
-.step-description p{
-  width: 25%;
-  margin-right: 10px;
+.description-text, .description-text-vertical{
+  width: 35%;
+}
+.description-text p, .description-text-vertical p{
+  margin-right: 20px;
   line-height: 1.5;
   text-align: justify;
 }
 .step-description img{
   margin-left: 10px;
 }
+.step-description-vertical{
+  display: flex;
+  flex-direction: column;
+  padding: 0px 100px 10px 100px;
+  align-items: center;
+  justify-content: center;
+}
+.description-img{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.intro{
+  background-color:#a4c3b220;
+}
 
-.body-content h3{
+.carousel h3{
   font-size: 28px;
   font-weight: lighter;
   margin-top: 20px;
+  text-align: center;
+  position: relative;
 }
+.carousel{
+  position: relative;
+  background-color:#a4c3b220;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 0px 20px 0px 20px;
+  height: 100%;
+}
+.step{
+  position: absolute;
+  width: 80%;
+  height: 80%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  padding: 50px;
+}
+
+.carousel button{
+  position: absolute;
+  background-color: transaprent;
+  border: none;
+  font-size: 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.carousel #prev{
+  left: 30px;
+  background-color: transparent;
+  color:#384c44;
+}
+.carousel #next{
+  right: 30px;
+  background-color: transparent;
+  color:#384c44;
+}
+#next:hover{
+  color:#171717;
+  cursor: pointer;
+  font-weight: bolder;
+}
+#prev:hover{
+  color:#171717;
+  cursor: pointer;
+  font-weight: bolder;
+}
+
