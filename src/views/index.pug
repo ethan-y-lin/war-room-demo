@@ -41,7 +41,7 @@ block content
                             div.tooltip-section
                                 div.tooltip-icon &quest;                               
                                 p.tooltip-text.hidden Upload your scanned furniture models here
-                    form(id="object-form" method='POST' enctype='multipart/form-data' action= "/upload-object")
+                    form(id="object-form")
                         div.form-flex-col
                             div.form-group.form-input
                                 label(for='name') Name: 
@@ -54,7 +54,9 @@ block content
                                 select#object-category.form-control(name='category' required)
                                     each category in categories
                                         option(value= category._id)= category.name
-                            button.button.submit-button(type='submit') Submit
+                            button#upload-object.button.submit-button Submit
+                            div#progressBarContainer(style="width: 100%; background-color: lightgray; height: 20px")
+                                div#progressBar(style="width: 0%; background-color: green; height: 100%;")
                         if errors
                             ul
                                 for error in errors

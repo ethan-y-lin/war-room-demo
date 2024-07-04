@@ -22,7 +22,7 @@ router.get('/about', app_controller.about);
 router.get('/upload-object', object_controller.object_upload_get);
 
 // POST request for creating Object.
-router.post('/upload-object', upload.single('object'), object_controller.object_upload_post);
+router.post('/upload-object', upload.single('file'), object_controller.object_upload_post);
 
 // GET request for dispalying list. 
 // router.get("/list", object_controller.object_list);

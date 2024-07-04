@@ -1,6 +1,8 @@
 import category from "../../models/category.js";
 import {DemoScene} from "./demo.js"
 import $ from 'jquery'
+import io from 'socket.io-client';
+
 console.log("INIT")
 const startModel = {room_url: new URL('../assets/warroom1.glb', import.meta.url)};
 
@@ -42,6 +44,9 @@ $(window).on('load', function() {
         init(startModel);
         start = false;
     }
+
+    const uploadObjectButton = document.getElementById("upload-object");
+    uploadObjectButton.addEventListener('click', uploadObject);
 
     const uploadCategoryForm = document.getElementById("c-form");
     uploadCategoryForm.addEventListener('submit', uploadCategory);
@@ -380,19 +385,62 @@ async function deleteCategory(categoryURL) {
     .catch(error => console.error('Error: ', error))
 }
 
+function resetBar(progressBar, socket) {
+    socket.removeAllListeners('uploadProgress');
+    progressBar.style.width = "0%";
+}
+
 async function uploadObject(e) {
     e.preventDefault();
     const objectNameInput = document.getElementById('object-name');
-    
+    const objectName = objectNameInput.value;
+
     const objectFileInput = document.getElementById('object-file');
 
     const objectCategoryInput = document.getElementById('object-category');
 
     const formData = new FormData();
-    formData.append('name', objectNameInput.value);
+    formData.append('name', objectName);
     formData.append('file', objectFileInput.files[0]);
     formData.append('category', objectCategoryInput.value);
-    addObjectToDOM(objectCategoryInput.value, objectNameInput.value, "");
+
+    const socket = io();
+    const progressBar = document.getElementById("progressBar");
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', 'upload-object', true);
+
+    xhr.upload.addEventListener('progress', (e) => {
+        if (e.lengthComputable) {
+            const percentComplete = (e.loaded / e.total) * 50;
+            console.log(percentComplete);
+            progressBar.style.width = percentComplete + '%';
+        }
+    });
+
+    xhr.onload = () => {
+        const response = JSON.parse(xhr.responseText);
+        if (xhr.status === 200 && response.success) {
+          addObjectToDOM(response.category, objectName, response.obj_url);
+          progressBar.style.width = "100%";
+          alert('File uploaded successfully');
+          resetBar(progressBar, socket);
+        } else {
+          alert('File upload failed');
+          resetBar(progressBar, socket);
+        }
+    };
+
+    xhr.onerror = () => {
+        alert('An error occurred during the upload');
+        resetBar(progressBar, socket);
+      };
+
+    xhr.send(formData);
+
+    socket.on('uploadProgress', (data) => {
+        progressBar.style.width = (50 + data.progress * 0.5) + '%';
+    });
 
     objectNameInput.value = "";
     objectFileInput.value = "";
@@ -400,7 +448,7 @@ async function uploadObject(e) {
 }
 
 async function addObjectToDOM(categoryName, name, url) {
-    const categoryID = "#category-"+ categoryName.replaceAll(' ', '-') + " layerx";
+    const categoryID = "#category-"+ categoryName.replaceAll(' ', '-') + " .layerx";
     console.log(categoryID)
     const categoryElement = document.querySelector(categoryID);
     // Create elements

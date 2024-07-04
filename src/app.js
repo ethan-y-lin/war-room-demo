@@ -5,11 +5,16 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const session = require('express-session');
+const cors = require('cors');
+
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+
 var getConnectionString = require("./config/mongodbConfig");
 
 var app = express();
+
+app.use(cors()); // Enable CORS
 
 // set up mongoose connection
 const mongoose = require("mongoose");
@@ -28,7 +33,7 @@ app.set('view engine', 'pug');
 
 app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true , limit: '50mb'}));
 app.use(cookieParser());
 // Serve static files
 app.use(express.static(path.join(__dirname, '../dist/public')));
@@ -60,4 +65,6 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-module.exports = app;
+
+
+module.exports = { app };
