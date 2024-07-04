@@ -100,13 +100,15 @@ exports.object_upload_post = [
         // Simulate Progres Updates
         let progress = 0;
         const interval = setInterval(() => {
-          progress += 10;
+          progress += 1;
           if (progress < 100) {
+            console.log(progress)
             io.emit('uploadProgress', { progress });
           } else {
+            
             clearInterval(interval);
           }
-        }, 500);
+        }, 20);
 
         // Upload model to Cloudinary
         const result = await new Promise((resolve, reject) => {
@@ -119,7 +121,8 @@ exports.object_upload_post = [
             resolve(result);
           }).end(req.file.buffer);
         });
-
+        clearInterval(interval);
+        io.emit('uploadProgress', {progress: 100});
         objectUrl = result.secure_url;
     
 
@@ -130,7 +133,7 @@ exports.object_upload_post = [
           category: req.body.category
         });
 
-        io.emit('uploadProgress', {progress: 100});
+
         // Check if Item with same name already exists.
         const objectExists = await Object.findOne({ name: req.body.name })
           .collation({ locale: "en", strength: 2 })
