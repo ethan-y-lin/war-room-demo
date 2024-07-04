@@ -9,197 +9,199 @@ block content
                 div.tutorials 
                     p
                         a.tutorial-button &#9432; Tutorials
-                nav.dropdown-menu
-                    div#column1.hidden
+          
+        aside#menu
+            nav.dropdown-menu
+                div#column1.hidden
+                    div.menu-title
+                        h2 Menu
+                    ul.layer1
+                        li
+                            div.tooltip
+                                a.menu-unit#fp FLOOR PLANS
+                                div.tooltip-section
+                                    div.tooltip-icon &quest;                               
+                                    p.tooltip-text.hidden See all your uploaded floor plans here
+                        li
+                            div.tooltip
+                                a.menu-unit#f FURNITURES
+                                div.tooltip-section
+                                    div.tooltip-icon &quest;                               
+                                    p.tooltip-text.hidden See all your uploaded furnitures here
+                        li
+                            div.tooltip
+                                a.menu-unit#m MEASUREMENT
+                                div.tooltip-section
+                                    div.tooltip-icon &quest;                               
+                                    p.tooltip-text.hidden Toggle between viewing and measuring the dimension of the room and furnitures
+                        li
+                            div.tooltip
+                                a.menu-unit#sp SAVED DESIGNS
+                                div.tooltip-section
+                                    div.tooltip-icon &quest;                               
+                                    p.tooltip-text.hidden See and edit your saved floor designs
+                        li                     
+                            div.object-button.tooltip
+                                a UPLOAD
+                                div.tooltip-section
+                                    div.tooltip-icon &quest;                               
+                                    p.tooltip-text.hidden Upload your scanned furniture models here
+                        form(id="object-form" method='POST' enctype='multipart/form-data' action= "/upload-object")
+                            div.form-flex-col
+                                div.form-group.form-input
+                                    label(for='name') Name: 
+                                    input#object-name.form-control(type='text', placeholder='Name' name='name' required value=(undefined===object ? '' : object.name) )
+                                div.form-group.form-input
+                                    label(for='object') Upload:  
+                                    input#object-file(type='file' name='object' accept="object/glb, object/obj" required)
+                                div.form-group.form-input
+                                    label(for='category') Category: 
+                                    select#object-category.form-control(name='category' required)
+                                        each category in categories
+                                            option(value= category._id)= category.name
+                                button.button.submit-button(type='submit') Submit
+                            if errors
+                                ul
+                                    for error in errors
+                                        li!= error.msg
+                        li
+                            a.menu-unit#p3 EXPORT
+                        li 
+                            a(href='/about') ABOUT
+                
+                div#column2
+                    ul#floor-plans.layer2.hidden
+                        div.back-button1 &lt; back
                         div.menu-title
-                            h2 Menu
-                        ul.layer1
-                            li
-                                div.tooltip
-                                    a.menu-unit#fp FLOOR PLANS
-                                    div.tooltip-section
-                                        div.tooltip-icon &quest;                               
-                                        p.tooltip-text.hidden See all your uploaded floor plans here
-                            li
-                                div.tooltip
-                                    a.menu-unit#f FURNITURES
-                                    div.tooltip-section
-                                        div.tooltip-icon &quest;                               
-                                        p.tooltip-text.hidden See all your uploaded furnitures here
-                            li
-                                div.tooltip
-                                    a.menu-unit#m MEASUREMENT
-                                    div.tooltip-section
-                                        div.tooltip-icon &quest;                               
-                                        p.tooltip-text.hidden Toggle between viewing and measuring the dimension of the room and furnitures
-                            li
-                                div.tooltip
-                                    a.menu-unit#sp SAVED DESIGNS
-                                    div.tooltip-section
-                                        div.tooltip-icon &quest;                               
-                                        p.tooltip-text.hidden See and edit your saved floor designs
-                            li                     
-                                div.object-button.tooltip
-                                    a UPLOAD
-                                    div.tooltip-section
-                                        div.tooltip-icon &quest;                               
-                                        p.tooltip-text.hidden Upload your scanned furniture models here
-                            form(id="object-form" method='POST' enctype='multipart/form-data' action= "/upload-object")
-                                div.form-flex-col
-                                    div.form-group.form-input
-                                        label(for='name') Name: 
-                                        input#object-name.form-control(type='text', placeholder='Name' name='name' required value=(undefined===object ? '' : object.name) )
-                                    div.form-group.form-input
-                                        label(for='object') Upload:  
-                                        input#object-file(type='file' name='object' accept="object/glb, object/obj" required)
-                                    div.form-group.form-input
-                                        label(for='category') Category: 
-                                        select#object-category.form-control(name='category' required)
-                                            each category in categories
-                                                option(value= category._id)= category.name
-                                    button.button.submit-button(type='submit') Submit
-                                if errors
-                                    ul
-                                        for error in errors
-                                            li!= error.msg
-                            li
-                                a.menu-unit#p3 EXPORT
-                            li 
-                                a(href='/about') ABOUT
-                    
-                    div#column2
-                        ul#floor-plans.layer2.hidden
-                            div.back-button1 &lt; back
-                            div.menu-title
-                                h2 FLOOR PLANS
-                            div.layerx
-                                each room in rooms
-                                    li
-                                        a(class="open-room-link" href="#" data-url=`${room.url}`) #{room.name}
-                                li.add-section
-                                    div#room-button.dropdown-button  
-                                        a &#43; Add new floor plan
-                                    form(id="room-form" method='POST' enctype='multipart/form-data' action= "/upload-room")    
-                                        div.form-group
-                                            label(for='name') Name: 
-                                            input#room-name.form-control(type='text', placeholder='Floor plan' name='name'  )
-                                        div.form-group#room-upload-form
-                                            label(for='room') Upload:  
-                                            input(type='file' name='room' accept="room/glb, room/obj")
-                                        button.button.submit-button(type='submit') Submit
-                                        if errors
-                                            ul
-                                                for error in errors
-                                                    li!= error.msg  
-                        ul#furnitures.layer2.hidden
-                            div.back-button1 &lt; back
-                            div.menu-title
-                                h2 FURNITURES
-                            div.layerx
-                                div.layerxx
-                                    each category in categories 
-                                        li(data-url=`${category.url}`)
-                                            a.menu-header(id= category.name.replaceAll(' ', '-') class="open-category-link" href="#" data-url=`${category.url}`) #{category.name}
-                                            button.delete-hover(class="delete-category" data-url=`${category.url}`) 
+                            h2 FLOOR PLANS
+                        div.layerx
+                            each room in rooms
                                 li
-                                    a#list.menu-header Full List        
-                                li.add-section
-                                    div#category-button.dropdown-button  
-                                        a &#43; Add new category
-                                    form#c-form
-                                        div#category-form.form-group
-                                            div.form-flex
-                                                input#category-name.form-control(type='text', placeholder='Category Name' name='name' value=(undefined===new_category ? '' : new_category.name) required)
-                                                button.button.submit-button(type='submit') Submit
-                                        if errors
-                                            ul
-                                                for error in errors
-                                                    li!= error.msg   
-                        ul#saved-plans.layer2.hidden
-                            div.back-button1 &lt; back
-                            div.menu-title
-                                h2 SAVED Designs
-                            div.layerx
-                                each design in designs 
-                                    li(data-url=`${design.url}`)
-                                        a(class="open-design-link" href="#" data-url=`${design.url}`) #{design.name}
-                                        button.delete-hover(class="delete-design" data-url=`${design.url}`) 
-                    div#column3.hidden
-                        each category in categories
-                            ul(id= "category-"+category.name.replaceAll(' ', '-'), class= "layer3 hidden")
-                                div.back-button2 &lt; back
-                                div.menu-title
-                                    h2= category.name
-                                div.layerx
-                                    if category.objects.length
-                                        each obj in category.objects
-                                            each object in objects  
-                                                    if obj == object.id
-                                                        li(data-url=`${object.url}`)
-                                                            a(class="add-object-to-scene" href="#" data-url=`${object.url}`) #{object.name}
-                                                            button.delete-hover(class="delete-object" data-url=`${object.url}`) 
-                                    else    
-                                        p There are no objects.
-                                    
-                        div#list3.layer3.hidden  
+                                    a(class="open-room-link" href="#" data-url=`${room.url}`) #{room.name}
+                            li.add-section
+                                div#room-button.dropdown-button  
+                                    a &#43; Add new floor plan
+                                form(id="room-form" method='POST' enctype='multipart/form-data' action= "/upload-room")
+                                    div.form-group
+                                        label(for='name') Name: 
+                                        input#room-name.form-control(type='text', placeholder='Floor plan' name='name'  )
+                                    div.form-group#room-upload-form
+                                        label(for='room') Upload:  
+                                        input(type='file' name='room' accept="room/glb, room/obj")
+                                    button.button.submit-button(type='submit') Submit
+                                    if errors
+                                        ul
+                                            for error in errors
+                                                li!= error.msg  
+                    ul#furnitures.layer2.hidden
+                        div.back-button1 &lt; back
+                        div.menu-title
+                            h2 FURNITURES
+                        div.layerx
+                            div.layerxx
+                                each category in categories 
+                                    li(data-url=`${category.url}`)
+                                        a.menu-header(id= category.name.replaceAll(' ', '-') class="open-category-link" href="#" data-url=`${category.url}`) #{category.name}
+                                        button.delete-hover(class="delete-category" data-url=`${category.url}`) 
+                            li
+                                a#list.menu-header Full List        
+                            li.add-section
+                                div#category-button.dropdown-button  
+                                    a &#43; Add new category
+                                form#c-form
+                                    div#category-form.form-group
+                                        div.form-flex
+                                            input#category-name.form-control(type='text', placeholder='Category Name' name='name' value=(undefined===new_category ? '' : new_category.name) required)
+                                            button.button.submit-button(type='submit') Submit
+                                    if errors
+                                        ul
+                                            for error in errors
+                                                li!= error.msg   
+                    ul#saved-plans.layer2.hidden
+                        div.back-button1 &lt; back
+                        div.menu-title
+                            h2 SAVED Designs
+                        div.layerx
+                            each design in designs 
+                                li(data-url=`${design.url}`)
+                                    a(class="open-design-link" href="#" data-url=`${design.url}`) #{design.name}
+                                    button.delete-hover(class="delete-design" data-url=`${design.url}`) 
+                div#column3.hidden
+                    each category in categories
+                        ul(id= "category-"+category.name.replaceAll(' ', '-'), class= "layer3 hidden")
                             div.back-button2 &lt; back
                             div.menu-title
-                                h2 Full List
-                            ul
-                                each object in objects
-                                    li 
-                                        a(class="add-object-to-scene" href="#" data-url=`${object.url}`) #{object.name}
+                                h2= category.name
+                            div.layerx
+                                if category.objects.length
+                                    each obj in category.objects
+                                        each object in objects  
+                                                if obj == object.id
+                                                    li(data-url=`${object.url}`)
+                                                        a(class="add-object-to-scene" href="#" data-url=`${object.url}`) #{object.name}
+                                                        button.delete-hover(class="delete-object" data-url=`${object.url}`) 
+                                else    
+                                    p There are no objects.
+                                
+                    div#list3.layer3.hidden  
+                        div.back-button2 &lt; back
+                        div.menu-title
+                            h2 Full List
+                        ul
+                            each object in objects
+                                li 
+                                    a(class="add-object-to-scene" href="#" data-url=`${object.url}`) #{object.name}
                                     
         
-        main#scene
-            div.title
-                h1 #{title}
-            div#scene-container
-                div#blocker
-                    div#instructions
+    main#scene
+        div.title
+            h1 #{title}
+        div#scene-container
+            div#blocker
+                div#instructions
+                    p
+                        h1 Click to play
+                    p Move: WASD
+                    p Look: MOUSE
+            div#hud
+                div#design-save-form 
+                    p#close-button &#x2715;
+                    div.design-flex     
+                        p Save the current design as: 
+                        div#design-form
+                            input#design-name.form-control(type='text', placeholder='Design Name' name='name' required)
+                            button#save-as-design.button.submit-button(type='submit') Submit
+                //- div#toggle-control 
+                //-     p " R " Rotate | " T " Translate
+                div#scene-left
+                    div#floorplan-name
                         p
-                            h1 Click to play
-                        p Move: WASD
-                        p Look: MOUSE
-                div#hud
-                    div#design-save-form 
-                        p#close-button &#x2715;
-                        div.design-flex     
-                            p Save the current design as: 
-                            div#design-form
-                                input#design-name.form-control(type='text', placeholder='Design Name' name='name' required)
-                                button#save-as-design.button.submit-button(type='submit') Submit
-                    //- div#toggle-control 
-                    //-     p " R " Rotate | " T " Translate
-                    div#scene-left
-                        div#floorplan-name
-                            p
-                                h2#floorplan-title War Room
-                            p#design-title.up Unsaved plan
-                        div#measurement-display
-                            p#display-mode
-                            p#measure-distance
-                    div#scene-right
-                        div#full-screen
-                            button#fullscreen-button ⛶
-                        div#scene-options
-                            button#save-design Save
-                            button#save-as Save as...
-                            button#reset Discard
-            div.view-buttons
-                button#ortho-view.view
-                    p Orthographic
-                    div.tooltip-section-vertical
-                        div.tooltip-icon-vertical &quest;                               
-                        p.tooltip-text-vertical.hidden Move furnitures around in a top-down view without moving the floor plan
-                button#outside-view.view Outside
-                    div.tooltip-section-vertical
-                        div.tooltip-icon-vertical &quest;                               
-                        p.tooltip-text-vertical.hidden Move furnitures using more flexible controls that allows you to move around the whole room as well.
-                button#inside-view.view Inside
-                    div.tooltip-section-vertical
-                        div.tooltip-icon-vertical &quest;                               
-                        p.tooltip-text-vertical.hidden Walk inside the room in the first-person view
+                            h2#floorplan-title War Room
+                        p#design-title.up Unsaved plan
+                    div#measurement-display
+                        p#display-mode
+                        p#measure-distance
+                div#scene-right
+                    div#full-screen
+                        button#fullscreen-button ⛶
+                    div#scene-options
+                        button#save-design Save
+                        button#save-as Save as...
+                        button#reset Discard
+        div.view-buttons
+            button#ortho-view.view
+                p Orthographic
+                div.tooltip-section-vertical
+                    div.tooltip-icon-vertical &quest;                               
+                    p.tooltip-text-vertical.hidden Move furnitures around in a top-down view without moving the floor plan
+            button#outside-view.view Outside
+                div.tooltip-section-vertical
+                    div.tooltip-icon-vertical &quest;                               
+                    p.tooltip-text-vertical.hidden Move furnitures using more flexible controls that allows you to move around the whole room as well.
+            button#inside-view.view Inside
+                div.tooltip-section-vertical
+                    div.tooltip-icon-vertical &quest;                               
+                    p.tooltip-text-vertical.hidden Walk inside the room in the first-person view
     //- script(src="./javascripts/jquery-3.7.1.min.js")
     //- script(src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js")
     //- script(src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js")

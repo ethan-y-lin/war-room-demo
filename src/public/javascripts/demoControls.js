@@ -558,6 +558,13 @@ class DemoControls {
         // object.position.set(this.#dragOrigin.x, this.#dragOrigin.y, this.#dragOrigin.z)
     }
 
+    #getObjectLabel(object) {
+        for (let child of object.children) {
+            if (child.name == "label") {
+                return child;
+            }
+        }
+    }
     /**
      * Initializes the gumball on a specific object.
      * @param {THREE.Object3D} object 
@@ -574,7 +581,7 @@ class DemoControls {
         }
         // Add mousedown/up event handling  
         this.#gumball.addEventListener("mouseDown", (event) => {
-            if(this.#orbit != null) {
+            if (this.#orbit != null) {
                 this.#orbit.enabled = false;
             }
         });
@@ -585,7 +592,7 @@ class DemoControls {
         });
 
         this.#gumball.attach(object);
-
+        this.#getObjectLabel(object).visible = false;
         this.#scene.add(this.#gumball);
         
         // this.#updateGumballRotation(object);
@@ -607,6 +614,7 @@ class DemoControls {
         if (this.#gumball == null) {
             return;
         }
+        this.#getObjectLabel(this.#gumball.object).visible = true;
         this.#gumballState.mode = this.#gumball.getMode();
         this.#scene.remove(this.#gumball);
         this.#gumball.dispose();

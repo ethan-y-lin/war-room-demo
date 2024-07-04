@@ -4,9 +4,10 @@
  * Module dependencies.
  */
 
-var app = require('../app');
+var { app } = require('../app');
 var debug = require('debug')('war-room-demo:server');
 var http = require('http');
+const {initSocket} = require('../socketHandler');
 
 /**
  * Get port from environment and store in Express.
@@ -20,6 +21,8 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
+
+initSocket(server)
 
 /**
  * Listen on provided port, on all network interfaces.
