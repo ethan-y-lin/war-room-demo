@@ -98,13 +98,13 @@ exports.object_upload_post = [
       
       try {
         // Simulate Progres Updates
-        let progress = 10;
+        let progress = 0;
         const interval = setInterval(() => {
-          progress += 20;
-          if (progress >= 90) {
-            clearInterval(interval);
-          } else {
+          progress += 10;
+          if (progress < 100) {
             io.emit('uploadProgress', { progress });
+          } else {
+            clearInterval(interval);
           }
         }, 500);
 
