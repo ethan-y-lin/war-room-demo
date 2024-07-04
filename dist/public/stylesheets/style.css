@@ -6,6 +6,12 @@ body {
   margin: 0;
   font-family: Georgia, 'Times New Roman', Times, serif;
 }
+.main-content{
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  width: 90%;
+}
 
 .title h1{
   font-size: 56px;
@@ -30,25 +36,47 @@ body {
 
 #menu{
   display: flex;
-  width: 300px;
-  position: fixed;
+  width: 100%;
   height: 100%;
   padding: 10px;
   justify-content: center;
   background-color: #a4c3b26a;
-  left: 0;
   z-index: 1;
 }
+.menu-toggle-button:hover{
+  cursor: pointer;
+  color:white;
+  background-color:#384c44;
+}
+
+.sidebar{
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content:flex-start;
+  transform: translateX(0);
+}
+.menu-toggle-button{
+  color:#384c44;
+  background-color:#a4c3b26a;
+  border: none;
+  font-size: 36px;
+  text-align: center;
+}
+.menu-toggle{
+  display: flex;
+  height: 42px;
+  width: 42px;
+}
+
 
 #scene{
   display: flex;
   flex-direction: column;
-  margin-left: 290px;
-  margin-right: 110px;
-  height: 100%;
+  width: 80%;
   align-items: center;
   position: relative;
-  padding: 0px 50px 0px 50px;
+  margin-left: 30px;
+  flex-grow: 1;
 
 }
 .no-cursor {
@@ -126,7 +154,6 @@ nav a{
   position: relative;
   border-bottom: 1px solid #445c524a;
   margin-left: 0px;
-  width: 100%;
 }
 .tooltip{
   display: flex;
@@ -247,8 +274,11 @@ nav a{
   flex-direction: column;
 }
 
+#list3 ul{
+  list-style: none;
+}
+
 .layerx li{
-  margin: 0px 5px 0px 5px;
   display: flex;
   flex-direction: row;
   position: relative;
@@ -265,12 +295,12 @@ nav a{
   flex-direction: column;
   align-items: end;
 }
-.layerx .add-section a{
-  width: 100%;
+/* .layerx .add-section a{
+  width: 90%;
 }
 .layerx .add-section form{
-  width: 100%;
-}
+  width: 90%;
+} */
 
 .deletion{
   display: flex;
@@ -561,24 +591,8 @@ nav a{
   display: none;
   position: relative;
   font-size: 14px;
-  width: 100%;
   background-color:#a4c3b230;
   padding: 5px;
-  border-bottom: 1px solid #445c5290;
-}
-
-#room-form{
-  font-size: 12px;
-  padding: 3px;
-  margin: 0px;
-}
-
-#room-form .form-group, #object-form .form-group{
-  margin: 0px;
-  padding: 5px;
-  width: 90%;
-  position: relative;
-
 }
 
 #room-name{
@@ -741,7 +755,6 @@ nav a{
 }
 
 /*-- ABOUT page --*/
-
 #back-to-index{
   margin-left: 30px;
   float: left;
@@ -877,3 +890,6 @@ nav a{
   font-weight: bolder;
 }
 
+/* ipad screen? */
+@media only screen and (width: 1366px) and (height: 1024px) {
+}

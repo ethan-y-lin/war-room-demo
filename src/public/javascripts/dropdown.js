@@ -46,20 +46,19 @@ $(document).ready(function () {
         $(".layer2").addClass("hidden");
         $("#column1").removeClass("hidden");
     })
-    //temporary solution
+    //temporary solution going back to column2 from furnitures
     $(".back-button2").on('click', function(){
         $("#column3").addClass("hidden");
         $("#furnitures").removeClass("hidden");
     })
 
+    //dropdown for adding category, uploading room/furniture models
     $("#category-button").on('click', function(){
         $("#category-form").slideToggle("slow");
     })
-
     $("#room-button").on('click', function(){
         $("#room-form").slideToggle("slow");
     })
-
     $(".object-button").on('click', function(){
         console.log("object-button clicked");
         $("#object-form").slideToggle("slow");
@@ -87,6 +86,9 @@ $(document).ready(function () {
     })
     $("#close-button").on('click', function(){
         $("#design-save-form").slideUp('slow');
+    })
+    $(".menu-toggle").on('click', function(){
+        $("#menu").toggle("sliding");
     })
 })
 
