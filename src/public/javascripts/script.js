@@ -406,15 +406,15 @@ async function uploadObject(e) {
 
     const socket = io();
     const progressBar = document.getElementById("progressBar");
-
+    let xhrProgress = 0;
+    let socketProgress = 0;
     const xhr = new XMLHttpRequest();
     xhr.open('POST', 'upload-object', true);
 
     xhr.upload.addEventListener('progress', (e) => {
         if (e.lengthComputable) {
-            const percentComplete = (e.loaded / e.total) * 50;
-            console.log(percentComplete);
-            progressBar.style.width = percentComplete + '%';
+            xhrProgress = (e.loaded / e.total);
+            progressBar.style.width = (xhrProgress * 10 + 0.9 * socketProgress) + '%';
         }
     });
 
@@ -422,6 +422,7 @@ async function uploadObject(e) {
         const response = JSON.parse(xhr.responseText);
         if (xhr.status === 200 && response.success) {
           addObjectToDOM(response.category, objectName, response.obj_url);
+          resetBar(progressBar, socket);
           progressBar.style.width = "100%";
           alert('File uploaded successfully');
           resetBar(progressBar, socket);
@@ -439,7 +440,8 @@ async function uploadObject(e) {
     xhr.send(formData);
 
     socket.on('uploadProgress', (data) => {
-        progressBar.style.width = (50 + data.progress * 0.5) + '%';
+        socketProgress = data.progress;
+        progressBar.style.width = (xhrProgress * 10 + 0.9 * socketProgress) + '%';
     });
 
     objectNameInput.value = "";
