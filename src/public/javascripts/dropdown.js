@@ -83,7 +83,7 @@ $(document).ready(function () {
         $("#design-save-form").slideUp('slow');
     })
     $(".menu-toggle").on('click', function(){
-        $("#menu").toggle("menu-on menu-off");
+        $(".sidebar").toggleClass(".menu-on menu-off");
         $("#scene").toggleClass(".not-expanded expanded");
     })
 })

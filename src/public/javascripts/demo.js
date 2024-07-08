@@ -691,7 +691,8 @@ class DemoScene {
     }
 
     guiControls(){
-        const gui = new GUI();
+        const gui = new GUI({autoPlace:false});
+        gui.domElement.id = "gui";
         
         // toggling light sources
         const hLight = this.getHemiLight();
@@ -742,7 +743,7 @@ class DemoScene {
         const boundingBoxToggle = {
             toggle: false
         }
-        folderControls.add(boundingBoxToggle, 'toggle').name('Show bounding boxes').onChange(value => {
+        folderControls.add(boundingBoxToggle, 'toggle').name('Show bounding box').onChange(value => {
             this.#objects.uploaded.forEach( (obj) => {
                 obj.children.forEach( (child) => {
                     if (child.name == "bounding_box") {
@@ -827,9 +828,9 @@ class DemoScene {
         //folderMeasurements.close();
 
         //changing the display of bounding boxes around furnitures
-        
-
+    
         gui.open();
+        var customContainer = $("#gui-container").append($(gui.domElement));
     }
 
     // getBoundingBox(){

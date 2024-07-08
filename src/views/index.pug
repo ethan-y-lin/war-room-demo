@@ -2,10 +2,10 @@ extends layout
 
 block content
     div.main-content
-        div.sidebar      
+        div.sidebar.menu-on    
             div.menu-toggle 
                 button.menu-toggle-button &#9776;
-            aside#menu.menu-on.menu-off
+            aside#menu
                 div.tutorials 
                     p
                         a.tutorial-button &#9432; Tutorials
@@ -204,6 +204,7 @@ block content
                     div.tooltip-section-vertical
                         div.tooltip-icon-vertical &quest;                               
                         p.tooltip-text-vertical.hidden Walk inside the room in the first-person view
+        div#gui-container
     //- script(src="./javascripts/jquery-3.7.1.min.js")
     //- script(src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js")
     //- script(src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js")
