@@ -2,9 +2,6 @@ import $ from 'jquery';
 $(document).ready(function () {
     $("#column1").removeClass("hidden");
     //need to refresh the menu when hidden later
-    $("#menu-toggle").on('click', function(){
-        $(".dropdown-menu").toggleClass("hidden");
-    });
 
     //ideally should use hover to determine hidden class but then it can't go to the next layer
     //will take a look at this later
@@ -87,8 +84,14 @@ $(document).ready(function () {
     $("#close-button").on('click', function(){
         $("#design-save-form").slideUp('slow');
     })
-    $(".menu-toggle").on('click', function(){
-        $("#menu").toggle("sliding");
-    })
+
 })
 
+
+$(".menu-toggle").on('click', function() {
+    $(".dropdown-menu").toggleClass("hidden");
+});
+
+$(".menu-toggle").on('click', function () {
+    $("#menu").toggle("sliding");
+})

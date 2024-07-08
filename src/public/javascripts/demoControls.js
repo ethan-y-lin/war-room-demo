@@ -255,7 +255,7 @@ class DemoControls {
         this.units;
         this.#floorObject = null;
         const sphereGeometry = new THREE.SphereGeometry( 0.1, 32, 16 ); 
-        const sphereMaterial = new THREE.MeshBasicMaterial( {color: 0x0000ff} ); 
+        const sphereMaterial = new THREE.MeshBasicMaterial( {color: 0x000000} ); 
         const sphere = new THREE.Mesh( sphereGeometry, sphereMaterial ); 
         this.#insidePointer = sphere;
         this.#moveToPoint = null;
@@ -419,11 +419,11 @@ class DemoControls {
                         this.#insidePointer.position.z = intersects[0].point.z;
 
                         if (firstObject.name.includes("floor")) {
-                            this.#colorObject(firstObject, 0xFF0000);
+                            this.#colorObject(this.#insidePointer, 0x00FF00);
                             this.#floorObject = firstObject;
                         } else {
                             if (this.#floorObject != null) {
-                                this.#colorObject(this.#floorObject, 0x000000);
+                                this.#colorObject(this.#insidePointer, 0xFF0000);
                             }
                         }
                     }
@@ -484,11 +484,11 @@ class DemoControls {
                             this.#insidePointer.position.z = intersects[0].point.z;
 
                             if (firstObject.name.includes("floor")) {
-                                this.#colorObject(firstObject, 0xFF0000);
+                                this.#colorObject(this.#insidePointer, 0x00FF00);
                                 this.#floorObject = firstObject;
                             } else {
                                 if (this.#floorObject != null) {
-                                    this.#colorObject(this.#floorObject, 0x000000);
+                                    this.#colorObject(this.#insidePointer, 0xFF0000);
                                 }
                             }
                         }
@@ -740,8 +740,14 @@ class DemoControls {
     }
 
     #colorObject(object, color) {
+        console.log(object)
         if (object.type == "Mesh" && object.name != "bounding_box") {
-            object.material.emissive.set( color );
+            if (object.material.emissive) {
+                object.material.emissive.set( color );
+            } else {
+                object.material.color = new THREE.Color (color);
+            }
+
         } else if (object.children.length > 0){
             object.children.forEach((obj) => {
                 this.#colorObject(obj, color);

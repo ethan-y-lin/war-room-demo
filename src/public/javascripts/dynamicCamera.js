@@ -41,12 +41,9 @@ class DynamicCamera {
      * @param {number} padding - Padding around the model for the orthographic view.
      */
     setOrthoCamera(canvas, modelSize, padding) {
-        console.log("after", canvas.offsetWidth, canvas.offsetHeight)
         const aspectRatio = canvas.offsetWidth / canvas.offsetHeight;
-        console.log("aspect ratio: " , aspectRatio)
         const width = Math.max(modelSize.x, modelSize.z) + 2 * padding;
         const height = width / aspectRatio;
-        console.log("height: ", height)
         // Orthographic camera setup
         let orthoCamera = new THREE.OrthographicCamera(
             -width / 2,

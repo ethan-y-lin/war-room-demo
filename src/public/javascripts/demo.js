@@ -6,7 +6,7 @@ import * as THREE from 'three';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
-import { round } from 'three/examples/jsm/nodes/Nodes.js';
+
 /**
  * This class represents a scene that is displayed on the HTML element 
  * with the id: "#scene-container". It handles the contents of the scene,
@@ -155,6 +155,12 @@ class DemoScene {
         this.#controls = new DemoControls(this.#camera, this.#canvas, this.#scene, this.#objects, this.#modelSize); // initializes to orthoControls
 
         window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.ortho) });
+        const hud = document.getElementById("hud");
+        const resizeObserer = new ResizeObserver(() => {
+            this.#onWindowResize(this.#current_camera);
+        })
+        resizeObserer.observe(this.#canvas);
+        
         console.log(window)
         this.#measurement_objects = {vertices: new THREE.Group(), edges: new THREE.Group()};
         this.#measurement_objects.vertices.name = "vertices";
@@ -559,8 +565,10 @@ class DemoScene {
      */
     #onWindowResize(camera){            
         console.log("window resized");
-        this.#renderer.setSize(this.#canvas.offsetWidth, this.#canvas.offsetHeight, false);
-        this.#labelRenderer.setSize(this.#canvas.offsetWidth, this.#canvas.offsetHeight, false);
+        console.log(this.#canvas.offsetHeight, this.#canvas.offsetWidth)
+        console.log(this.#renderer)
+        this.#renderer.setSize(this.#canvas.offsetWidth, this.#canvas.offsetHeight, true);
+        this.#labelRenderer.setSize(this.#canvas.offsetWidth, this.#canvas.offsetHeight, true);
         if (this.#camera.name == "ortho") {
             console.log("ortho camera")
             this.#camera.setOrthoCamera(this.#canvas, this.#modelSize, 2 );
@@ -583,6 +591,7 @@ class DemoScene {
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.ortho)} );
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.outside)} );
         window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.inside)} );
+
         //add ceiling to the inside view
         const ceilingGeo = new THREE.BoxGeometry(this.#modelSize.x, 0.1, this.#modelSize.z);
         const ceilingMat = new THREE.MeshBasicMaterial({color: 0xedeae5});
@@ -627,6 +636,7 @@ class DemoScene {
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.outside)} );
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.inside)} );
         window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.ortho)} );
+
         this.#scene.remove(this.#objects.ceiling);
         this.#scene.remove(this.#lights.room);
     }
@@ -718,15 +728,21 @@ class DemoScene {
         const setInsideMode = {
             keyboard: () => {
                 this.#controls.insideMode = "keyboard";
-                this.#controls.switchControls("inside", this.#camera.inside, this.#canvas);
+                if (this.#camera.name == "inside") {
+                    this.#controls.switchControls("inside", this.#camera.inside, this.#canvas);
+                }
             },
-            teleport: () => {
+            teleport: () =>  {
                 this.#controls.insideMode = "teleport";
-                this.#controls.switchControls("inside", this.#camera.inside, this.#canvas);
+                if (this.#camera.name == "inside") {
+                    this.#controls.switchControls("inside", this.#camera.inside, this.#canvas);
+                }
             },
             mobile: () => {
                 this.#controls.insideMode = "mobile";
-                this.#controls.switchControls("inside", this.#camera.inside, this.#canvas);
+                if (this.#camera.name == "inside") {
+                    this.#controls.switchControls("inside", this.#camera.inside, this.#canvas);
+                }
             }
         }
         folderMoving.add({selectedFunction: 'mobile'}, 'selectedFunction', Object.keys(setInsideMode))
