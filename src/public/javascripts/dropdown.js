@@ -84,6 +84,7 @@ $(document).ready(function () {
     })
     $(".menu-toggle").on('click', function(){
         $("#menu").toggle("menu-on menu-off");
+        $("#scene").toggleClass(".not-expanded expanded");
     })
 })
 
