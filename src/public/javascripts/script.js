@@ -44,7 +44,7 @@ $(window).on('load', function() {
         init(startModel);
         start = false;
     }
-
+    console.log("ADDING EVENT LISTENERS")
     const uploadObjectButton = document.getElementById("upload-object");
     uploadObjectButton.addEventListener('click', uploadObject);
 
@@ -69,6 +69,7 @@ $(window).on('load', function() {
     });
 
     const designLinks = document.querySelectorAll('.open-design-link');
+    console.log(designLinks)
     designLinks.forEach(link => {
         link.addEventListener('click', function(event) {
             if (APP != null) {
@@ -85,6 +86,7 @@ $(window).on('load', function() {
     const deleteDesignButtons = document.querySelectorAll('.delete-design');
     deleteDesignButtons.forEach(button => {
         button.addEventListener('click', function (event) {
+            console.log("delete design");
             event.preventDefault();
             const url = this.dataset.url
             deleteDesign(url);

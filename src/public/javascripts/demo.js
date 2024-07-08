@@ -6,7 +6,7 @@ import * as THREE from 'three';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
-
+import grassShader from '../shaders/grass.js'
 /**
  * This class represents a scene that is displayed on the HTML element 
  * with the id: "#scene-container". It handles the contents of the scene,
@@ -102,6 +102,9 @@ class DemoScene {
     #units;
     #showBoundingBoxes;
 
+    #grassUniforms;
+    #grassMesh;
+    #startTime;
     /**
      * Calls for the initialization the DemoScene object and then
      * calls the animation loop when initialization is completed.
@@ -394,6 +397,37 @@ class DemoScene {
         // const lightHelper = new THREE.SpotLightHelper( spotLight );
         // scene.add( lightHelper );
         
+        // GRASS
+        // Parameters
+        const PLANE_SIZE = 30;
+        const BLADE_COUNT = 100000;
+        const BLADE_WIDTH = 0.1;
+        const BLADE_HEIGHT = 0.5;
+        const BLADE_HEIGHT_VARIATION = 0.2;
+
+        // Grass Texture
+        const grassTexture = new THREE.TextureLoader().load('../img/grass.jpg');
+        const cloudTexture = new THREE.TextureLoader().load('../img/cloud.jpg');
+        cloudTexture.wrapS = cloudTexture.wrapT = THREE.RepeatWrapping;
+
+        // Time Uniform
+        this.#startTime = Date.now();
+        const timeUniform = { type: 'f', value: 0.0 };
+
+        // Grass Shader
+        this.#grassUniforms = {
+            textures: { value: [grassTexture, cloudTexture] },
+            iTime: timeUniform
+        };
+
+        const grassMaterial = new THREE.ShaderMaterial({
+            uniforms: this.#grassUniforms,
+            vertexShader: grassShader.vert,
+            fragmentShader: grassShader.frag,
+            vertexColors: true,
+            side: THREE.DoubleSide
+        });
+
         //ground
         const groundGeo = new THREE.PlaneGeometry(1000, 1000);
         const groundMat = new THREE.MeshLambertMaterial({color: 0x1c150d});
@@ -405,7 +439,9 @@ class DemoScene {
         
         //skydome
         const skyGeo = new THREE.SphereGeometry(800, 32, 15);
-        const skyMat = new THREE.MeshLambertMaterial({color: 0x87ceeb, side: THREE.BackSide});
+        const textureLoader = new THREE.TextureLoader();
+        const skyTexture = textureLoader.load('../img/sky.png');
+        const skyMat = new THREE.MeshBasicMaterial({map: skyTexture, side: THREE.BackSide});
         const sky = new THREE.Mesh(skyGeo, skyMat);
         scene.add(sky);
         
@@ -432,6 +468,11 @@ class DemoScene {
                 // initialize objects
                 const objects = [...this.#model.children]; // must be copy because removing directly will cause some to be skipped.
                 this.#organizeObjects(objects);
+
+                const NO_GRASS_RECT = [-this.#modelSize.x / 2, this.#modelSize.x / 2, -this.#modelSize.z / 2, this.#modelSize.z / 2, ]
+                const grassGeo = generateFieldGeo(PLANE_SIZE, BLADE_COUNT, BLADE_WIDTH, BLADE_HEIGHT, BLADE_HEIGHT_VARIATION, NO_GRASS_RECT)
+                const grassMesh = new THREE.Mesh(grassGeo, grassMaterial);
+                this.#grassMesh = grassMesh;
 
                 // initializes grid
                 const size = Math.max(this.#modelSize.x, this.#modelSize.z);
@@ -536,6 +577,10 @@ class DemoScene {
             this.#measurement_objects.vertices.clear();
             this.#measurement_objects.edges.clear();
         }
+        if (this.#camera.name !== "ortho") {
+            const elapsedTime = Date.now() - this.#startTime;
+            this.#grassUniforms.iTime.value = elapsedTime;
+        }
     }
 
     /**
@@ -555,6 +600,7 @@ class DemoScene {
             this.#controls.updateControls(this.#camera);           
             this.#renderer.render(this.#scene, this.#current_camera);
             this.#labelRenderer.render(this.#scene, this.#current_camera);
+
             this.#animate();
         });
     }
@@ -585,6 +631,7 @@ class DemoScene {
      */
     setInsideViewMode() {
         this.#scene.remove(this.#objects.ceiling);
+        this.#scene.add(this.#grassMesh);
         this.#camera.setInsideCamera(this.#canvas);
         this.#current_camera = this.#camera.inside;
         this.#controls.switchControls("inside", this.#camera.inside, this.#canvas);
@@ -617,6 +664,7 @@ class DemoScene {
      * Sets the scene view to outside mode by updating camera, controls, and objects.
      */
     setOutsideViewMode() {
+        this.#scene.add(this.#grassMesh);
         this.#camera.setOutsideCamera(this.#canvas);
         this.#current_camera = this.#camera.outside;
         this.#controls.switchControls("outside", this.#camera.outside, this.#canvas);
@@ -630,6 +678,7 @@ class DemoScene {
      * Sets the scene view to ortho mode by updating camera, controls, and objects.
      */
     setOrthoViewMode() {
+        this.#scene.remove(this.#grassMesh);
         this.#camera.setOrthoCamera(this.#canvas, this.#modelSize, 2);
         this.#current_camera = this.#camera.ortho;
         this.#controls.switchControls("ortho", this.#camera.ortho, this.#canvas);
@@ -868,6 +917,117 @@ class DemoScene {
         });
     }
 }
+
+function convertRange (val, oldMin, oldMax, newMin, newMax) {
+    return (((val - oldMin) * (newMax - newMin)) / (oldMax - oldMin)) + newMin;
+}
+  
+function generateFieldGeo(
+    PLANE_SIZE, 
+    BLADE_COUNT, 
+    BLADE_WIDTH, 
+    BLADE_HEIGHT, 
+    BLADE_HEIGHT_VARIATION,
+    NO_GRASS_RECT // New parameter: [xMin, xMax, zMin, zMax] for the rectangular area where no grass should be placed
+  ) {
+    const positions = [];
+    const uvs = [];
+    const indices = [];
+    const colors = [];
+  
+    for (let i = 0; i < BLADE_COUNT; i++) {
+      const VERTEX_COUNT = 5;
+      const surfaceMin = PLANE_SIZE / 2 * -1;
+      const surfaceMax = PLANE_SIZE / 2;
+  
+      let x = Math.random() * PLANE_SIZE - PLANE_SIZE / 2;
+      let z = Math.random() * PLANE_SIZE - PLANE_SIZE / 2;
+  
+      // Check if the blade position is inside the no-grass rectangle
+      if (x >= NO_GRASS_RECT[0] && x <= NO_GRASS_RECT[1] && z >= NO_GRASS_RECT[2] && z <= NO_GRASS_RECT[3]) {
+        if (x > 0) {
+            x = NO_GRASS_RECT[1] + Math.random() * (PLANE_SIZE / 2 - NO_GRASS_RECT[1])
+        } else {
+            x = NO_GRASS_RECT[0] - Math.random() * (PLANE_SIZE / 2 - NO_GRASS_RECT[1])
+        }
+        if (z > 0) {
+            z = NO_GRASS_RECT[3] + Math.random() * (PLANE_SIZE / 2 - NO_GRASS_RECT[4]);
+        } else {
+            z = NO_GRASS_RECT[2] - Math.random() * (PLANE_SIZE / 2 - NO_GRASS_RECT[4]);
+        }
+      }
+  
+      const pos = new THREE.Vector3(x, 0, z);
+      const uv = [convertRange(pos.x, surfaceMin, surfaceMax, 0, 1), convertRange(pos.z, surfaceMin, surfaceMax, 0, 1)];
+  
+      const blade = generateBlade(pos, i * VERTEX_COUNT, uv, BLADE_WIDTH, BLADE_HEIGHT, BLADE_HEIGHT_VARIATION);
+      blade.verts.forEach(vert => {
+        positions.push(...vert.pos);
+        uvs.push(...vert.uv);
+        colors.push(...vert.color);
+      });
+      blade.indices.forEach(indice => indices.push(indice));
+    }
+  
+    const geom = new THREE.BufferGeometry();
+    geom.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3));
+    geom.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), 2));
+    geom.setAttribute('color', new THREE.BufferAttribute(new Float32Array(colors), 3));
+    geom.setIndex(indices);
+    geom.computeVertexNormals();
+  
+    return geom;
+  }
+  
+  
+  function generateBlade (center, vArrOffset, uv, BLADE_WIDTH, BLADE_HEIGHT, BLADE_HEIGHT_VARIATION) {
+    const MID_WIDTH = BLADE_WIDTH * 0.5;
+    const TIP_OFFSET = 0.1;
+    const height = BLADE_HEIGHT + (Math.random() * BLADE_HEIGHT_VARIATION);
+  
+    const yaw = Math.random() * Math.PI * 2;
+    const yawUnitVec = new THREE.Vector3(Math.sin(yaw), 0, -Math.cos(yaw));
+    const tipBend = Math.random() * Math.PI * 2;
+    const tipBendUnitVec = new THREE.Vector3(Math.sin(tipBend), 0, -Math.cos(tipBend));
+  
+    // Find the Bottom Left, Bottom Right, Top Left, Top right, Top Center vertex positions
+    const bl = new THREE.Vector3().addVectors(center, new THREE.Vector3().copy(yawUnitVec).multiplyScalar((BLADE_WIDTH / 2) * 1));
+    const br = new THREE.Vector3().addVectors(center, new THREE.Vector3().copy(yawUnitVec).multiplyScalar((BLADE_WIDTH / 2) * -1));
+    const tl = new THREE.Vector3().addVectors(center, new THREE.Vector3().copy(yawUnitVec).multiplyScalar((MID_WIDTH / 2) * 1));
+    const tr = new THREE.Vector3().addVectors(center, new THREE.Vector3().copy(yawUnitVec).multiplyScalar((MID_WIDTH / 2) * -1));
+    const tc = new THREE.Vector3().addVectors(center, new THREE.Vector3().copy(tipBendUnitVec).multiplyScalar(TIP_OFFSET));
+  
+    tl.y += height / 2;
+    tr.y += height / 2;
+    tc.y += height;
+  
+    // Vertex Colors
+    const black = [0, 0, 0];
+    const gray = [0.5, 0.5, 0.5];
+    const white = [1.0, 1.0, 1.0];
+  
+    const verts = [
+      { pos: bl.toArray(), uv: uv, color: black },
+      { pos: br.toArray(), uv: uv, color: black },
+      { pos: tr.toArray(), uv: uv, color: gray },
+      { pos: tl.toArray(), uv: uv, color: gray },
+      { pos: tc.toArray(), uv: uv, color: white }
+    ];
+  
+    const indices = [
+      vArrOffset,
+      vArrOffset + 1,
+      vArrOffset + 2,
+      vArrOffset + 2,
+      vArrOffset + 4,
+      vArrOffset + 3,
+      vArrOffset + 3,
+      vArrOffset,
+      vArrOffset + 2
+    ];
+  
+    return { verts, indices };
+  }
 
 export {DemoScene}
 

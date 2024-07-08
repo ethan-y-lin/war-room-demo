@@ -17,9 +17,15 @@ module.exports = [
           test: /\.js$/,
           exclude: /node_modules/,
           use: {
-            loader: 'babel-loader'
+            loader: 'babel-loader',
+          
           }
-        }
+        },
+        {
+          test: /\.(glsl|vs|fs)$/,
+          loader: 'webpack-glsl-loader',
+          exclude: /node_modules/,
+        },
       ]
     }
   },
