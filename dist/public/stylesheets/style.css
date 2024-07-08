@@ -23,7 +23,6 @@ body {
 
 .tutorials{
   position: absolute;
-  margin-left: 10px;
   z-index: 2;
 }
 .tutorial-button:hover{
@@ -33,7 +32,6 @@ body {
 }
 
 
-
 #menu{
   display: flex;
   width: 100%;
@@ -41,8 +39,16 @@ body {
   padding: 10px;
   justify-content: center;
   background-color: #a4c3b26a;
-  z-index: 1;
 }
+.menu-on{
+  left:0;
+  transition: left 1s linear !important;
+}
+.menu-off{
+  left:-100%;
+  transition: left 1s linear !important;
+}
+
 .menu-toggle-button:hover{
   cursor: pointer;
   color:white;
@@ -53,14 +59,14 @@ body {
   display: flex;
   flex-direction: row-reverse;
   justify-content:flex-start;
-  transform: translateX(0);
 }
 .menu-toggle-button{
   color:#384c44;
-  background-color:#a4c3b26a;
+  background-color:#a4c3b2;
   border: none;
   font-size: 36px;
   text-align: center;
+  margin-top: -8px;
 }
 .menu-toggle{
   display: flex;
@@ -76,7 +82,7 @@ body {
   align-items: center;
   position: relative;
   margin-left: 30px;
-  flex-grow: 1;
+  margin-right: 50px;
 
 }
 .no-cursor {
@@ -217,7 +223,7 @@ nav a{
 .tooltip-text{
   position: absolute;
   background-color:#445c52ca;
-  z-index: auto;
+  z-index: 5;
   color: white;
   padding: 5px;
   border-radius: 3px;
@@ -229,7 +235,7 @@ nav a{
 .tooltip-text-vertical{
   position: absolute;
   background-color:#445c52ca;
-  z-index: auto;
+  z-index: 5;
   color: white;
   padding: 10px;
   border-radius: 3px;
@@ -245,7 +251,6 @@ nav a{
   color:  #445c52;
   background: transparent;
   transition: 0.2s ease-in-out;
-  z-index: 1;
 }
 .dropdown-menu ul a:hover{
   background: linear-gradient(to right, #c1e5d100, #1892645a, #c1e5d100);
@@ -284,16 +289,19 @@ nav a{
   position: relative;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
 }
 
 .layerx li a{
   margin: 5px 0px 5px 0px;
+  width: 100%;
 }
 
 .layerx .add-section{
   display: flex;
   flex-direction: column;
   align-items: end;
+  width: inherit;
 }
 /* .layerx .add-section a{
   width: 90%;
@@ -399,7 +407,7 @@ nav a{
 
 #scene-container {
   width: 100%;
-  height: 80%;
+  height: 100%;
   display: flex;
   flex-direction: row;
   position: relative;
@@ -414,7 +422,6 @@ nav a{
   height: 100%;
   justify-content: space-between;
   position: absolute;
-  /* z-index: 1; */
 }
 
 #scene-left{
@@ -605,6 +612,7 @@ nav a{
 #room-upload-form{
   display: flex;
   flex-direction: row;
+  width: inherit;
 }
 
 #room-form button{
@@ -892,4 +900,7 @@ nav a{
 
 /* ipad screen? */
 @media only screen and (width: 1366px) and (height: 1024px) {
+  .lil-gui{
+    font-size: smaller;
+  }
 }
