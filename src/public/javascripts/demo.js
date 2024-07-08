@@ -160,7 +160,7 @@ class DemoScene {
             this.#onWindowResize(this.#current_camera);
         })
         resizeObserer.observe(this.#canvas);
-        
+
         console.log(window)
         this.#measurement_objects = {vertices: new THREE.Group(), edges: new THREE.Group()};
         this.#measurement_objects.vertices.name = "vertices";
@@ -496,15 +496,15 @@ class DemoScene {
             displayModeElement.textContent = "Measurement: ";
             const measure_points = this.#controls.getMeasurePoints();
             if (measure_points.length > this.#measurement_objects.vertices.children.length) {
-                const cubeGeometry = new THREE.BoxGeometry( 0.1, 0.1, 0.1 ); 
-                const cubeMaterial = new THREE.MeshBasicMaterial( {color: 0x0000ff} ); 
-                const cube = new THREE.Mesh( cubeGeometry, cubeMaterial ); 
+                const sphereGeometry = new THREE.SphereGeometry( 0.1, 32,16 ); 
+                const sphereMaterial = new THREE.MeshBasicMaterial( {color: 0xff0000} ); 
+                const sphere = new THREE.Mesh( sphereGeometry, sphereMaterial ); 
                 const point = measure_points[measure_points.length-1];
-                cube.position.set(point.x, point.y, point.z);
-                this.#measurement_objects.vertices.add( cube );
+                sphere.position.set(point.x, point.y, point.z);
+                this.#measurement_objects.vertices.add( sphere );
                 const lineGeometry = new THREE.BufferGeometry().setFromPoints( measure_points );
                 const lineMaterial = new THREE.LineBasicMaterial({
-                                        color: 0x0000ff
+                                        color: 0x000000
                                     });
                 const line = new THREE.Line( lineGeometry, lineMaterial );
                 this.#measurement_objects.edges.add( line );

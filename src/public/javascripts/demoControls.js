@@ -927,7 +927,7 @@ class DemoControls {
                 for (let i = 0 ; i < this.#measure_points.length; i++) {
                     let closestPoint = new THREE.Vector3();
                     this.#raycaster.ray.closestPointToPoint(this.#measure_points[i], closestPoint);
-                    if (closestPoint.distanceTo(this.#measure_points[i]) < 1) {
+                    if (closestPoint.distanceTo(this.#measure_points[i]) < 0.1) {
                         if (i == 0) {
                             this.#measure_points.shift();
                             return;
@@ -987,14 +987,14 @@ class DemoControls {
 
                 const lineGeometry = new THREE.BufferGeometry().setFromPoints( [this.#measure_points[0], point] );
                 const lineMaterial = new THREE.LineBasicMaterial({
-                                        color: 0x0000ff
+                                        color: 0x000000
                                     });
                 const line = new THREE.Line( lineGeometry, lineMaterial );
-                const cubeGeometry = new THREE.BoxGeometry( 0.1, 0.1, 0.1 ); 
-                const cubeMaterial = new THREE.MeshBasicMaterial( {color: 0x0000ff} ); 
-                const cube = new THREE.Mesh( cubeGeometry, cubeMaterial ); 
-                cube.position.set(point.x, point.y, point.z);
-                this.#measureGroup.add(cube);
+                const sphereGeometry = new THREE.SphereGeometry( 0.1, 32, 16 ); 
+                const sphereMaterial = new THREE.MeshBasicMaterial( {color: 0xff0000} ); 
+                const sphere = new THREE.Mesh( sphereGeometry, sphereMaterial ); 
+                sphere.position.set(point.x, point.y, point.z);
+                this.#measureGroup.add(sphere);
                 this.#measureGroup.add(line);
                 const dist = this.#measure_points[0].distanceTo(point);
                 if (this.units == "meters") {
