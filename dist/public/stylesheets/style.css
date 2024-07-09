@@ -798,6 +798,7 @@ nav a{
   margin-left: 30px;
   float: left;
   position: fixed;
+  z-index: 9;
 }
 .about-title{
   text-align: center;
@@ -818,7 +819,7 @@ nav a{
   color:rgb(70, 70, 70);
 }
 .pictures{
-  width: 30vw;
+  width: 25vw;
   margin: 5px;
 }
 .pictures-small{
@@ -889,7 +890,7 @@ nav a{
 }
 .step{
   position: absolute;
-  width: 80%;
+  width: 65%;
   height: 80%;
   display: flex;
   flex-direction: column;
@@ -901,22 +902,20 @@ nav a{
 
 .carousel button{
   position: absolute;
-  background-color: transaprent;
+  background-color: transparent;
   border: none;
-  font-size: 32px;
+  font-size: 48px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  background-color: transparent;
+  color:#384c44;
 }
 .carousel #prev{
-  left: 30px;
-  background-color: transparent;
-  color:#384c44;
+  left: 80px;
 }
 .carousel #next{
-  right: 30px;
-  background-color: transparent;
-  color:#384c44;
+  right: 80px;
 }
 #next:hover{
   color:#171717;
