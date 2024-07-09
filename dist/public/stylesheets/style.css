@@ -562,7 +562,7 @@ nav a{
   cursor: pointer;
 }
 
-#object-upload-modal{
+/* #object-upload-modal{
   position: fixed;
   z-index: 99;
   left:0;
@@ -571,7 +571,7 @@ nav a{
   height: 100%;
   overflow: auto;
   background-color:rgba(0,0,0,0.5);
-}
+} */
 
 .close{
   float: left;
@@ -677,8 +677,8 @@ nav a{
 
 
 .delete-hover{
-  margin-top:10px;
-  width: 24px;
+  margin-right: 10px;
+  width: 28px;
   height: 24px;
   border: none;
   background-color: transparent;
