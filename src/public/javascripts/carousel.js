@@ -32,3 +32,32 @@ $("#prev").on('click', function(){
 $("#next").on('click', function(){
     nextStep();
 })
+
+$("#dot1").on('click', function(){
+    steps.addClass("hidden");
+    $("#step1").removeClass("hidden");
+})
+$("#dot2").on('click', function(){
+    steps.addClass("hidden");
+    $("#step2").removeClass("hidden");
+})
+$("#dot3").on('click', function(){
+    steps.addClass("hidden");
+    $("#step3").removeClass("hidden");
+})
+$("#dot4").on('click', function(){
+    steps.addClass("hidden");
+    $("#step4").removeClass("hidden");
+})
+$("#dot5").on('click', function(){
+    steps.addClass("hidden");
+    $("#step5").removeClass("hidden");
+})
+$("#dot6").on('click', function(){
+    steps.addClass("hidden");
+    $("#step6").removeClass("hidden");
+})
+$("#dot7").on('click', function(){
+    steps.addClass("hidden");
+    $("#step7").removeClass("hidden");
+})

@@ -873,6 +873,11 @@ label{
 .main-about{
   flex-grow:1;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color:#a4c3b220;
 }
 
 
@@ -929,7 +934,6 @@ label{
 }
 .carousel{
   position: relative;
-  background-color:#a4c3b220;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -980,6 +984,25 @@ label{
   color:#171717;
   cursor: pointer;
   font-weight: bolder;
+}
+.carousel-dot{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-top: -60px;
+  z-index:9;
+}
+.dot{
+  height: 14px;
+  width: 14px;
+  background-color:#a4c3b26a;
+  border-radius: 25%;
+  display: inline-block;
+  margin: 10px;
+}
+.dot:hover{
+  background-color:#445c52;
+  cursor: pointer;
 }
 
 /* ipad screen? */

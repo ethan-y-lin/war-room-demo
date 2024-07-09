@@ -814,6 +814,7 @@ class DemoScene {
         const sToggle = {
             toggle: true
         };
+
         folderLights.add(hToggle, 'toggle').name('Hemisphere light').onChange(value =>{
             hLight.visible = value;
         });
@@ -957,13 +958,6 @@ class DemoScene {
                     measurementUnits[selectedFunction]();
                 }
             });
-
-        //toggling dimensions display
-        const folderDimensions = gui.addFolder('Dimensions');
-        const dimensionsToggle = {
-            toggle: false
-        }
-
 
         gui.open();
         if($("#gui-container").children().length == 0){
