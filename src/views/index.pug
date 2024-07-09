@@ -58,16 +58,24 @@ block content
                                             each category in categories
                                                 option(value= category._id)= category.name
                                     button#upload-object.button.submit-button Submit
-                                div#progressBarContainer(style="width: 100%; background-color: lightgray; height: 20px")
-                                    div#progressBar(style="width: 0%; background-color: green; height: 100%;")
+                                div#progressBarContainer
+                                    div#progressBar
                                 if errors
                                     ul
                                         for error in errors
                                             li!= error.msg
                             li
-                                a.menu-unit#p3 EXPORT
+                                div.tooltip 
+                                    a.menu-unit#p3 EXPORT
+                                    div.tooltip-section
+                                        div.tooltip-icon &quest;                               
+                                        p.tooltip-text.hidden Export the model of your chosen design plan
                             li 
-                                a(href='/about') ABOUT
+                                div.tooltip
+                                    a(href='/about') ABOUT
+                                    div.tooltip-section
+                                        div.tooltip-icon &quest;                               
+                                        p.tooltip-text.hidden Check out the step-by-step instruction on how to use this website
                     
                     div#column2
                         ul#floor-plans.layer2.hidden
