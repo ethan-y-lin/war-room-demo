@@ -445,9 +445,10 @@ nav a{
   margin-left: 10px;
   color: white;
   justify-content: space-between;
+  align-items: start;
 }
 
-#scene-left .up, #scene-left h2{
+#design-title, #floorplan-title{
   margin-top: -10px;
   margin-bottom: -20px;
   font-family: Georgia, 'Times New Roman', Times, serif;
@@ -465,7 +466,7 @@ nav a{
   margin: 5px 0px 10px 0px;
 }
 
-#scene-left h2{
+#floorplan-title{
   border-bottom: 1px solid #ffffff;
 }
 
@@ -929,7 +930,5 @@ nav a{
 
 /* ipad screen? */
 @media only screen and (width: 1366px) and (height: 1024px) {
-  .lil-gui{
-    font-size: smaller;
-  }
+ 
 }
