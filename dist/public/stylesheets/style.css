@@ -28,10 +28,20 @@ body {
 .tutorials{
   position: absolute;
   z-index: 2;
+  width: 100%;
+  display: flex;
+  flex-direction: horizontal;
+  justify-content: start;
 }
 
+.tutorial-button{
+  margin-left: 50px;
+  color:#445c52;
+}
+
+
 .tutorial-button:hover{
-  color: #384c44;
+  color:#171717;
   cursor: pointer;
   text-decoration: underline;
 }
@@ -40,7 +50,6 @@ body {
   display: flex;
   width: 300px;
   height: 100%;
-  padding: 10px;
   justify-content: center;
   background-color: #a4c3b26a;
 }
@@ -51,7 +60,7 @@ body {
 }
 
 .menu-off{
-  width: 42px;
+  width: 40px;
   transition: width .5s ease-in-out !important;
 }
 
@@ -264,7 +273,7 @@ nav a{
   padding: 10px 10px;
   color:  #445c52;
   background: transparent;
-  transition: 0.2s ease-in-out;
+  width: 100%;
 }
 .dropdown-menu ul a:hover{
   background: linear-gradient(to right, #c1e5d100, #1892645a, #c1e5d100);
@@ -596,6 +605,7 @@ nav a{
 #progressBarContainer{
   width: 100%;
   background-color: rgb(245, 245, 245);
+  border: 1px solid #c4c4c4;
   height: 10px;
   border-radius: 6px;
   margin-top: 5px;
@@ -612,7 +622,7 @@ nav a{
   font-size: 14px;
   background-color:#a4c3b230;
   padding: 5px;
-  width: 250px;
+  width: 255px;
 }
 
 #room-name{
@@ -657,6 +667,32 @@ nav a{
 
 #category-form button:hover, #room-form button:hover{
   background-color:#a4c3b2;
+}
+
+input{
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  font-family:Georgia, 'Times New Roman', Times, serif;
+}
+
+label{
+  margin-right: 5px;
+}
+
+#object-category{
+  text-decoration: none;
+  background-color: white;
+  border-radius: 3px;
+  border: 1px solid #333;
+  font-family:Georgia, 'Times New Roman', Times, serif;
+  color:#333;
+  padding: 5px;
+}
+#object-category:hover{
+  cursor: pointer;
+  background-color:rgb(245, 245, 245);
+  color:#000;
 }
 
 .dropdown-button{
@@ -930,5 +966,13 @@ nav a{
 
 /* ipad screen? */
 @media only screen and (width: 1366px) and (height: 1024px) {
- 
+  .menu-toggle{
+    display: flex;
+    height: 42px;
+    width: 42px;
+  }
+  #fullscreen-button{
+    height: 40px;
+    width: 40px;
+  }
 }

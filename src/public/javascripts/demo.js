@@ -731,8 +731,6 @@ class DemoScene {
                 controlToggle[selectedFunction]();
             }
         });
-        // folderControls.add(controlToggle, 'translate').name('Translate');
-        // folderControls.add(controlToggle, 'rotate').name('Rotate');
         
         //toggling bounding boxes
         const boundingBoxToggle = {
@@ -819,8 +817,13 @@ class DemoScene {
                 }
             });
 
-        //changing the display of bounding boxes around furnitures
-    
+        //toggling dimensions display
+        const folderDimensions = gui.addFolder('Dimensions');
+        const dimensionsToggle = {
+            toggle: false
+        }
+
+
         gui.open();
         if($("#gui-container").children().length == 0){
             $("#gui-container").append($(gui.domElement));
