@@ -90,14 +90,14 @@ body {
   position: relative;
 }
 
+/* scene expansion based on menu collapse */
 .not-expanded {
-  width: 60%;
-  transition: width 1s ease-in-out;
+  width: 65%;
+  transition: width .5s ease-in-out;
 }
-
 .expanded {
   width: 80%;
-  transition: width 1s ease-in-out;
+  transition: width .5s ease-in-out;
 }
 
 .no-cursor {
@@ -317,12 +317,6 @@ nav a{
   align-items: end;
   width: inherit;
 }
-/* .layerx .add-section a{
-  width: 90%;
-}
-.layerx .add-section form{
-  width: 90%;
-} */
 
 .deletion{
   display: flex;
@@ -445,9 +439,10 @@ nav a{
   margin-left: 10px;
   color: white;
   justify-content: space-between;
+  align-items: start;
 }
 
-#scene-left .up, #scene-left h2{
+#design-title, #floorplan-title{
   margin-top: -10px;
   margin-bottom: -20px;
   font-family: Georgia, 'Times New Roman', Times, serif;
@@ -465,7 +460,7 @@ nav a{
   margin: 5px 0px 10px 0px;
 }
 
-#scene-left h2{
+#floorplan-title{
   border-bottom: 1px solid #ffffff;
 }
 
@@ -561,16 +556,6 @@ nav a{
   cursor: pointer;
 }
 
-#object-upload-modal{
-  position: fixed;
-  z-index: 99;
-  left:0;
-  top:0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color:rgba(0,0,0,0.5);
-}
 
 .close{
   float: left;
@@ -606,6 +591,19 @@ nav a{
   margin: 0px;
   padding: 0px;
   font-size: 12px;
+}
+/* Progress bar underneath the uploading object form */
+#progressBarContainer{
+  width: 100%;
+  background-color: rgb(245, 245, 245);
+  height: 10px;
+  border-radius: 6px;
+  margin-top: 5px;
+}
+#progressBar{
+  width: 0%;
+  background-color:#222f2a;
+  height: 100%;
 }
 
 #object-form, #category-form, #room-form{
@@ -651,6 +649,7 @@ nav a{
 .submit-button{
   font-size: 12px;
   width: 50px;
+  height: 28px;
   background-color:#384c44;
   color: white;
   border: none;
@@ -676,8 +675,8 @@ nav a{
 
 
 .delete-hover{
-  margin-top:10px;
-  width: 24px;
+  margin-right: 10px;
+  width: 28px;
   height: 24px;
   border: none;
   background-color: transparent;
@@ -688,6 +687,10 @@ nav a{
 .delete-hover:hover{
   background-image: url("../img/delete-open.png");
   cursor: pointer;
+}
+
+.form-group{
+  padding: 5px;
 }
 
 .form-flex{
@@ -710,7 +713,6 @@ nav a{
   flex-direction: row;
   justify-content: space-between;
   align-items:center;
-  padding: 10px;
 }
 
 #design-save-form{
@@ -796,6 +798,7 @@ nav a{
   margin-left: 30px;
   float: left;
   position: fixed;
+  z-index: 9;
 }
 .about-title{
   text-align: center;
@@ -816,7 +819,7 @@ nav a{
   color:rgb(70, 70, 70);
 }
 .pictures{
-  width: 30vw;
+  width: 25vw;
   margin: 5px;
 }
 .pictures-small{
@@ -887,7 +890,7 @@ nav a{
 }
 .step{
   position: absolute;
-  width: 80%;
+  width: 65%;
   height: 80%;
   display: flex;
   flex-direction: column;
@@ -899,22 +902,20 @@ nav a{
 
 .carousel button{
   position: absolute;
-  background-color: transaprent;
+  background-color: transparent;
   border: none;
-  font-size: 32px;
+  font-size: 48px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  background-color: transparent;
+  color:#384c44;
 }
 .carousel #prev{
-  left: 30px;
-  background-color: transparent;
-  color:#384c44;
+  left: 80px;
 }
 .carousel #next{
-  right: 30px;
-  background-color: transparent;
-  color:#384c44;
+  right: 80px;
 }
 #next:hover{
   color:#171717;
@@ -929,7 +930,5 @@ nav a{
 
 /* ipad screen? */
 @media only screen and (width: 1366px) and (height: 1024px) {
-  .lil-gui{
-    font-size: smaller;
-  }
+ 
 }

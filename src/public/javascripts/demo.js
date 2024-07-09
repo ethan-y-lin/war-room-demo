@@ -822,7 +822,9 @@ class DemoScene {
         //changing the display of bounding boxes around furnitures
     
         gui.open();
-        var customContainer = $("#gui-container").append($(gui.domElement));
+        if($("#gui-container").children().length == 0){
+            $("#gui-container").append($(gui.domElement));
+        }
     }
 
     downloadScene() {
