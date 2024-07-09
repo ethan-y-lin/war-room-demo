@@ -114,6 +114,8 @@ class DemoScene {
     #grassUniforms;
     #grassMesh;
     #startTime;
+
+    #objectGroups;
     /**
      * Calls for the initialization the DemoScene object and then
      * calls the animation loop when initialization is completed.
@@ -139,11 +141,13 @@ class DemoScene {
                         doors: [],
                         windows: [],
                         uploaded: []};
+        this.#objectGroups = [];
+        this.#showBoundingBoxes = false;
         this.#lights = {};
         this.#scene = new THREE.Scene();
         // this.room = new URL('../assets/warroom1.glb', import.meta.url);
         this.#room = room;
-
+        this.#units = "feet";
         // initialize geometries
         this.#grid_scale = 0.1; // meter
         await this.#initGeometries(this.#scene);
@@ -164,7 +168,8 @@ class DemoScene {
         
         // initialize controls 
         this.#controls = new DemoControls(this.#camera, this.#canvas, this.#scene, this.#objects, this.#modelSize); // initializes to orthoControls
-
+        this.#controls.units = this.#units;
+        
         window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.ortho) });
         const hud = document.getElementById("hud");
         const resizeObserer = new ResizeObserver(() => {
@@ -188,14 +193,12 @@ class DemoScene {
         this.#labelRenderer.domElement.style.pointerEvents = 'none';
         this.#canvas.appendChild( this.#labelRenderer.domElement );
         
-        this.#units = "feet";
-        this.#controls.units = this.#units;
-        this.#showBoundingBoxes = false;
         this.guiControls();
 
         for (let objData of objects) {
             this.addObject(objData.object, objData.position, objData.rotation);
         }
+
     }
 
     #initListeners() {
@@ -217,8 +220,10 @@ class DemoScene {
         $('#m').on('click', () => {
             if (this.#controls.orthoMode != "measure") {
                 this.#controls.orthoMode = "measure";
+                $('#m').text("VIEW")
             } else {
                 this.#controls.orthoMode = "drag";
+                $('#m').text("MEASURE")
             }
         })
         
@@ -463,6 +468,9 @@ class DemoScene {
                 this.#modelSize = bbox.getSize(new THREE.Vector3());
                 if (this.#modelSize.x < this.#modelSize.z) {
                     this.#model.rotateOnAxis(new THREE.Vector3(0,1,0), Math.PI / 2);
+                    const temp = this.#modelSize.x;
+                    this.#modelSize.x = this.#modelSize.z;
+                    this.#modelSize.z = temp;
                 }
                 // add model to scene
                 scene.add(this.#model);
@@ -474,6 +482,7 @@ class DemoScene {
 
                 const NO_GRASS_RECT = [-this.#modelSize.x / 2, this.#modelSize.x / 2, -this.#modelSize.z / 2, this.#modelSize.z / 2, ]
                 const grassGeo = generateFieldGeo(PLANE_SIZE, BLADE_COUNT, BLADE_WIDTH, BLADE_HEIGHT, BLADE_HEIGHT_VARIATION, NO_GRASS_RECT)
+                this.resources.push(grassGeo)
                 const grassMesh = new THREE.Mesh(grassGeo, grassMaterial);
                 this.#grassMesh = grassMesh;
 
@@ -487,6 +496,28 @@ class DemoScene {
             });
         });
     }
+
+    #getObjectInfo(name) {
+        let type = "";
+        let groupNum = "";
+        let soloNum = "";
+        let split1 = name.indexOf("_");
+        let split2 = name.lastIndexOf("_");
+        type = name.substring(0, split1);
+        if (split1 + 1 < name.length) {
+            if (split1 == split2) {
+                groupNum = name.substring(split1 + 1, name.length);
+                return {type: type, groupNum: groupNum, soloNum: "NA"};
+            } else {
+                groupNum = name.substring(split1 + 1, split2);
+                if (split2 + 1 < name.length) {
+                    soloNum = name.substring(split2 + 1, name.length);
+                    return {type: type, groupNum: groupNum, soloNum: soloNum};
+                }
+            }
+        }
+        return {type: type, groupNum: "NA", soloNum: "NA"}; 
+    }
     /**
      * Organizes objects in the scene by categorizing them into doors, windows, walls, and removing irrelevant objects.
      * The organization is based on the names of the objects. 
@@ -497,21 +528,30 @@ class DemoScene {
      */
     #organizeObjects (objects) {
         objects.forEach((obj) =>  {
-
+            
             if (obj.children.length > 0) {
                 this.#organizeObjects(obj.children);
                 return;
             }  
-            if (obj.name.includes("door")) {
+            const objInfo = this.#getObjectInfo(obj.name);
+            if (objInfo.type == "door") {
                 this.#objects.doors.push(obj);
-            } else if (obj.name.includes("window")) {
+            } else if (objInfo.type == "window") {
                 this.#objects.windows.push(obj);
-            } else if (obj.name.includes("wall") || obj.name.includes("floor")) {
+            } else if (objInfo.type == "wall" || objInfo.type == "floor") {
+                const group = objInfo.type + objInfo.groupNum;
+                console.log(group)
+                if (! (this.#objectGroups.includes(group))) {
+                    this.#objectGroups.push(group);
+                    obj.clear();
+                    this.#addDimensionLabels(obj);
+                }
+                console.log(this.#objectGroups);
                 this.#objects.walls.push(obj);
-                if(obj.name.includes("floor")){
+                if(objInfo.type == "floor"){
                     obj.material.color.setHex(0x8b5a2b);
                     obj.receiveShadow = true;
-                } else if(obj.name.includes("wall")){
+                } else if(objInfo.type == "wall"){
                     obj.material.color.setHex(0xedeae5);
                     obj.castShadow = true;
                     obj.receiveShadow = true;
@@ -520,6 +560,71 @@ class DemoScene {
                 this.#model.remove(obj);
             }
         });
+    }
+
+    #addDimensionLabels (obj) {
+        // get model dimensions
+        let bbox = new THREE.Box3().setFromObject(obj);
+        const size = bbox.getSize(new THREE.Vector3());
+        // Create a box helper
+        const boxGeometry = new THREE.BoxGeometry(bbox.max.x - bbox.min.x, bbox.max.y - bbox.min.y, bbox.max.z - bbox.min.z);
+        this.resources.push(boxGeometry);
+        const boundingBox = new THREE.Mesh(boxGeometry, boxMaterial);
+
+        boundingBox.position.set((bbox.max.x + bbox.min.x) / 2, (bbox.max.y + bbox.min.y) / 2, (bbox.max.z + bbox.min.z) / 2);
+        boundingBox.name = "bounding_box";
+        boundingBox.visible = this.#showBoundingBoxes;
+        obj.add(boundingBox);
+        if (size.x > 1) {
+            // add label
+            const text = document.createElement( 'div' );
+            text.style.backgroundColor = 'rgba(50,50,50,0.5)';
+            text.style.color = 'white';
+            text.className = 'dim-label';
+            text.style.borderRadius = '5px';
+            text.style.padding = '5px';
+            text.dataset.value = size.x;
+
+            if (this.#units == "meters") {
+                const roundDist = Math.round(size.x * 100) / 100;
+                text.textContent = roundDist + " m";
+            } else if (this.#units == "feet") {
+                const feet = size.x * 3.281;
+                const flooredFeet = Math.floor(feet);
+                const inches = Math.round((feet - flooredFeet) * 12);  
+                text.textContent = flooredFeet + " ft. " + inches + " in.";
+            }
+    
+            const label = new CSS2DObject( text );
+            label.name = "xlabel";
+            label.position.set((bbox.min.x + bbox.max.x) / 2, bbox.min.y, bbox.min.z)
+            obj.add(label)
+        } 
+        if (size.z > 1) {
+            // add label
+            const text = document.createElement( 'div' );
+            text.style.backgroundColor = 'rgba(50,50,50,0.5)';
+            text.style.color = 'white';
+            text.className = 'dim-label';
+            text.style.borderRadius = '5px';
+            text.style.padding = '5px';
+            text.dataset.value = size.z;
+
+            if (this.#units == "meters") {
+                const roundDist = Math.round(size.z * 100) / 100;
+                text.textContent = roundDist + " m";
+            } else if (this.#units == "feet") {
+                const feet = size.z * 3.281;
+                const flooredFeet = Math.floor(feet);
+                const inches = Math.round((feet - flooredFeet) * 12);  
+                text.textContent = flooredFeet + " ft. " + inches + " in.";
+            }
+            
+            const label = new CSS2DObject( text );
+            label.name = "zlabel";
+            label.position.set(bbox.min.x, bbox.min.y, (bbox.min.z + bbox.max.z) / 2)
+            obj.add(label)
+        }
     }
 
     /**
@@ -625,6 +730,7 @@ class DemoScene {
      * Sets the scene view to inside mode by updating camera, controls, and objects.
      */
     setInsideViewMode() {
+        this.#scene.remove(this.#lights.room);
         this.#scene.remove(this.#objects.ceiling);
         this.#scene.add(this.#grassMesh);
         this.#camera.setInsideCamera(this.#canvas);
@@ -696,19 +802,28 @@ class DemoScene {
         const sLight = this.getSpotLight();
         const folderLights = gui.addFolder('Light Conditions');
 
-        const lightsToggle = {
+        const hToggle = {
             toggle: true
         };
-        folderLights.add(lightsToggle, 'toggle').name('Hemisphere light').onChange(value =>{
+        const aToggle = {
+            toggle: true
+        };
+        const dToggle = {
+            toggle: true
+        };
+        const sToggle = {
+            toggle: true
+        };
+        folderLights.add(hToggle, 'toggle').name('Hemisphere light').onChange(value =>{
             hLight.visible = value;
         });
-        folderLights.add(lightsToggle, 'toggle').name('Ambient light').onChange(value =>{
+        folderLights.add(aToggle, 'toggle').name('Ambient light').onChange(value =>{
             aLight.visible = value;
         });
-        folderLights.add(lightsToggle, 'toggle').name('Directional light').onChange(value =>{
+        folderLights.add(dToggle, 'toggle').name('Directional light').onChange(value =>{
             dLight.visible = value;
         });
-        folderLights.add(lightsToggle, 'toggle').name('Spot light').onChange(value =>{
+        folderLights.add(sToggle, 'toggle').name('Spot light').onChange(value =>{
             sLight.visible = value;
         });
 
@@ -739,37 +854,51 @@ class DemoScene {
             toggle: false
         }
         folderControls.add(boundingBoxToggle, 'toggle').name('Show bounding box').onChange(value => {
-            this.#objects.uploaded.forEach( (obj) => {
-                obj.children.forEach( (child) => {
-                    if (child.name == "bounding_box") {
+
+            const allObjects = this.#objects.furniture.concat(this.#objects.walls).concat(this.#objects.uploaded).concat(this.#objects.windows);
+            allObjects.forEach( (obj) => {
+                obj.children.forEach((child) => {
+                    if (child.name.includes("bounding_box")) {
                         child.visible = value;
                     }
                 })
             });
             this.#showBoundingBoxes = value;
         });
-
+        const showDimensions = {
+            toggle: true
+        }
+        folderControls.add(showDimensions, 'toggle').name('Show Dimensions').onChange(value => {
+            const allObjects = this.#objects.furniture.concat(this.#objects.walls).concat(this.#objects.uploaded).concat(this.#objects.windows);
+            allObjects.forEach( (obj) => {
+                obj.children.forEach((child) => {
+                    if (child.name.includes("label")) {
+                        child.visible = value;
+                    }
+                })
+            });
+        });
         //changing material color?
         // const folderColors = folderControls.addFolder('Furniture Colors');
         // folderColors.close();
 
         // Moving Controls
         const folderMoving = gui.addFolder('General Controls');
-        const setOrthoMode = {
-            drag: () => {
-                this.#controls.orthoMode = "drag";
-            },
-            measure: () => {
-                this.#controls.orthoMode = "measure";
-            }
-        }
-        folderMoving.add({selectedFunction: 'drag'}, 'selectedFunction', Object.keys(setOrthoMode))
-        .name('Orthographic')
-        .onChange((selectedFunction) => {
-            if (setOrthoMode[selectedFunction]) {
-                setOrthoMode[selectedFunction]();
-            }
-        });
+        // const setOrthoMode = {
+        //     drag: () => {
+        //         this.#controls.orthoMode = "drag";
+        //     },
+        //     measure: () => {
+        //         this.#controls.orthoMode = "measure";
+        //     }
+        // }
+        // folderMoving.add({selectedFunction: 'drag'}, 'selectedFunction', Object.keys(setOrthoMode))
+        // .name('Orthographic').listen()
+        // .onChange((selectedFunction) => {
+        //     if (setOrthoMode[selectedFunction]) {
+        //         setOrthoMode[selectedFunction]();
+        //     }
+        // });
         const setInsideMode = {
             keyboard: () => {
                 this.#controls.insideMode = "keyboard";
@@ -803,10 +932,22 @@ class DemoScene {
         const measurementUnits = {
             'meter': () => {
                 this.#units = "meters";
+                const dimLabels = document.querySelectorAll(".dim-label");
+                dimLabels.forEach( (dimLabel) => {
+                    const roundDist = Math.round(dimLabel.dataset.value * 100) / 100;
+                    dimLabel.textContent = roundDist + " m";
+                });
                 this.#controls.units = "meters";
             },
             'feet': () => {
                 this.#units = "feet";
+                const dimLabels = document.querySelectorAll(".dim-label");
+                dimLabels.forEach( (dimLabel) => {
+                    const feet = dimLabel.dataset.value * 3.281;
+                    const flooredFeet = Math.floor(feet);
+                    const inches = Math.round((feet - flooredFeet) * 12);  
+                    dimLabel.textContent = flooredFeet + " ft. " + inches + " in.";
+                });
                 this.#controls.units = "feet";
             }
         }
@@ -911,13 +1052,17 @@ class DemoScene {
     }
 
     dispose () {
-        // this.#renderer.dispose();
-        console.log(this.resources);
+        this.#scene.clear();
+        const allObjects = this.#objects.furniture.concat(this.#objects.walls).concat(this.#objects.uploaded).concat(this.#objects.windows);
+        allObjects.forEach( (obj) => {
+            obj.clear();
+            this.#model.remove(obj);
+        });
         for (let i = this.resources.length - 1; i >= 0; i--) {
             this.resources[i].dispose();
             delete this.resources[i];
         }
-        console.log(this.resources);
+        this.resources = [];
         this.#controls.dispose();
     }
 }
@@ -934,6 +1079,7 @@ function generateFieldGeo(
     BLADE_HEIGHT_VARIATION,
     NO_GRASS_RECT // New parameter: [xMin, xMax, zMin, zMax] for the rectangular area where no grass should be placed
   ) {
+    console.log("GENERATRING FIELD")
     const positions = [];
     const uvs = [];
     const indices = [];

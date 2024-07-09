@@ -297,10 +297,7 @@ class DemoControls {
      */
     #reset() {
         // this.#drag.dispose();
-        if (this.#floorObject != null) {
-            this.#colorObject(this.#floorObject, 0x000000);
-            this.#scene.remove(this.#insidePointer);
-        }
+        this.#scene.remove(this.#insidePointer);
         this.#pointerLock.dispose();
         this.#mobile.dispose();
         this.#orbit.dispose();
