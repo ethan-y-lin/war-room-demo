@@ -1,105 +1,124 @@
 extends layout
 
 block content
-    div#back-to-index    
-        p 
-            a(href='/').back-button1 &lt; back
-    div.title.about-title
-        h1 ABOUT
-        p.description
-            | This project is a 3D furniture planner that allows a user to upload 3D models of a room
-            | and objects and view how the objects in the room look in 3D. It is designed to be used
-            | in conjunction with 3D room scanning applications like 
-            em Polycam (https://poly.cam/). 
-            | It supports several view modes including orthographic, perspective, and first-person.
-            | It also implements features like measuring distance and exporting the 3D models.
-    div.intro
-        h2 How to Use
-        p.description
-            em Note: the demonstration is based on the usage of Polycam for scanning the room and any furnitures. 
-            em Please refer to the software for a detailed instruction on how to get a better quality of the scan.
-    
-    div.carousel
-        div#step1.step.hidden
-            h3 STEP 1: Scan the room and export
-                br
-                | (Skip if the data of the current floor plan has been updated)
-            div.step-description
-                div.description-text
-                    p
-                        | Use the ROOM Mode in Polycam to scan the space. 
-                        | After scanning the room, skip the "process" option to obtain a clean model.  
-                        | This mode will provide a clean white model of the room with the existing furnitures in the scene.
-                        | Don't worry - keep the model as it is, and we will handle the cleaning process afterwards. 
-                        | After done scanning, export the gltf/obj file to your own device.
-                div.description-img
-                    img.pictures(src='/img/demo1.jpg')
-        div#step2.step.hidden
-            h3 STEP 2: Scan the furniture and export
-            div.step-description
-                div.description-text
-                    p 
-                        | Use the LiDAR Mode in Polycam to scan the furniture of your choice.
-                        | After done scanning, you can use the tools provided in the software to do some preliminary processing to make the model look cleaner.
-                        | When you are ready, export the gltf/obj file to your own device.
-                div.description-img
-                    img.pictures(src='/img/demo2.jpg')
-        div#step3.step.hidden
-            h3 STEP 3: Upload the glb/obj file
-            div.step-description
-                div.description-text
-                    p 
-                        | To upload the floor plan you scanned, go to "FLOOR PLANS" - "&#43; Add new floor plan". Make sure to give it a name.
-                        | To upload the piece of furniture you scanned, go to "UPLOAD". Make sure to give it a name and place it in a category.
-                        | You can also make a new category of your choice inside the "FURNITURES" submenu.
-                        | You will be able to see the uploaded floor plans and furnitures under their designated submenu list.
-                        | Note: To delete any unwanted furnitures, click the trash can icon next to the item.
-                div.description-img
-                    img.pictures(src='/img/demo3.jpg')
-        div#step4.step.hidden    
-            h3 STEP 4: Load the room model and place the furniture model into the scene
-            div.step-description
-                div.description-text 
-                    p 
-                        | To choose the floor plan, simply go to "FLOOR PLANS" and select the one that you would like to place your furnitures in. 
-                        | All pre-existing furnitures during scanning will be cleared at this stage. (NOTE: the cleaning process is based on 
-                        | the way Polycam output its room model, therefore this performance is not guaranteed if using other scanning softwares.) 
-                        | Next, go to "FURNITURES" - choose the category - select the item of your choice to place it into the scene.
-                div.description-img
-                    img.pictures(src='/img/demo4.jpg')
-        div#step5.step.hidden    
-            h3 STEP 5: Controls
-            div.step-description 
-                div.description-text-vertical
-                    p After loading the objects you want, the control panel allows you to manipulate the scene in multiple ways:         
-                    p 
-                        strong Light Conditions: 
-                        | Check/Uncheck the box next to the light source to see different combination of lightings.
-                    p 
-                        strong Furniture Manipulations: 
-                        | When in Orthographic and Outside view, toggle between translate and rotate mode to place your chosen furnitures in the desired place.
-                    p 
-                        strong General Controls: 
-                        | When in Orthographic view, toggle between viewing and measuring mode; When in Inside view, toggel between teleport and keyboard mode as the way of navigating the space in first-person view.
-                div.description-img
-                    img.pictures-small(src='/img/demo5.jpg')    
-        div#step6.step.hidden
-            h3 STEP 6: Save your design 
-            div.step-description 
-                div.description-text 
-                    p
-                        | While you are designing the space, remember to save from time to time to avoid losing your progress. 
-                        br
-                        | After you are satisfied with the design, click 'Save as' to save your design and retrieve it from the menu option "SAVED DESIGNS" later.
-                div.description-img 
-                    img.pictures-small(src='/img/demo6.jpg')
-        div#step7.step.hidden    
-            h3 STEP 7: Export your design
-            div.step-description 
-                div.description-text 
-                    p To export, select "EXPORT" from the menu to download the chosen design in glb format.
-                div.description-img 
-                    img.pictures(src='/img/demo7.jpg')
-        button#prev &lt;
-        button#next &gt;
+    div#content
+        div#back-button-section    
+            p 
+                a(href='/').back-button1#back-to-index &lt; back
+        aside.sidebar-about
+            div.title.about-title
+                h1 ABOUT
+                p.description
+                    | This project is a 3D furniture planner that allows a user to upload 3D models of a room
+                    | and objects and view how the objects in the room look in 3D. It is designed to be used
+                    | in conjunction with 3D room scanning applications like 
+                    em Polycam (https://poly.cam/). 
+                    | It supports several view modes including orthographic, perspective, and first-person.
+                    | It also implements features like measuring distance and exporting the 3D models.
+        
+        main.main-about
+            div.carousel
+                div.carousel-button
+                    button#prev &lt;
+                div.steps-section
+                    div#step1.step.hidden
+                        div.step-title
+                            h3 STEP 1: Scan the room and export
+                                br
+                                | (Skip if the data of the current floor plan has been updated)
+                        div.step-description
+                            div.description-text
+                                p
+                                    | Use the ROOM Mode in Polycam to scan the space. 
+                                    | After scanning the room, skip the "process" option to obtain a clean model.  
+                                    | This mode will provide a clean white model of the room with the existing furnitures in the scene.
+                                    | Don't worry - keep the model as it is, and we will handle the cleaning process afterwards. 
+                                    | After done scanning, export the gltf/obj file to your own device.
+                            div.description-img
+                                img.pictures(src='/img/demo1.jpg')
+                        div.description
+                            p
+                                em Note: the demonstration is based on the usage of Polycam for scanning the room and any furnitures. 
+                                em Please refer to the software for a detailed instruction on how to get a better quality of the scan.
+                    div#step2.step.hidden
+                        h3 STEP 2: Scan the furniture and export
+                        div.step-description
+                            div.description-text
+                                p 
+                                    | Use the LiDAR Mode in Polycam to scan the furniture of your choice.
+                                    | After done scanning, you can use the tools provided in the software to do some preliminary processing to make the model look cleaner.
+                                    | When you are ready, export the gltf/obj file to your own device.
+                            div.description-img
+                                img.pictures(src='/img/demo2.jpg')
+                        div.description
+                            p
+                                em Note: the demonstration is based on the usage of Polycam for scanning the room and any furnitures. 
+                                em Please refer to the software for a detailed instruction on how to get a better quality of the scan.
+                    div#step3.step.hidden
+                        h3 STEP 3: Upload the glb/obj file
+                        div.step-description
+                            div.description-text
+                                p 
+                                    | To upload the floor plan you scanned, go to "FLOOR PLANS" - "&#43; Add new floor plan". Make sure to give it a name.
+                                    | To upload the piece of furniture you scanned, go to "UPLOAD". Make sure to give it a name and place it in a category.
+                                    | You can also make a new category of your choice inside the "FURNITURES" submenu.
+                                    | You will be able to see the uploaded floor plans and furnitures under their designated submenu list.
+                                    | Note: To delete any unwanted furnitures, click the trash can icon next to the item.
+                            div.description-img
+                                img.pictures(src='/img/demo3.jpg')
+                    div#step4.step.hidden    
+                        h3 STEP 4: Load the room model and place the furniture model into the scene
+                        div.step-description
+                            div.description-text 
+                                p 
+                                    | To choose the floor plan, simply go to "FLOOR PLANS" and select the one that you would like to place your furnitures in. 
+                                    | All pre-existing furnitures during scanning will be cleared at this stage. (NOTE: the cleaning process is based on 
+                                    | the way Polycam output its room model, therefore this performance is not guaranteed if using other scanning softwares.) 
+                                    | Next, go to "FURNITURES" - choose the category - select the item of your choice to place it into the scene.
+                            div.description-img
+                                img.pictures(src='/img/demo4.jpg')
+                    div#step5.step.hidden    
+                        h3 STEP 5: Controls
+                        div.step-description 
+                            div.description-text-vertical
+                                p After loading the objects you want, the control panel allows you to manipulate the scene in multiple ways:         
+                                p 
+                                    strong Light Conditions: 
+                                    | Check/Uncheck the box next to the light source to see different combination of lightings.
+                                p 
+                                    strong Furniture Manipulations: 
+                                    | When in Orthographic and Outside view, toggle between translate and rotate mode to place your chosen furnitures in the desired place.
+                                p 
+                                    strong General Controls: 
+                                    | When in Orthographic view, toggle between viewing and measuring mode; When in Inside view, toggel between teleport and keyboard mode as the way of navigating the space in first-person view.
+                            div.description-img
+                                img.pictures-small(src='/img/demo5.jpg')    
+                    div#step6.step.hidden
+                        h3 STEP 6: Save your design 
+                        div.step-description 
+                            div.description-text 
+                                p
+                                    | While you are designing the space, remember to save from time to time to avoid losing your progress. 
+                                    br
+                                    | After you are satisfied with the design, click 'Save as' to save your design and retrieve it from the menu option "SAVED DESIGNS" later.
+                            div.description-img 
+                                img.pictures-small(src='/img/demo6.jpg')
+                    div#step7.step.hidden    
+                        h3 STEP 7: Export your design
+                        div.step-description 
+                            div.description-text 
+                                p To export, select "EXPORT" from the menu to download the chosen design in glb format.
+                            div.description-img 
+                                img.pictures(src='/img/demo7.jpg')
+                div.carousel-button
+                    button#next &gt;
+            div.carousel-dot 
+                span.dot#dot1 
+                span.dot#dot2 
+                span.dot#dot3 
+                span.dot#dot4 
+                span.dot#dot5 
+                span.dot#dot6 
+                span.dot#dot7
+
     script(src="./js/carousel.js", type="module")
