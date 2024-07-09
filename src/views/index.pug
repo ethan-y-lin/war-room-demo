@@ -48,12 +48,12 @@ block content
                                 div.form-flex-col
                                     div.form-group.form-input
                                         label(for='name') Name: 
-                                        input#object-name.form-control(type='text', placeholder='Name' name='name' required value=(undefined===object ? '' : object.name) )
+                                        input#object-name.form-control(type='text', placeholder='Furniture Name' name='name' required value=(undefined===object ? '' : object.name) )
                                     div.form-group.form-input
-                                        label(for='object') Upload:  
+                                        label(for='object') Upload:   
                                         input#object-file(type='file' name='object' accept="object/glb, object/obj" required)
                                     div.form-group.form-input
-                                        label(for='category') Category: 
+                                        label(for='category') Category:  
                                         select#object-category.form-control(name='category' required)
                                             each category in categories
                                                 option(value= category._id)= category.name
