@@ -784,30 +784,29 @@ class DemoControls {
         return {hasCollision: false, collidedObject: null} ;
     }
 
-    #toggleGumball = (event) =>{
-        switch(event.code){
-            case 'KeyT':
-                this.#gumball.mode = 'translate';
-                this.#gumball.showX = true;
-                this.#gumball.showZ = true;
-                this.#gumball.showY = false;
-                break;
-            case 'KeyR':
-                this.#gumball.mode = 'rotate';
-                this.#gumball.showX = false;
-                this.#gumball.showZ = false;
-                this.#gumball.showY = true;
-                break;
-            case 'Backspace':
-                if (this.#gumball != null) {
+    #toggleGumball = (event) => {
+        if (this.#gumball != null) {
+            switch(event.code){
+                case 'KeyT':
+                    this.#gumball.mode = 'translate';
+                    this.#gumball.showX = true;
+                    this.#gumball.showZ = true;
+                    this.#gumball.showY = false;
+                    break;
+                case 'KeyR':
+                    this.#gumball.mode = 'rotate';
+                    this.#gumball.showX = false;
+                    this.#gumball.showZ = false;
+                    this.#gumball.showY = true;
+                    break;
+                case 'Backspace':
                     const object = this.#gumball.object
                     this.#clearGumball();
                     object.clear();
                     this.#scene.remove(object)
-                }
-
             }
-        };
+        }
+     };
     
     #insideOnKeyDown = ( event ) => {
 
