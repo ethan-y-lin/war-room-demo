@@ -98,6 +98,7 @@ class DynamicCamera {
         this.name = "outside";
         this.outside = outsideCamera;
     }
+
 }
 
 export { DynamicCamera };

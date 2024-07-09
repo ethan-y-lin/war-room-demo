@@ -213,7 +213,6 @@ class MobileControls extends EventDispatcher {
         _euler.x = Math.max( _PI_2 - this.maxPolarAngle, Math.min( _PI_2 - this.minPolarAngle, _euler.x ) );
     
         camera.quaternion.setFromEuler( _euler );
-        console.log("on pointer move")
         this.dispatchEvent( _changeEvent );
     }
     
@@ -230,7 +229,6 @@ class MobileControls extends EventDispatcher {
                 if (tapLen < 500 && tapLen > 0) {
                     console.log('Double tapped!');
                     event.preventDefault();
-                    console.log('Scope:', scope);
                     
                     // Ensure scope is an EventDispatcher
                     if (typeof scope.dispatchEvent === 'function') {

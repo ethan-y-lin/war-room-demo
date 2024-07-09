@@ -3,6 +3,14 @@ import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockCont
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
 import { MobileControls } from './mobileControls';
+
+const sphereGeometry = new THREE.SphereGeometry( 0.1, 32, 16 ); 
+const blackMaterial = new THREE.MeshBasicMaterial( {color: 0x000000} ); 
+const redMaterial = new THREE.MeshBasicMaterial( {color: 0xff0000} ); 
+const lineMaterial = new THREE.LineBasicMaterial({
+    color: 0x000000
+});
+
 /**
  * This class contains the control logic for each of the views and modes. 
  * Using ThreeJS add-on controls, this class supports "drag controls" for 
@@ -254,9 +262,8 @@ class DemoControls {
         this.switchControls("ortho", camera.ortho, canvas);
         this.units;
         this.#floorObject = null;
-        const sphereGeometry = new THREE.SphereGeometry( 0.1, 32, 16 ); 
-        const sphereMaterial = new THREE.MeshBasicMaterial( {color: 0x000000} ); 
-        const sphere = new THREE.Mesh( sphereGeometry, sphereMaterial ); 
+
+        const sphere = new THREE.Mesh( sphereGeometry, blackMaterial ); 
         this.#insidePointer = sphere;
         this.#moveToPoint = null;
         this.#moving = false;
@@ -396,7 +403,6 @@ class DemoControls {
             const time = performance.now();
             if (this.insideMode == "mobile") {
                 if (this.#moving) {
-                    console.log("moving")
                     this.#mobile.pointerSpeed = 0;
                     const delta = ( time - this.#prev_time ) / 1000;
                     this.#moveToPoint.velocity += 5 * delta;
@@ -448,10 +454,8 @@ class DemoControls {
                     this.#setCameraBB(this.#insideCameraBB, camera.inside);
                     let collision = this.#checkCollisions(this.#insideCameraBB, this.#boundingBoxes)
                     if (collision.hasCollision && collision.collidedBox.name != "wall_11_3" && collision.collidedBox.name != "wall_11_4" ) {
-                        console.log(collision.collidedBox)
                         this.#pointerLock.moveRight(this.#velocity.x * delta );
                         this.#pointerLock.moveForward(this.#velocity.z * delta );
-                        console.log("collision")
                         this.#setCameraBB(this.#insideCameraBB, camera.inside);
                         this.#velocity.x = 0;
                         this.#velocity.z = 0;
@@ -460,7 +464,6 @@ class DemoControls {
             } else if (this.insideMode == "teleport"){
                 if (this.#pointerLock.isLocked) {
                     if (this.#moving) {
-                        console.log("moving")
                         this.#pointerLock.pointerSpeed = 0;
                         const delta = ( time - this.#prev_time ) / 1000;
                         this.#moveToPoint.velocity += 5 * delta;
@@ -505,7 +508,6 @@ class DemoControls {
                 const boundingBox = new THREE.Box3().setFromObject( object);
                 const isCollided = this.#checkCollisions(boundingBox, this.#boundingBoxes);
                 if (isCollided.hasCollision && isCollided.collidedBox.name != object.name) {
-                    console.log("Collision!");
                     this.#colorObject(object, 0xFF0000);
                 } else {
                     this.#colorObject(object, 0x000000);
@@ -551,12 +553,6 @@ class DemoControls {
 
     }
 
-    #shiftCollidedObject (object, boundingBox) {
-
-        const collidedBoxCenter = collidedBox.max.add(collidedBox.min).divideScalar(2);
-        const difference = object.position.sub(collidedBoxCenter);
-        // object.position.set(this.#dragOrigin.x, this.#dragOrigin.y, this.#dragOrigin.z)
-    }
 
     #getObjectLabel(object) {
         for (let child of object.children) {
@@ -598,14 +594,6 @@ class DemoControls {
         // this.#updateGumballRotation(object);
     }
 
-    #updateGumballRotation(object) {
-        // Update gumball rotation based on the object's current rotation
-        object.updateMatrixWorld();
-        const localQuaternionRotation = object.quaternion.clone();
-        this.#gumball.setSpace("local");
-        this.#gumball.setRotationFromQuaternion(localQuaternionRotation.invert());
-        this.#gumball.setSpace("global");
-    }
     /**
      * Resets the gumball.
      * @private
@@ -637,7 +625,6 @@ class DemoControls {
      * or null if no gumball control is active.
      */
     #clickObject(object, camera) {
-        console.log(object)
         if (this.#gumball != null) {
             if (object == this.#gumball.object) {
                 return this.#gumball;
@@ -740,7 +727,6 @@ class DemoControls {
     }
 
     #colorObject(object, color) {
-        console.log(object)
         if (object.type == "Mesh" && object.name != "bounding_box") {
             if (object.material.emissive) {
                 object.material.emissive.set( color );
@@ -818,8 +804,8 @@ class DemoControls {
             case 'Backspace':
                 if (this.#gumball != null) {
                     const object = this.#gumball.object
-                    object.clear();
                     this.#clearGumball();
+                    object.clear();
                     this.#scene.remove(object)
                 }
 
@@ -959,7 +945,6 @@ class DemoControls {
 
     #orthoOnMove = (event) => {
         if (this.orthoMode == "measure") {
-            console.log("drag measure");
             this.#measureGroup.clear();
             if (this.#measure_points.length == 1) {
                 const displayDistanceElement = document.getElementById("measure-distance");
@@ -986,13 +971,10 @@ class DemoControls {
                 }
 
                 const lineGeometry = new THREE.BufferGeometry().setFromPoints( [this.#measure_points[0], point] );
-                const lineMaterial = new THREE.LineBasicMaterial({
-                                        color: 0x000000
-                                    });
+
                 const line = new THREE.Line( lineGeometry, lineMaterial );
-                const sphereGeometry = new THREE.SphereGeometry( 0.1, 32, 16 ); 
-                const sphereMaterial = new THREE.MeshBasicMaterial( {color: 0xff0000} ); 
-                const sphere = new THREE.Mesh( sphereGeometry, sphereMaterial ); 
+
+                const sphere = new THREE.Mesh( sphereGeometry, redMaterial ); 
                 sphere.position.set(point.x, point.y, point.z);
                 this.#measureGroup.add(sphere);
                 this.#measureGroup.add(line);
@@ -1038,6 +1020,10 @@ class DemoControls {
         }
     }
 
-}
+    dispose() {
+        this.#reset();
+        this.#clearGumball();
+    }
+ }
 
 export {DemoControls};

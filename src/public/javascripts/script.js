@@ -3,15 +3,15 @@ import {DemoScene} from "./demo.js"
 import $ from 'jquery'
 import io from 'socket.io-client';
 
-console.log("INIT")
 const startModel = {room_url: new URL('../assets/warroom1.glb', import.meta.url)};
 
-let APP;
+let APP = null;
 let start = true;
 
 function init(model, objects = []) {
-    console.log(model);
-
+    if (APP !== null) {
+        APP.dispose();
+    }
     APP = new DemoScene(model, objects);
     const objectLinks = document.querySelectorAll('.add-object-to-scene');
     
@@ -44,7 +44,6 @@ $(window).on('load', function() {
         init(startModel);
         start = false;
     }
-    console.log("ADDING EVENT LISTENERS")
     const uploadObjectButton = document.getElementById("upload-object");
     uploadObjectButton.addEventListener('click', uploadObject);
 
@@ -61,7 +60,6 @@ $(window).on('load', function() {
             event.preventDefault(); // Prevent default link behavior
             
             const url = this.dataset.url; // Get the URL from data-url attribute
-            console.log(url)
             const roomName = await fetchAndInitRoom(url); // Call the fetchAndAddObject function with the URL
             const roomTitle = document.getElementById("floorplan-title");
             roomTitle.textContent = roomName;
@@ -69,7 +67,7 @@ $(window).on('load', function() {
     });
 
     const designLinks = document.querySelectorAll('.open-design-link');
-    console.log(designLinks)
+
     designLinks.forEach(link => {
         link.addEventListener('click', function(event) {
             if (APP != null) {
@@ -78,7 +76,6 @@ $(window).on('load', function() {
             event.preventDefault(); // Prevent default link behavior
             
             const url = this.dataset.url; // Get the URL from data-url attribute
-            console.log(url)
             fetchAndInitDesign(url); // Call the fetchAndAddObject function with the URL
         });
     });
@@ -125,7 +122,6 @@ async function fetchAndAddObject(app, objURL) {
             throw new Error('Failed to fetch object');
         }
         const object = await response.json(); // Await parsing the JSON response
-        console.log(object); // Log the parsed JSON object
         app.addObject(object); // Assuming APP.addObject() adds the object to your application
     } catch (error) {
         console.error('Error fetching object:', error);
@@ -137,7 +133,6 @@ async function fetchAndInitRoom(roomURL) {
         APP.clear();
     }
     try {
-        console.log('/room' + roomURL)
         const response = await fetch('/room' + roomURL); // Await the fetch call
         if (!response.ok) {
             throw new Error('Failed to fetch object');
@@ -195,7 +190,6 @@ function addDesignToDOM(design){
         event.preventDefault(); // Prevent default link behavior
         
         const url = this.dataset.url; // Get the URL from data-url attribute
-        console.log(url)
         fetchAndInitDesign(url); // Call the fetchAndAddObject function with the URL
     });
 
@@ -224,8 +218,6 @@ async function deleteDesign(designURL) {
         if (data.success) {
             document.querySelector(`li[data-url="${designURL}"]`).remove();
             const designTitle = document.getElementById("design-title");
-            console.log(designTitle.textContent);
-            console.log(data.name)
             if (designTitle.textContent == data.name ) {
                 designTitle.textContent = "Unsaved Plan";
             }
@@ -275,7 +267,6 @@ async function fetchAndInitDesign(designURL) {
         sceneContainer.removeChild(previousScene);
         const design = await response.json(); // Await parsing the JSON response
         design.room.room_url = new URL(design.room.room_url);
-        console.log(design.objects);
         init(design.room, design.objects); 
 
         const designTitle = document.getElementById("design-title");
@@ -289,7 +280,6 @@ async function uploadCategory(e) {
     e.preventDefault();
     const categoryNameElement = document.getElementById('category-name');
     const categoryName = categoryNameElement.value;
-    console.log(categoryName)
     fetch('/upload-category', {
         method: 'POST',
         headers: {
@@ -300,7 +290,6 @@ async function uploadCategory(e) {
         })
     }).then(response => response.json())
     .then(data => {
-        console.log(data)
         if (data.success) {
 
             const layerX = document.querySelector("#furnitures .layerxx");
@@ -453,7 +442,6 @@ async function uploadObject(e) {
 
 async function addObjectToDOM(categoryName, name, url) {
     const categoryID = "#category-"+ categoryName.replaceAll(' ', '-') + " .layerx";
-    console.log(categoryID)
     const categoryElement = document.querySelector(categoryID);
     // Create elements
     const li = document.createElement('li');

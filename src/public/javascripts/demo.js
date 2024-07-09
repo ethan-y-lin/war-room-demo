@@ -7,6 +7,15 @@ import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
 import grassShader from '../shaders/grass.js'
+
+const boxMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+const sphereGeometry = new THREE.SphereGeometry( 0.1, 32,16 ); 
+const sphereMaterial = new THREE.MeshBasicMaterial( {color: 0xff0000} ); 
+const lineMaterial = new THREE.LineBasicMaterial({
+    color: 0x000000
+});
+const ceilingMat = new THREE.MeshBasicMaterial({color: 0xedeae5});
+
 /**
  * This class represents a scene that is displayed on the HTML element 
  * with the id: "#scene-container". It handles the contents of the scene,
@@ -111,7 +120,6 @@ class DemoScene {
      * @param {Object} room 
      */
     constructor(room, objects) {
-        console.log(objects)
         this.#initialize(room, objects).then(() => {
             this.#animate();
         });
@@ -124,6 +132,7 @@ class DemoScene {
      * @param {URL} room 
      */
     async #initialize(room, objects) {
+        this.resources = [];
         this.#canvas = document.getElementById("scene-container");
         this.#objects = {walls: [], 
                         furniture: [],
@@ -134,7 +143,7 @@ class DemoScene {
         this.#scene = new THREE.Scene();
         // this.room = new URL('../assets/warroom1.glb', import.meta.url);
         this.#room = room;
-        console.log(room);
+
         // initialize geometries
         this.#grid_scale = 0.1; // meter
         await this.#initGeometries(this.#scene);
@@ -153,7 +162,6 @@ class DemoScene {
         this.#camera = new DynamicCamera(this.#canvas, this.#modelSize); // initializes to orthoCamera
         this.#current_camera = this.#camera.ortho;
         
-        console.log(this.#objects)
         // initialize controls 
         this.#controls = new DemoControls(this.#camera, this.#canvas, this.#scene, this.#objects, this.#modelSize); // initializes to orthoControls
 
@@ -164,7 +172,6 @@ class DemoScene {
         })
         resizeObserer.observe(this.#canvas);
 
-        console.log(window)
         this.#measurement_objects = {vertices: new THREE.Group(), edges: new THREE.Group()};
         this.#measurement_objects.vertices.name = "vertices";
         this.#measurement_objects.edges.name = "edges";
@@ -265,7 +272,6 @@ class DemoScene {
                     this.#controls.getPointerLock().isLocked = true;
                     domElement.addEventListener( 'mousemove', this.#controls.getLock());
                 }
-                console.log("set full screen")
                 this.isFullScreen = true;
             } else {
                 this.isFullScreen = false;
@@ -276,15 +282,14 @@ class DemoScene {
             
         });
     }
+
     // shifted up
     openPosition = (obj) => {
         let bbox = new THREE.Box3().setFromObject(obj);
-        console.log(bbox)
         const shift = bbox.min.y;
         return new THREE.Vector3(0, -shift + 0.01, 0);
     }
 
-    // PROBABLY WILL HAVE TO CHANGE DRASTICALLY
     addObject (object, position = null, rotation = null) {
 
         const addedObject = object;
@@ -302,9 +307,7 @@ class DemoScene {
 
             if (position == null) {
                 const openPos = this.openPosition(newObject); // find an open position to display the box
-                console.log(newObject.position)
                 newObject.position.set(openPos.x, openPos.y, openPos.z);
-                console.log(newObject)
             } else {
                 newObject.position.set(position.x, position.y, position.z);
             }   
@@ -320,7 +323,7 @@ class DemoScene {
 
             // Create a box helper
             const boxGeometry = new THREE.BoxGeometry(box.max.x - box.min.x, box.max.y - box.min.y, box.max.z - box.min.z);
-            const boxMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+            this.resources.push(boxGeometry);
             const boundingBox = new THREE.Mesh(boxGeometry, boxMaterial);
 
             boundingBox.position.set(0, (box.max.y + box.min.y) / 2, 0);
@@ -339,7 +342,6 @@ class DemoScene {
     
             const label = new CSS2DObject( text );
             label.name = "label";
-            console.log(label);
             newObject.add(label)
 
             this.#objects.uploaded.push(newObject);
@@ -375,9 +377,6 @@ class DemoScene {
         directionalLight.shadow.camera.bottom = -12;
         this.#lights.direct = directionalLight;
         scene.add(directionalLight);
-        
-        const dLightHelper = new THREE.DirectionalLightHelper(directionalLight);
-        //scene.add(dLightHelper);
 
         const spotLight = new THREE.SpotLight(0xFFFFFF, 10000);
         spotLight.angle = 0.2;
@@ -427,10 +426,13 @@ class DemoScene {
             vertexColors: true,
             side: THREE.DoubleSide
         });
+        this.resources.push(grassMaterial);
 
         //ground
         const groundGeo = new THREE.PlaneGeometry(1000, 1000);
+        this.resources.push(groundGeo);
         const groundMat = new THREE.MeshLambertMaterial({color: 0x1c150d});
+        this.resources.push(groundMat);
         const ground = new THREE.Mesh(groundGeo, groundMat);
         ground.rotation.x = -Math.PI/2;
         ground.position.y = -0.2;
@@ -439,9 +441,11 @@ class DemoScene {
         
         //skydome
         const skyGeo = new THREE.SphereGeometry(800, 32, 15);
+        this.resources.push(skyGeo)
         const textureLoader = new THREE.TextureLoader();
         const skyTexture = textureLoader.load('../img/sky.png');
         const skyMat = new THREE.MeshBasicMaterial({map: skyTexture, side: THREE.BackSide});
+        this.resources.push(skyMat);
         const sky = new THREE.Mesh(skyGeo, skyMat);
         scene.add(sky);
         
@@ -464,7 +468,6 @@ class DemoScene {
                 scene.add(this.#model);
                 this.#model.position.set(0, this.#modelSize.y / 2, 0); // makes the ground at y = 0;
 
-                console.log(this.#model.children)
                 // initialize objects
                 const objects = [...this.#model.children]; // must be copy because removing directly will cause some to be skipped.
                 this.#organizeObjects(objects);
@@ -476,8 +479,8 @@ class DemoScene {
 
                 // initializes grid
                 const size = Math.max(this.#modelSize.x, this.#modelSize.z);
-                const gridHelper = new THREE.GridHelper(size, size / this.#grid_scale, 0x000000, 0x097969);
-                //scene.add(gridHelper);
+                // const gridHelper = new THREE.GridHelper(size, size / this.#grid_scale, 0x000000, 0x097969);
+                // //scene.add(gridHelper);
                 resolve();
             }, undefined, (error) => {
                 reject(error);
@@ -537,16 +540,12 @@ class DemoScene {
             displayModeElement.textContent = "Measurement: ";
             const measure_points = this.#controls.getMeasurePoints();
             if (measure_points.length > this.#measurement_objects.vertices.children.length) {
-                const sphereGeometry = new THREE.SphereGeometry( 0.1, 32,16 ); 
-                const sphereMaterial = new THREE.MeshBasicMaterial( {color: 0xff0000} ); 
                 const sphere = new THREE.Mesh( sphereGeometry, sphereMaterial ); 
                 const point = measure_points[measure_points.length-1];
                 sphere.position.set(point.x, point.y, point.z);
                 this.#measurement_objects.vertices.add( sphere );
                 const lineGeometry = new THREE.BufferGeometry().setFromPoints( measure_points );
-                const lineMaterial = new THREE.LineBasicMaterial({
-                                        color: 0x000000
-                                    });
+                this.resources.push(lineGeometry);
                 const line = new THREE.Line( lineGeometry, lineMaterial );
                 this.#measurement_objects.edges.add( line );
                          
@@ -610,13 +609,9 @@ class DemoScene {
      * @param {*} camera 
      */
     #onWindowResize(camera){            
-        console.log("window resized");
-        console.log(this.#canvas.offsetHeight, this.#canvas.offsetWidth)
-        console.log(this.#renderer)
         this.#renderer.setSize(this.#canvas.offsetWidth, this.#canvas.offsetHeight, true);
         this.#labelRenderer.setSize(this.#canvas.offsetWidth, this.#canvas.offsetHeight, true);
         if (this.#camera.name == "ortho") {
-            console.log("ortho camera")
             this.#camera.setOrthoCamera(this.#canvas, this.#modelSize, 2 );
             this.#current_camera = this.#camera.ortho;
         } else {
@@ -641,7 +636,7 @@ class DemoScene {
 
         //add ceiling to the inside view
         const ceilingGeo = new THREE.BoxGeometry(this.#modelSize.x, 0.1, this.#modelSize.z);
-        const ceilingMat = new THREE.MeshBasicMaterial({color: 0xedeae5});
+        this.resources.push(this.ceilingGeo)
         const ceiling = new THREE.Mesh(ceilingGeo, ceilingMat);
         if (this.#modelSize.x < this.#modelSize.z) {
             ceiling.rotateOnAxis(new THREE.Vector3(0,1,0), Math.PI / 2);
@@ -823,9 +818,6 @@ class DemoScene {
                     measurementUnits[selectedFunction]();
                 }
             });
-        console.log(measurementUnits);
-        
-        //folderMeasurements.close();
 
         //changing the display of bounding boxes around furnitures
     
@@ -833,9 +825,6 @@ class DemoScene {
         var customContainer = $("#gui-container").append($(gui.domElement));
     }
 
-    // getBoundingBox(){
-    //     return this.#objects.boundingBox;
-    // }
     downloadScene() {
         const exporter = new GLTFExporter();
         this.#model.position.set(0,0,0);
@@ -911,11 +900,23 @@ class DemoScene {
     getSpotLight(){
         return this.#lights.spot;
     }
+
     clear() {
         this.#objects.uploaded.forEach( (obj) => {
             obj.clear();
             this.#model.remove(obj);
         });
+    }
+
+    dispose () {
+        // this.#renderer.dispose();
+        console.log(this.resources);
+        for (let i = this.resources.length - 1; i >= 0; i--) {
+            this.resources[i].dispose();
+            delete this.resources[i];
+        }
+        console.log(this.resources);
+        this.#controls.dispose();
     }
 }
 
