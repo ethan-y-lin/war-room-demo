@@ -505,17 +505,11 @@ nav a{
   font-size: 16px;
   border-radius: 3px;
 }
-#scene-options #reset{
-  background-color:#445c5290;
-  color:#e5e5e5;
-  border-color: transparent;
-  font-size: 12px;
-  height: 25px;
-}
+
 #scene-options #reset:hover{
-  background-color: #445c52;
+  background-color: #c53535;
   color: white;
-}
+} 
 
 #scene-options button:hover{
   background-color:#a4c3b2;
@@ -830,48 +824,71 @@ label{
 
 
 /*-- ABOUT page --*/
-#back-to-index{
-  margin-left: 30px;
+#content{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+#back-button-section{
   float: left;
-  position: fixed;
+  position: absolute;
   z-index: 9;
+  top:0;
+}
+#back-to-index{
+  margin-left: 10px;
+}
+#back-to-index:hover{
+  color: white;
+}
+.sidebar-about{
+  width: 280px;
+  height: 100%;
+  background-color:#445c52;
+  float: left;
+  padding: 5px;
+  display: flex;
+  flex-direction:column;
+  justify-content: center;
 }
 .about-title{
-  text-align: center;
-  margin: 50px 30px 10px 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.about-title h1{
+  color: white;
+  border-bottom: 2px solid white;
+}
+.about-title .description{
+  color: white;
+  width: 250px;
+  text-align: start;
+  line-height: 1.8;
+}
+.main-about{
+  flex-grow:1;
+  height: 100%;
 }
 
-.about-title>h1{
-  margin-bottom: 10px;
-  border-bottom: 3px solid #a4c3b2;
-  
-}
 
-.description{
-  margin: 5px 120px 0px 120px;
-  text-align: justify;
-  font-size: large;
-  line-height: 1.5;
-  color:rgb(70, 70, 70);
-}
+/* Carousel */
 .pictures{
-  width: 25vw;
+  width: 20vw;
   margin: 5px;
 }
 .pictures-small{
-  width: 15vw;
+  width: 10vw;
   margin: 5px;
 }
-
-.intro h2{
-  font-size: 48px;
-  text-align: center;
-  font-weight: lighter;
-  padding-top: 30px;
-  margin-top: 0;
-  margin-bottom: 0;
+.steps-section .description{
+  width: 80%;
+  color:#777;
 }
-
 .step-description{
   display: flex;
   flex-direction: row;
@@ -881,7 +898,7 @@ label{
   position: relative;
 }
 .description-text, .description-text-vertical{
-  width: 35%;
+  width: 50%;
 }
 .description-text p, .description-text-vertical p{
   margin-right: 20px;
@@ -903,10 +920,6 @@ label{
   align-items: center;
   justify-content: center;
 }
-.intro{
-  background-color:#a4c3b220;
-}
-
 .carousel h3{
   font-size: 28px;
   font-weight: lighter;
@@ -921,37 +934,42 @@ label{
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  padding: 0px 20px 0px 20px;
   height: 100%;
+  width: 100%;
+}
+.steps-section{
+  flex-grow:4;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 .step{
   position: absolute;
-  width: 65%;
+  width: 90%;
   height: 80%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   background-color: white;
-  padding: 50px;
 }
-
-.carousel button{
+.carousel-button{
+  width: 36px;
+  z-index: 9;
+}
+.carousel-button button{
   position: absolute;
   background-color: transparent;
   border: none;
-  font-size: 48px;
+  font-size: 36px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
   background-color: transparent;
   color:#384c44;
-}
-.carousel #prev{
-  left: 80px;
-}
-.carousel #next{
-  right: 80px;
 }
 #next:hover{
   color:#171717;
