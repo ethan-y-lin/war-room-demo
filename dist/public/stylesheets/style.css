@@ -1018,7 +1018,8 @@ label{
 }
 
 /* ipad screen? */
-@media only screen and (width: 1366px) and (height: 1024px) {
+/* @media only screen and (width: 1366px) and (height: 1024px) { */
+@media only screen and (width: 1194px) and (height: 834px) {
   .menu-toggle{
     display: flex;
     height: 42px;
