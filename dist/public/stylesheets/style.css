@@ -878,6 +878,7 @@ label{
   justify-content: center;
   align-items: center;
   background-color:#a4c3b220;
+  padding: 0px 10px 0px 10px;
 }
 
 
@@ -893,6 +894,7 @@ label{
 .steps-section .description{
   width: 80%;
   color:#777;
+  font-size: 14px;
 }
 .step-description{
   display: flex;
@@ -976,13 +978,14 @@ label{
   position: absolute;
   background-color: transparent;
   border: none;
-  font-size: 36px;
+  font-size: 42px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   background-color: transparent;
   color:#384c44;
+  font-weight:bold;
 }
 #next:hover{
   color:#171717;
