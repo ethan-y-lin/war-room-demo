@@ -7,6 +7,9 @@ import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
 import grassShader from '../shaders/grass.js'
+import { Sky } from 'three/addons/objects/Sky.js';
+import SunCalc from 'suncalc';
+// import { Sky } from 'three/addons/objects/Sky.js'
 
 const boxMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
 const sphereGeometry = new THREE.SphereGeometry( 0.1, 32,16 ); 
@@ -116,6 +119,9 @@ class DemoScene {
     #startTime;
 
     #objectGroups;
+    #sky;
+    #skyController;
+    #sunSim;
     /**
      * Calls for the initialization the DemoScene object and then
      * calls the animation loop when initialization is completed.
@@ -134,6 +140,8 @@ class DemoScene {
      * @param {URL} room 
      */
     async #initialize(room, objects) {
+        this.gui = new GUI({autoPlace:false});
+        this.#sunSim = false;
         this.resources = [];
         this.#canvas = document.getElementById("scene-container");
         this.#objects = {walls: [], 
@@ -150,7 +158,6 @@ class DemoScene {
         this.#units = "feet";
         // initialize geometries
         this.#grid_scale = 0.1; // meter
-        await this.#initGeometries(this.#scene);
 
         // // initialize renderer
         this.#renderer = new THREE.WebGLRenderer( { antialias: true } );
@@ -158,14 +165,20 @@ class DemoScene {
         this.#renderer.setSize(this.#canvas.offsetWidth, this.#canvas.offsetHeight);
         this.#renderer.shadowMap.enabled = true;
         this.#renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        this.#renderer.outputEncoding = THREE.sRGBEncoding;
+        this.#renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        this.#renderer.toneMappingExposure = 0.5;
         this.#renderer.domElement.id = "3js-scene"
         this.#renderer.domElement.style = "";
         this.#canvas.appendChild( this.#renderer.domElement );
 
+        this.#current_camera = null;
+        await this.#initGeometries(this.#scene);
+
         // // initialize camera
         this.#camera = new DynamicCamera(this.#canvas, this.#modelSize); // initializes to orthoCamera
         this.#current_camera = this.#camera.ortho;
-        
+
         // initialize controls 
         this.#controls = new DemoControls(this.#camera, this.#canvas, this.#scene, this.#objects, this.#modelSize); // initializes to orthoControls
         this.#controls.units = this.#units;
@@ -193,7 +206,7 @@ class DemoScene {
         this.#labelRenderer.domElement.style.pointerEvents = 'none';
         this.#canvas.appendChild( this.#labelRenderer.domElement );
         
-        this.guiControls();
+        this.initGui(this.gui);
 
         for (let objData of objects) {
             this.addObject(objData.object, objData.position, objData.rotation);
@@ -355,6 +368,88 @@ class DemoScene {
         });
     }
 
+
+    #initSky(scene, gui) {
+
+        // Add Sky
+        this.#sky = new Sky();
+        this.#sky.scale.setScalar( 45000 );
+        scene.add( this.#sky );
+
+        this.#skyController = {
+            turbidity: 20,
+            rayleigh: 0.558,
+            mieCoefficient: 0.009,
+            mieDirectionalG: 0.999998,
+            elevation: 15,
+            azimuth: -45,
+            exposure: this.#renderer.toneMappingExposure,
+            dateTime: new Date(),
+            latitude: 42.4755, // Example latitude for New York City
+            longitude: -76.4857, // Example longitude for New York City
+          }
+
+        gui.add( this.#skyController, 'turbidity', 0.0, 20.0, 0.1 ).onChange( this.#guiChanged );
+        gui.add( this.#skyController, 'rayleigh', 0.0, 4, 0.001 ).onChange( this.#guiChanged );
+        gui.add( this.#skyController, 'mieCoefficient', 0.0, 0.1, 0.001 ).onChange( this.#guiChanged );
+        gui.add( this.#skyController, 'mieDirectionalG', 0.0, 1, 0.001 ).onChange( this.#guiChanged );
+        gui.add( this.#skyController, 'exposure', 0, 1, 0.0001 ).onChange( this.#guiChanged );
+        const sunSimToggle = {
+            toggle: false
+        }
+
+        gui.add(sunSimToggle, 'toggle').name("Sun Sim").onChange( (value) => this.#sunSim = value);
+        document.getElementById('date-input').addEventListener('change', (event) => {
+            console.log("changed")
+            const time = document.getElementById('time-input').value;
+            const date = event.target.value;
+            if (date && time) {
+                this.#skyController.dateTime = new Date(`${date}T${time}:00`);
+            }
+            console.log(this.#skyController.dateTime)
+            this.#guiChanged();
+        });
+
+        document.getElementById('time-input').addEventListener('change', (event) => {
+            console.log("changed")
+            const date = document.getElementById('date-input').value;
+            const time = event.target.value;
+            if (date && time) {
+                this.#skyController.dateTime = new Date(`${date}T${time}:00`);
+            }
+            console.log(this.#skyController.dateTime)
+            this.#guiChanged();
+        });
+        // Add latitude and longitude inputs to the GUI
+        gui.add(this.#skyController, 'latitude', -90, 90).onChange(this.#guiChanged)
+        gui.add(this.#skyController, 'longitude', -180, 180).onChange(this.#guiChanged);
+
+        this.#guiChanged();
+    }
+
+    #guiChanged = () => {
+
+        const uniforms = this.#sky.material.uniforms;
+        uniforms[ 'turbidity' ].value = this.#skyController.turbidity;
+        uniforms[ 'rayleigh' ].value = this.#skyController.rayleigh;
+        uniforms[ 'mieCoefficient' ].value = this.#skyController.mieCoefficient;
+        uniforms[ 'mieDirectionalG' ].value = this.#skyController.mieDirectionalG;
+
+        const sunPosition = SunCalc.getPosition(this.#skyController.dateTime, this.#skyController.latitude, this.#skyController.longitude);
+        const phi = Math.PI / 2 - sunPosition.altitude; // Altitude to polar angle
+        const theta = Math.PI - sunPosition.azimuth; // Azimuth adjustment
+
+        const sun = new THREE.Vector3();
+        sun.setFromSphericalCoords( 1, phi, theta );
+
+        uniforms[ 'sunPosition' ].value.copy( sun );
+
+        this.#renderer.toneMappingExposure = this.#skyController.exposure;
+        if (this.#current_camera) {
+            this.#renderer.render( this.#scene, this.#current_camera );
+        }
+    }
+
     /**
      * Initializes the geometries and lights in the given scene.
      * Adds various types of lights to the scene and sets up a GUI for toggling them.
@@ -444,15 +539,17 @@ class DemoScene {
         ground.receiveShadow = true;
         scene.add(ground);
         
+        this.#initSky(scene, this.gui);
+
         //skydome
-        const skyGeo = new THREE.SphereGeometry(800, 32, 15);
-        this.resources.push(skyGeo)
-        const textureLoader = new THREE.TextureLoader();
-        const skyTexture = textureLoader.load('../img/sky.png');
-        const skyMat = new THREE.MeshBasicMaterial({map: skyTexture, side: THREE.BackSide});
-        this.resources.push(skyMat);
-        const sky = new THREE.Mesh(skyGeo, skyMat);
-        scene.add(sky);
+        // const skyGeo = new THREE.SphereGeometry(800, 32, 15);
+        // this.resources.push(skyGeo)
+        // const textureLoader = new THREE.TextureLoader();
+        // const skyTexture = textureLoader.load('../img/sky.png');
+        // const skyMat = new THREE.MeshBasicMaterial({map: skyTexture, side: THREE.BackSide});
+        // this.resources.push(skyMat);
+        // const sky = new THREE.Mesh(skyGeo, skyMat);
+        // scene.add(sky);
         
         // const axesHelper = new THREE.AxesHelper( 100 );
         // scene.add( axesHelper );
@@ -627,6 +724,24 @@ class DemoScene {
         }
     }
 
+    updateDateTime(date) {
+        let day = date.getDate(),
+            month = date.getMonth() + 1,
+            year = date.getFullYear(),
+            hour = date.getHours(),
+            min  = date.getMinutes();
+
+        month = (month < 10 ? "0" : "") + month;
+        day = (day < 10 ? "0" : "") + day;
+        hour = (hour < 10 ? "0" : "") + hour;
+        min = (min < 10 ? "0" : "") + min;
+
+        let today = year + "-" + month + "-" + day,
+            displayTime = hour + ":" + min; 
+
+        document.getElementById('date-input').value = today;      
+        document.getElementById("time-input").value = displayTime;
+    }
     /**
      * Updates the scene based on the current control view and mode.
      * 
@@ -639,6 +754,12 @@ class DemoScene {
      * @private
      */
     #updateScene() {
+        if (this.#sunSim) {
+            this.#skyController.dateTime.setMinutes(this.#skyController.dateTime.getMinutes() + 1);
+            this.updateDateTime(this.#skyController.dateTime);
+            this.#guiChanged();
+        }
+
         const displayModeElement = document.getElementById("display-mode");
         const displayDistanceElement = document.getElementById("measure-distance");
         if (this.#controls.orthoMode == "measure") {            
@@ -791,8 +912,8 @@ class DemoScene {
         this.#scene.remove(this.#lights.room);
     }
 
-    guiControls(){
-        const gui = new GUI({autoPlace:false});
+    initGui(gui){
+        
         gui.domElement.id = "gui";
         
         // toggling light sources
@@ -960,7 +1081,7 @@ class DemoScene {
             });
 
         gui.open();
-        if($("#gui-container").children().length == 0){
+        if($("#gui-container").children().length == 2){
             $("#gui-container").append($(gui.domElement));
         }
     }
