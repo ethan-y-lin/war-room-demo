@@ -11,7 +11,7 @@ exports.index = asyncHandler(async (req, res, next) => {
 
     console.log("render home page")
     res.render("index", {
-      title: "War Room Demo",
+      title: "3D Furniture Planner Demo",
       modal: false,
       modal_title: "",
       objects: objects,

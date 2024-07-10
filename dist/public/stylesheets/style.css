@@ -157,7 +157,7 @@ nav a{
   background-color: transparent;
   text-align: center;
   padding: 10px;
-  font-weight:200;
+  font-weight:300;
   border-bottom: 2px solid rgb(30, 30, 30);
   margin-bottom: 5px;
   font-size: 36px;
@@ -667,7 +667,7 @@ input{
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  font-family:Georgia, 'Times New Roman', Times, serif;
+  font-family: Georgia, 'Times New Roman', Times, serif;
 }
 
 label{
@@ -679,7 +679,7 @@ label{
   background-color: white;
   border-radius: 3px;
   border: 1px solid #333;
-  font-family:Georgia, 'Times New Roman', Times, serif;
+  font-family: Georgia, 'Times New Roman', Times, serif;
   color:#333;
   padding: 5px;
 }
@@ -813,7 +813,7 @@ label{
   font-size: 16px;
 }
 .lil-gui{
-  font-family:Georgia, 'Times New Roman', Times, serif;
+  font-family: Georgia, 'Times New Roman', Times, serif;
   font-size: 14px;
   padding: 5px;
 }
@@ -878,6 +878,7 @@ label{
   justify-content: center;
   align-items: center;
   background-color:#a4c3b220;
+  padding: 0px 10px 0px 10px;
 }
 
 
@@ -893,6 +894,7 @@ label{
 .steps-section .description{
   width: 80%;
   color:#777;
+  font-size: 14px;
 }
 .step-description{
   display: flex;
@@ -908,7 +910,16 @@ label{
 .description-text p, .description-text-vertical p{
   margin-right: 20px;
   line-height: 1.5;
-  text-align: justify;
+  text-align: start;
+}
+.step-title{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.step-title h5{
+  margin-top: 0;
 }
 .step-description img{
   margin-left: 10px;
@@ -967,13 +978,14 @@ label{
   position: absolute;
   background-color: transparent;
   border: none;
-  font-size: 36px;
+  font-size: 42px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   background-color: transparent;
   color:#384c44;
+  font-weight:bold;
 }
 #next:hover{
   color:#171717;
@@ -1006,7 +1018,8 @@ label{
 }
 
 /* ipad screen? */
-@media only screen and (width: 1366px) and (height: 1024px) {
+/* @media only screen and (width: 1366px) and (height: 1024px) { */
+@media only screen and (width: 1194px) and (height: 834px) {
   .menu-toggle{
     display: flex;
     height: 42px;
