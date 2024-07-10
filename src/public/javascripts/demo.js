@@ -270,6 +270,8 @@ class DemoScene {
                     domElement.webkitRequestFullscreen();
                 } else if (domElement.msRequestFullscreen){
                     domElement.msRequestFullscreen();
+                } else if (domElement.mozRequestFullScreen){
+                    domElement.mozRequestFullScreen();
                 }
 
                 if (this.#camera.name == "inside") {

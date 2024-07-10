@@ -5,7 +5,7 @@ body {
   height: 100%;
   background-color: white;
   margin: 0;
-  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 .main-content{
@@ -157,7 +157,7 @@ nav a{
   background-color: transparent;
   text-align: center;
   padding: 10px;
-  font-weight:200;
+  font-weight:300;
   border-bottom: 2px solid rgb(30, 30, 30);
   margin-bottom: 5px;
   font-size: 36px;
@@ -365,7 +365,7 @@ nav a{
 }
 
 .view{
-  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 16px;
   width: 180px;
   height: 40px;
@@ -387,7 +387,7 @@ nav a{
 }
 
 .button{
-  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 16px;
   width: 120px;
   height: 40px;
@@ -454,7 +454,7 @@ nav a{
 #design-title, #floorplan-title{
   margin-top: -10px;
   margin-bottom: -20px;
-  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-family: Arial, Helvetica, sans-serif;
   background: linear-gradient(to right, #171717, #58585800);
   padding: 5px 25px 5px 10px;
 }
@@ -501,7 +501,7 @@ nav a{
   cursor: pointer;
   height: 30px;
   width: 85px;
-  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 16px;
   border-radius: 3px;
 }
@@ -590,7 +590,7 @@ nav a{
 }
 
 .upload-button a{
-  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-family: Arial, Helvetica, sans-serif;
   margin: 0px;
   padding: 0px;
   font-size: 12px;
@@ -667,7 +667,7 @@ input{
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  font-family:Georgia, 'Times New Roman', Times, serif;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 label{
@@ -679,7 +679,7 @@ label{
   background-color: white;
   border-radius: 3px;
   border: 1px solid #333;
-  font-family:Georgia, 'Times New Roman', Times, serif;
+  font-family: Arial, Helvetica, sans-serif;
   color:#333;
   padding: 5px;
 }
@@ -813,7 +813,7 @@ label{
   font-size: 16px;
 }
 .lil-gui{
-  font-family:Georgia, 'Times New Roman', Times, serif;
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 14px;
   padding: 5px;
 }
@@ -908,7 +908,16 @@ label{
 .description-text p, .description-text-vertical p{
   margin-right: 20px;
   line-height: 1.5;
-  text-align: justify;
+  text-align: start;
+}
+.step-title{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.step-title h5{
+  margin-top: 0;
 }
 .step-description img{
   margin-left: 10px;
