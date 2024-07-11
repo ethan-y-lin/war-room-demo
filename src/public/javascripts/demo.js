@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import { DynamicCamera } from "./dynamicCamera.js";
 import { DemoControls } from "./demoControls.js";
-import GUI from 'lil-gui';
+import {DemoGui} from './demoGui.js'
 import * as THREE from 'three';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -92,8 +92,6 @@ class DemoScene {
      */
     #camera;
 
-    #current_camera;
-
     /**
      * The custom controls object that directs the controls for 
      * interacting with the scene depending on which view and mode.
@@ -119,8 +117,6 @@ class DemoScene {
 
     #objectGroups;
     #sky;
-    #skyController;
-    #sunSim;
     #sun;
     /**
      * Calls for the initialization the DemoScene object and then
@@ -140,8 +136,7 @@ class DemoScene {
      * @param {URL} room 
      */
     async #initialize(room, objects) {
-        this.gui = new GUI({autoPlace:false});
-        this.#sunSim = false;
+        this.sunSim = false;
         this.resources = [];
         this.#canvas = document.getElementById("scene-container");
         this.#objects = {walls: [], 
@@ -172,21 +167,21 @@ class DemoScene {
         this.#renderer.domElement.style = "";
         this.#canvas.appendChild( this.#renderer.domElement );
 
-        this.#current_camera = null;
+        this.current_camera = null;
         await this.#initGeometries(this.#scene);
 
         // // initialize camera
         this.#camera = new DynamicCamera(this.#canvas, this.#modelSize); // initializes to orthoCamera
-        this.#current_camera = this.#camera.ortho;
-
+        this.current_camera = this.#camera.ortho;
+        this.view = "ortho";
         // initialize controls 
         this.#controls = new DemoControls(this.#camera, this.#canvas, this.#scene, this.#objects, this.#modelSize); // initializes to orthoControls
         this.#controls.units = this.#units;
-        
+
         window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.ortho) });
         const hud = document.getElementById("hud");
         const resizeObserer = new ResizeObserver(() => {
-            this.#onWindowResize(this.#current_camera);
+            this.#onWindowResize(this.current_camera);
         })
         resizeObserer.observe(this.#canvas);
 
@@ -205,13 +200,11 @@ class DemoScene {
         this.#labelRenderer.domElement.style.top = '0px';
         this.#labelRenderer.domElement.style.pointerEvents = 'none';
         this.#canvas.appendChild( this.#labelRenderer.domElement );
-        
-        this.initGui(this.gui);
 
         for (let objData of objects) {
             this.addObject(objData.object, objData.position, objData.rotation);
         }
-
+        const GUI = new DemoGui(this, this.#controls);
     }
 
     #initListeners() {
@@ -371,7 +364,7 @@ class DemoScene {
     }
 
 
-    #initSky(scene, gui) {
+    #initSky(scene) {
 
         // Add Sky
         this.#sky = new Sky();
@@ -384,7 +377,7 @@ class DemoScene {
         
         scene.add(this.#sun);
 
-        this.#skyController = {
+        this.skyController = {
             turbidity: 20,
             rayleigh: 0.558,
             mieCoefficient: 0.009,
@@ -397,25 +390,16 @@ class DemoScene {
             longitude: -76.4857, // Example longitude for New York City
           }
 
-        gui.add( this.#skyController, 'turbidity', 0.0, 20.0, 0.1 ).onChange( this.#guiChanged );
-        gui.add( this.#skyController, 'rayleigh', 0.0, 4, 0.001 ).onChange( this.#guiChanged );
-        gui.add( this.#skyController, 'mieCoefficient', 0.0, 0.1, 0.001 ).onChange( this.#guiChanged );
-        gui.add( this.#skyController, 'mieDirectionalG', 0.0, 1, 0.001 ).onChange( this.#guiChanged );
-        gui.add( this.#skyController, 'exposure', 0, 1, 0.0001 ).onChange( this.#guiChanged );
-        const sunSimToggle = {
-            toggle: false
-        }
 
-        gui.add(sunSimToggle, 'toggle').name("Sun Sim").onChange( (value) => this.#sunSim = value);
+
         document.getElementById('date-input').addEventListener('change', (event) => {
             console.log("changed")
             const time = document.getElementById('time-input').value;
             const date = event.target.value;
             if (date && time) {
-                this.#skyController.dateTime = new Date(`${date}T${time}:00`);
+                this.skyController.dateTime = new Date(`${date}T${time}:00`);
             }
-            console.log(this.#skyController.dateTime)
-            this.#guiChanged();
+            this.onSkyChange();
         });
 
         document.getElementById('time-input').addEventListener('change', (event) => {
@@ -423,35 +407,28 @@ class DemoScene {
             const date = document.getElementById('date-input').value;
             const time = event.target.value;
             if (date && time) {
-                this.#skyController.dateTime = new Date(`${date}T${time}:00`);
+                this.skyController.dateTime = new Date(`${date}T${time}:00`);
             }
-            console.log(this.#skyController.dateTime)
-            this.#guiChanged();
+            this.onSkyChange();
         });
-        // Add latitude and longitude inputs to the GUI
-        gui.add(this.#skyController, 'latitude', -90, 90).onChange(this.#guiChanged)
-        gui.add(this.#skyController, 'longitude', -180, 180).onChange(this.#guiChanged);
-
-        this.#guiChanged();
+        this.onSkyChange();
     }
 
-    #guiChanged = () => {
+    onSkyChange = () => {
 
         const uniforms = this.#sky.material.uniforms;
-        uniforms[ 'turbidity' ].value = this.#skyController.turbidity;
-        uniforms[ 'rayleigh' ].value = this.#skyController.rayleigh;
-        uniforms[ 'mieCoefficient' ].value = this.#skyController.mieCoefficient;
-        uniforms[ 'mieDirectionalG' ].value = this.#skyController.mieDirectionalG;
+        uniforms[ 'turbidity' ].value = this.skyController.turbidity;
+        uniforms[ 'rayleigh' ].value = this.skyController.rayleigh;
+        uniforms[ 'mieCoefficient' ].value = this.skyController.mieCoefficient;
+        uniforms[ 'mieDirectionalG' ].value = this.skyController.mieDirectionalG;
 
-        const sunPosition = SunCalc.getPosition(this.#skyController.dateTime, this.#skyController.latitude, this.#skyController.longitude);
+        const sunPosition = SunCalc.getPosition(this.skyController.dateTime, this.skyController.latitude, this.skyController.longitude);
         const phi = Math.PI / 2 - sunPosition.altitude; // Altitude to polar angle
         const theta = Math.PI - sunPosition.azimuth; // Azimuth adjustment
         if (phi > Math.PI / 2) {
-            console.log("night")
             this.#sun.intensity = 0;
         } else {
             this.#sun.intensity = this.#solar_intensity(this.#air_mass_kasten_young(sunPosition.altitude)) * 0.03;
-            console.log(Math.round(this.#sun.intensity));
         }
 
         const sun = new THREE.Vector3();
@@ -459,9 +436,9 @@ class DemoScene {
         this.#sun.position.set(sun.x, sun.y, sun.z)
         uniforms[ 'sunPosition' ].value.copy( sun );
 
-        this.#renderer.toneMappingExposure = this.#skyController.exposure;
-        if (this.#current_camera) {
-            this.#renderer.render( this.#scene, this.#current_camera );
+        this.#renderer.toneMappingExposure = this.skyController.exposure;
+        if (this.current_camera) {
+            this.#renderer.render( this.#scene, this.current_camera );
         }
     }
 
@@ -563,7 +540,7 @@ class DemoScene {
         ground.receiveShadow = true;
         scene.add(ground);
         
-        this.#initSky(scene, this.gui);
+        this.#initSky(scene);
 
         //skydome
         // const skyGeo = new THREE.SphereGeometry(800, 32, 15);
@@ -661,13 +638,11 @@ class DemoScene {
                 this.#objects.windows.push(obj);
             } else if (objInfo.type == "wall" || objInfo.type == "floor") {
                 const group = objInfo.type + objInfo.groupNum;
-                console.log(group)
                 if (! (this.#objectGroups.includes(group))) {
                     this.#objectGroups.push(group);
                     obj.clear();
                     this.#addDimensionLabels(obj);
                 }
-                console.log(this.#objectGroups);
                 this.#objects.walls.push(obj);
                 if(objInfo.type == "floor"){
                     obj.material.color.setHex(0x8b5a2b);
@@ -778,10 +753,10 @@ class DemoScene {
      * @private
      */
     #updateScene() {
-        if (this.#sunSim) {
-            this.#skyController.dateTime.setMinutes(this.#skyController.dateTime.getMinutes() + 1);
-            this.updateDateTime(this.#skyController.dateTime);
-            this.#guiChanged();
+        if (this.sunSim) {
+            this.skyController.dateTime.setMinutes(this.skyController.dateTime.getMinutes() + 1);
+            this.updateDateTime(this.skyController.dateTime);
+            this.onSkyChange();
         }
 
         const displayModeElement = document.getElementById("display-mode");
@@ -847,8 +822,8 @@ class DemoScene {
         requestAnimationFrame(() => {
             this.#updateScene();
             this.#controls.updateControls(this.#camera);           
-            this.#renderer.render(this.#scene, this.#current_camera);
-            this.#labelRenderer.render(this.#scene, this.#current_camera);
+            this.#renderer.render(this.#scene, this.current_camera);
+            this.#labelRenderer.render(this.#scene, this.current_camera);
 
             this.#animate();
         });
@@ -863,7 +838,7 @@ class DemoScene {
         this.#labelRenderer.setSize(this.#canvas.offsetWidth, this.#canvas.offsetHeight, true);
         if (this.#camera.name == "ortho") {
             this.#camera.setOrthoCamera(this.#canvas, this.#modelSize, 2 );
-            this.#current_camera = this.#camera.ortho;
+            this.current_camera = this.#camera.ortho;
         } else {
             camera.aspect = this.#canvas.offsetWidth / this.#canvas.offsetHeight;
             camera.updateProjectionMatrix();
@@ -875,12 +850,13 @@ class DemoScene {
      * Sets the scene view to inside mode by updating camera, controls, and objects.
      */
     setInsideViewMode() {
+        this.view = "inside";
         this.#scene.remove(this.#lights.room);
         this.#scene.remove(this.#objects.ceiling);
         this.#scene.add(this.#grassMesh);
         this.#camera.setInsideCamera(this.#canvas);
-        this.#current_camera = this.#camera.inside;
-        this.#controls.switchControls("inside", this.#camera.inside, this.#canvas);
+        this.current_camera = this.#camera.inside;
+        this.#controls.switchControls("inside");
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.ortho)} );
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.outside)} );
         window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.inside)} );
@@ -910,10 +886,11 @@ class DemoScene {
      * Sets the scene view to outside mode by updating camera, controls, and objects.
      */
     setOutsideViewMode() {
+        this.view = "outside";
         // this.#scene.add(this.#grassMesh);
         this.#camera.setOutsideCamera(this.#canvas);
-        this.#current_camera = this.#camera.outside;
-        this.#controls.switchControls("outside", this.#camera.outside, this.#canvas);
+        this.current_camera = this.#camera.outside;
+        this.#controls.switchControls("outside");
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.ortho)} );
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.inside)} );
         window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.outside)} );
@@ -924,10 +901,11 @@ class DemoScene {
      * Sets the scene view to ortho mode by updating camera, controls, and objects.
      */
     setOrthoViewMode() {
+        this.view = "ortho";
         this.#scene.remove(this.#grassMesh);
         this.#camera.setOrthoCamera(this.#canvas, this.#modelSize, 2);
-        this.#current_camera = this.#camera.ortho;
-        this.#controls.switchControls("ortho", this.#camera.ortho, this.#canvas);
+        this.current_camera = this.#camera.ortho;
+        this.#controls.switchControls("ortho");
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.outside)} );
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.inside)} );
         window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.ortho)} );
@@ -936,178 +914,39 @@ class DemoScene {
         this.#scene.remove(this.#lights.room);
     }
 
-    initGui(gui){
-        
-        gui.domElement.id = "gui";
-        
-        // toggling light sources
-        const hLight = this.getHemiLight();
-        const aLight = this.getAmbientLight();
-        const dLight = this.getDirectionalLight();
-        const sLight = this.getSpotLight();
-        const folderLights = gui.addFolder('Light Conditions');
-
-        const hToggle = {
-            toggle: true
-        };
-        const aToggle = {
-            toggle: true
-        };
-        const dToggle = {
-            toggle: true
-        };
-        const sToggle = {
-            toggle: true
-        };
-
-        folderLights.add(hToggle, 'toggle').name('Hemisphere light').onChange(value =>{
-            hLight.visible = value;
+    toggleAllObjects (value, target) {
+        const allObjects = this.#objects.furniture.concat(this.#objects.walls).concat(this.#objects.uploaded).concat(this.#objects.windows);
+        allObjects.forEach( (obj) => {
+            obj.children.forEach((child) => {
+                if (child.name.includes(target)) {
+                    child.visible = value;
+                }
+            })
         });
-        folderLights.add(aToggle, 'toggle').name('Ambient light').onChange(value =>{
-            aLight.visible = value;
-        });
-        folderLights.add(dToggle, 'toggle').name('Directional light').onChange(value =>{
-            dLight.visible = value;
-        });
-        folderLights.add(sToggle, 'toggle').name('Spot light').onChange(value =>{
-            sLight.visible = value;
-        });
-
-        //toggling object controls (translate/rotate)
-        const folderControls = gui.addFolder('Object Controls');
-        const controlToggle = {
-            'translate': () => {
-                this.#controls.setGumballMode('translate');
-            },
-            'rotate': () => {
-                this.#controls.setGumballMode('rotate');
-                
-            }
-        }
-
-        folderControls.add({selectedFunction: 'translate'}, 'selectedFunction', Object.keys(controlToggle))
-        .name('Mode')
-        .onChange((selectedFunction) => {
-            if (controlToggle[selectedFunction]) {
-                controlToggle[selectedFunction]();
-            }
-        });
-        
-        //toggling bounding boxes
-        const boundingBoxToggle = {
-            toggle: false
-        }
-        folderControls.add(boundingBoxToggle, 'toggle').name('Show bounding box').onChange(value => {
-
-            const allObjects = this.#objects.furniture.concat(this.#objects.walls).concat(this.#objects.uploaded).concat(this.#objects.windows);
-            allObjects.forEach( (obj) => {
-                obj.children.forEach((child) => {
-                    if (child.name.includes("bounding_box")) {
-                        child.visible = value;
-                    }
-                })
-            });
+        if (target == "bounding_box") {
             this.#showBoundingBoxes = value;
-        });
-        const showDimensions = {
-            toggle: true
         }
-        folderControls.add(showDimensions, 'toggle').name('Show Dimensions').onChange(value => {
-            const allObjects = this.#objects.furniture.concat(this.#objects.walls).concat(this.#objects.uploaded).concat(this.#objects.windows);
-            allObjects.forEach( (obj) => {
-                obj.children.forEach((child) => {
-                    if (child.name.includes("label")) {
-                        child.visible = value;
-                    }
-                })
+    }
+
+    setUnits (units) {
+        this.#units = units;
+        const dimLabels = document.querySelectorAll(".dim-label");
+
+        if (units == "meter"){
+            dimLabels.forEach( (dimLabel) => {
+                const roundDist = Math.round(dimLabel.dataset.value * 100) / 100;
+                dimLabel.textContent = roundDist + " m";
             });
-        });
-        //changing material color?
-        // const folderColors = folderControls.addFolder('Furniture Colors');
-        // folderColors.close();
-
-        // Moving Controls
-        const folderMoving = gui.addFolder('General Controls');
-        // const setOrthoMode = {
-        //     drag: () => {
-        //         this.#controls.orthoMode = "drag";
-        //     },
-        //     measure: () => {
-        //         this.#controls.orthoMode = "measure";
-        //     }
-        // }
-        // folderMoving.add({selectedFunction: 'drag'}, 'selectedFunction', Object.keys(setOrthoMode))
-        // .name('Orthographic').listen()
-        // .onChange((selectedFunction) => {
-        //     if (setOrthoMode[selectedFunction]) {
-        //         setOrthoMode[selectedFunction]();
-        //     }
-        // });
-        const setInsideMode = {
-            keyboard: () => {
-                this.#controls.insideMode = "keyboard";
-                if (this.#camera.name == "inside") {
-                    this.#controls.switchControls("inside", this.#camera.inside, this.#canvas);
-                }
-            },
-            teleport: () =>  {
-                this.#controls.insideMode = "teleport";
-                if (this.#camera.name == "inside") {
-                    this.#controls.switchControls("inside", this.#camera.inside, this.#canvas);
-                }
-            },
-            mobile: () => {
-                this.#controls.insideMode = "mobile";
-                if (this.#camera.name == "inside") {
-                    this.#controls.switchControls("inside", this.#camera.inside, this.#canvas);
-                }
-            }
-        }
-        folderMoving.add({selectedFunction: 'mobile'}, 'selectedFunction', Object.keys(setInsideMode))
-        .name('Inside')
-        .onChange((selectedFunction) => {
-            if (setInsideMode[selectedFunction]) {
-                setInsideMode[selectedFunction]();
-            }
-        });
-    
-        //changing measurement units
-        const folderMeasurements = gui.addFolder('Units');
-        const measurementUnits = {
-            'meter': () => {
-                this.#units = "meters";
-                const dimLabels = document.querySelectorAll(".dim-label");
-                dimLabels.forEach( (dimLabel) => {
-                    const roundDist = Math.round(dimLabel.dataset.value * 100) / 100;
-                    dimLabel.textContent = roundDist + " m";
-                });
-                this.#controls.units = "meters";
-            },
-            'feet': () => {
-                this.#units = "feet";
-                const dimLabels = document.querySelectorAll(".dim-label");
-                dimLabels.forEach( (dimLabel) => {
-                    const feet = dimLabel.dataset.value * 3.281;
-                    const flooredFeet = Math.floor(feet);
-                    const inches = Math.round((feet - flooredFeet) * 12);  
-                    dimLabel.textContent = flooredFeet + " ft. " + inches + " in.";
-                });
-                this.#controls.units = "feet";
-            }
-        }
-
-        folderMeasurements.add({selectedFunction: 'feet'}, 'selectedFunction', Object.keys(measurementUnits))
-            .name('unit')
-            .onChange((selectedFunction) => {
-                if (measurementUnits[selectedFunction]) {
-                    measurementUnits[selectedFunction]();
-                }
+        } else if (units == "feet") {
+            dimLabels.forEach( (dimLabel) => {
+                const feet = dimLabel.dataset.value * 3.281;
+                const flooredFeet = Math.floor(feet);
+                const inches = Math.round((feet - flooredFeet) * 12);  
+                dimLabel.textContent = flooredFeet 
+                + " ft. " + inches + " in.";
             });
-
-        gui.open();
-        if($("#gui-container").children().length == 2){
-            $("#gui-container").append($(gui.domElement));
         }
+        this.#controls.units = units;
     }
 
     downloadScene() {

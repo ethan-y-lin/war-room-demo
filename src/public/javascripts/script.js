@@ -1,17 +1,20 @@
 import category from "../../models/category.js";
-import {DemoScene} from "./demo.js"
-import $ from 'jquery'
+import {DemoScene} from "./demo.js";
+import { DemoGui } from "./demoGui.js";
+import $ from 'jquery';
 import io from 'socket.io-client';
 
 const startModel = {room_url: new URL('../assets/warroom1.glb', import.meta.url)};
 
 let APP = null;
+let GUI = null;
 let start = true;
 
 function init(model, objects = []) {
     if (APP !== null) {
         APP.dispose();
     }
+
     APP = new DemoScene(model, objects);
     const objectLinks = document.querySelectorAll('.add-object-to-scene');
     
@@ -28,15 +31,6 @@ function init(model, objects = []) {
     saveDesignButton.removeEventListener('click', saveDesign);
     saveDesignButton.addEventListener('click', saveDesign);
 }
-
-// init(secondModel);
-
-$(document).on('keydown', function(event) {
-    if (event.key === 'F1' || event.keyCode === 112) {
-        event.preventDefault(); // Prevent the default action (help menu)
-        init(startModel);
-    }
-});
 
 $(window).on('load', function() {
 
@@ -268,7 +262,6 @@ async function fetchAndInitDesign(designURL) {
         const design = await response.json(); // Await parsing the JSON response
         design.room.room_url = new URL(design.room.room_url);
         init(design.room, design.objects); 
-
         const designTitle = document.getElementById("design-title");
         designTitle.textContent = design.name;
     } catch (error) {

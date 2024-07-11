@@ -259,7 +259,7 @@ class DemoControls {
         this.#dragOrigin = new THREE.Vector3();
         this.#measureGroup = new THREE.Group();
         this.#scene.add(this.#measureGroup);
-        this.switchControls("ortho", camera.ortho, canvas);
+        this.switchControls("ortho");
         this.units;
         this.#floorObject = null;
 
@@ -319,20 +319,23 @@ class DemoControls {
         this.hideBlocker();
     }
 
-    #setToMobile(camera, canvas) {
+    setToMobile() {
+        this.#reset();
         console.log("mobile");
-        this.#mobile = new MobileControls(camera, canvas);
+        this.#mobile = new MobileControls(this.#camera.inside, this.#canvas);
         this.#scene.add(this.#insidePointer);   
         this.#mobile.addEventListener('dblclick', this.#insideOnDblClick);
     }
 
-    #setToNonMobile(camera, canvas) {
+    setToNonMobile() {
+        this.#reset();
         if (this.insideMode == "teleport") {
             this.#scene.add(this.#insidePointer);   
         } else {
             this.#boundingBoxes = this.#getBoundingBoxes(this.#objects);
         }
-        this.#pointerLock = new PointerLockControls(camera, canvas);
+        console.log("Set to Non Mobile")
+        this.#pointerLock = new PointerLockControls(this.#camera.inside, this.#canvas);
         this.#pointerLock.enabled = true;
         const instructions = document.getElementById( 'instructions' );
         instructions.addEventListener( 'click', this.#lock);
@@ -349,7 +352,7 @@ class DemoControls {
      * @param {*} camera The camera that the new view uses. Type should be THREE.Camera
      * @param {*} canvas The canvas for the view. Type: DOM element.
      */
-    switchControls(newControl, camera, canvas) {
+    switchControls(newControl) {
         this.#view = newControl;
         if (newControl == "ortho") {
             this.#reset();
@@ -363,15 +366,14 @@ class DemoControls {
             this.#boundingBoxes = this.#getBoundingBoxes(this.#objects);
             this.#canvas.addEventListener('click', this.#outsideOnClick);
             document.addEventListener('keydown', this.#toggleGumball);
-            this.#orbit = new OrbitControls(camera, canvas);
+            this.#orbit = new OrbitControls(this.#camera.outside, this.#canvas);
             this.#orbit.enabled = true;
             this.hideBlocker();
         } else if (newControl == "inside"){
-            this.#reset();
             if (this.insideMode == "mobile") {
-                this.#setToMobile(camera, canvas);
+                this.setToMobile();
             } else {
-                this.#setToNonMobile(camera, canvas);
+                this.setToNonMobile();
             }
 
         }
