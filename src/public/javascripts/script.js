@@ -7,7 +7,6 @@ import io from 'socket.io-client';
 const startModel = {room_url: new URL('../assets/warroom1.glb', import.meta.url)};
 
 let APP = null;
-let GUI = null;
 let start = true;
 
 function init(model, objects = []) {

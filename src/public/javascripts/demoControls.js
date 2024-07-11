@@ -4,7 +4,6 @@ import { TransformControls } from 'three/examples/jsm/controls/TransformControls
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
 import { MobileControls } from './mobileControls';
 
-const sphereGeometry = new THREE.SphereGeometry( 0.1, 32, 16 ); 
 const blackMaterial = new THREE.MeshBasicMaterial( {color: 0x000000} ); 
 const redMaterial = new THREE.MeshBasicMaterial( {color: 0xff0000} ); 
 const lineMaterial = new THREE.LineBasicMaterial({
@@ -236,10 +235,9 @@ class DemoControls {
         this.#draggableObjects = objects.furniture.concat(objects.uploaded);
         this.#modelSize = modelSize;
         this.orthoMode = "drag";
-        this.insideMode = "mobile";
+        this.insideMode = "teleport";
         this.#measure_points = [];
 
-    
         this.#orbit = new OrbitControls(camera.outside, canvas);
 
         this.#gumball = null;
@@ -263,6 +261,7 @@ class DemoControls {
         this.units;
         this.#floorObject = null;
 
+        const sphereGeometry = new THREE.SphereGeometry( 0.1, 32, 16 ); 
         const sphere = new THREE.Mesh( sphereGeometry, blackMaterial ); 
         this.#insidePointer = sphere;
         this.#moveToPoint = null;
@@ -971,7 +970,7 @@ class DemoControls {
                 const lineGeometry = new THREE.BufferGeometry().setFromPoints( [this.#measure_points[0], point] );
 
                 const line = new THREE.Line( lineGeometry, lineMaterial );
-
+                const sphereGeometry = new THREE.SphereGeometry( 0.1, 32, 16 ); 
                 const sphere = new THREE.Mesh( sphereGeometry, redMaterial ); 
                 sphere.position.set(point.x, point.y, point.z);
                 this.#measureGroup.add(sphere);

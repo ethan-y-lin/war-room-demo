@@ -1,8 +1,8 @@
 import $ from 'jquery';
 import { DynamicCamera } from "./dynamicCamera.js";
 import { DemoControls } from "./demoControls.js";
-import {DemoGui} from './demoGui.js'
 import * as THREE from 'three';
+import GUI from 'lil-gui';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
@@ -204,9 +204,181 @@ class DemoScene {
         for (let objData of objects) {
             this.addObject(objData.object, objData.position, objData.rotation);
         }
-        const GUI = new DemoGui(this, this.#controls);
+
+        this.gui = new GUI({autoPlace: false});
+        this.initGui(this.gui);
     }
 
+    initGui(gui){
+        const previousGui = document.getElementById("gui")
+        if (previousGui) {
+            $("#gui").remove();
+        }
+
+        
+        const folderSky = gui.addFolder('Sky Conditions');
+        folderSky.add( this.skyController, 'turbidity', 0.0, 20.0, 0.1 ).onChange( this.onSkyChange());
+        folderSky.add( this.skyController, 'rayleigh', 0.0, 4, 0.001 ).onChange( this.onSkyChange());
+        folderSky.add( this.skyController, 'mieCoefficient', 0.0, 0.1, 0.001 ).onChange( this.onSkyChange());
+        folderSky.add( this.skyController, 'mieDirectionalG', 0.0, 1, 0.001 ).onChange( this.onSkyChange());
+        folderSky.add( this.skyController, 'exposure', 0, 1, 0.0001 ).onChange( this.onSkyChange());
+        // Add latitude and longitude inputs to the GUI
+        folderSky.add(this.skyController, 'latitude', -90, 90).onChange(this.onSkyChange())
+        folderSky.add(this.skyController, 'longitude', -180, 180).onChange(this.onSkyChange());
+        const sunSimToggle = {
+            toggle: false
+        }
+        folderSky.add(sunSimToggle, 'toggle').name("Sun Sim").onChange( (value) => this.sunSim = value);
+
+        // toggling light sources
+        const hLight = this.getHemiLight();
+        const aLight = this.getAmbientLight();
+        const dLight = this.getDirectionalLight();
+        const sLight = this.getSpotLight();
+        const folderLights = gui.addFolder('Light Conditions');
+
+        const hToggle = {
+            toggle: true
+        };
+        const aToggle = {
+            toggle: true
+        };
+        const dToggle = {
+            toggle: true
+        };
+        const sToggle = {
+            toggle: true
+        };
+
+        folderLights.add(hToggle, 'toggle').name('Hemisphere light').onChange(value =>{
+            hLight.visible = value;
+        });
+        folderLights.add(aToggle, 'toggle').name('Ambient light').onChange(value =>{
+            aLight.visible = value;
+        });
+        folderLights.add(dToggle, 'toggle').name('Directional light').onChange(value =>{
+            dLight.visible = value;
+        });
+        folderLights.add(sToggle, 'toggle').name('Spot light').onChange(value =>{
+            sLight.visible = value;
+        });
+
+        //toggling object controls (translate/rotate)
+        const folderControls = gui.addFolder('Object Controls');
+        const controlToggle = {
+            'translate': () => {
+                this.#controls.setGumballMode('translate');
+            },
+            'rotate': () => {
+                this.#controls.setGumballMode('rotate');
+            }
+        }
+
+        folderControls.add({selectedFunction: 'translate'}, 'selectedFunction', Object.keys(controlToggle))
+        .name('Mode')
+        .onChange((selectedFunction) => {
+            if (controlToggle[selectedFunction]) {
+                controlToggle[selectedFunction]();
+            }
+        });
+        
+        //toggling bounding boxes
+        const boundingBoxToggle = {
+            toggle: false
+        }
+        folderControls.add(boundingBoxToggle, 'toggle').name('Show bounding box').onChange(value => {
+            this.toggleAllObjects(value, "bounding_box");
+        });
+
+        const showDimensions = {
+            toggle: true
+        }
+        folderControls.add(showDimensions, 'toggle').name('Show Dimensions').onChange(value => {
+            this.toggleAllObjects(value, "label");
+        });
+
+        //changing material color?
+        // const folderColors = folderControls.addFolder('Furniture Colors');
+        // folderColors.close();
+
+        // Moving Controls
+        const folderMoving = gui.addFolder('General Controls');
+        // const setOrthoMode = {
+        //     drag: () => {
+        //         this.#controls.orthoMode = "drag";
+        //     },
+        //     measure: () => {
+        //         this.#controls.orthoMode = "measure";
+        //     }
+        // }
+        // folderMoving.add({selectedFunction: 'drag'}, 'selectedFunction', Object.keys(setOrthoMode))
+        // .name('Orthographic').listen()
+        // .onChange((selectedFunction) => {
+        //     if (setOrthoMode[selectedFunction]) {
+        //         setOrthoMode[selectedFunction]();
+        //     }
+        // });
+
+        const setInsideMode = {
+            keyboard: () => {
+                this.#controls.insideMode = "keyboard";
+                console.log(this.view)
+                if (this.view == "inside") {
+                    console.log("keyboard")
+                    this.#controls.setToNonMobile();
+                }
+            },
+            teleport: () =>  {
+                this.#controls.insideMode = "teleport";
+                if (this.view == "inside") {
+                    console.log("teleport")
+                    this.#controls.setToNonMobile();
+                }
+            },
+            mobile: () => {
+                this.#controls.insideMode = "mobile";
+                if (this.view == "inside") {
+                    console.log("mobile")
+                    this.#controls.setToMobile();
+                }
+            }
+        }
+
+        folderMoving.add({selectedFunction: 'teleport'}, 'selectedFunction', Object.keys(setInsideMode))
+        .name('Inside')
+        .onChange((selectedFunction) => {
+            if (setInsideMode[selectedFunction]) {
+                setInsideMode[selectedFunction]();
+            }
+        });
+    
+        //changing measurement units
+        const folderMeasurements = gui.addFolder('Units');
+        const measurementUnits = {
+            'meter': () => {
+                this.setUnits("meter")
+            },
+            'feet': () => {
+                this.setUnits("feet");
+            }
+        }
+
+        folderMeasurements.add({selectedFunction: 'feet'}, 'selectedFunction', Object.keys(measurementUnits))
+            .name('unit')
+            .onChange((selectedFunction) => {
+                if (measurementUnits[selectedFunction]) {
+                    measurementUnits[selectedFunction]();
+                }
+            });
+
+        console.log(gui)
+
+        gui.domElement.id = "gui";
+        $("#gui-container").append(gui.domElement);
+
+        gui.open();
+    }
+    
     #initListeners() {
         $('#inside-view').off('click');
         $('#outside-view').off('click');
@@ -655,6 +827,7 @@ class DemoScene {
             } else {
                 this.#model.remove(obj);
             }
+            this.#model.remove(obj);
         });
     }
 
@@ -861,9 +1034,9 @@ class DemoScene {
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.outside)} );
         window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.inside)} );
 
-        //add ceiling to the inside view
+        // add ceiling to the inside view
         const ceilingGeo = new THREE.BoxGeometry(this.#modelSize.x, 0.1, this.#modelSize.z);
-        this.resources.push(this.ceilingGeo)
+        this.resources.push(ceilingGeo)
         const ceiling = new THREE.Mesh(ceilingGeo, ceilingMat);
         if (this.#modelSize.x < this.#modelSize.z) {
             ceiling.rotateOnAxis(new THREE.Vector3(0,1,0), Math.PI / 2);
@@ -875,12 +1048,9 @@ class DemoScene {
 
         const roomLight = new THREE.DirectionalLight(0xe0f1ff, 8);
         roomLight.position.set(0, ceiling.position.y-0.1, 0);
-        //const roomLightHelper = new THREE.DirectionalLightHelper(roomLight);
         roomLight.castShadow = true;
-        // roomLight.lookAt(2, 0, 1);
         this.#scene.add(roomLight);
         this.#lights.room = roomLight;
-        //this.#scene.add(roomLightHelper);
     }
     /**
      * Sets the scene view to outside mode by updating camera, controls, and objects.
@@ -1033,6 +1203,7 @@ class DemoScene {
     }
 
     dispose () {
+        console.log(this.resources)
         this.#scene.clear();
         const allObjects = this.#objects.furniture.concat(this.#objects.walls).concat(this.#objects.uploaded).concat(this.#objects.windows);
         allObjects.forEach( (obj) => {
@@ -1040,6 +1211,7 @@ class DemoScene {
             this.#model.remove(obj);
         });
         for (let i = this.resources.length - 1; i >= 0; i--) {
+            console.log(this.resources[i])
             this.resources[i].dispose();
             delete this.resources[i];
         }
