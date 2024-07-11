@@ -97,6 +97,7 @@ body {
   align-items: center;
   justify-self: center;
   position: relative;
+  min-width: 800px;
 }
 
 /* scene expansion based on menu collapse */

@@ -1,6 +1,6 @@
 import category from "../../models/category.js";
 import {DemoScene} from "./demo.js";
-import { DemoGui } from "./demoGui.js";
+// import { DemoGui } from "./demoGui.js";
 import $ from 'jquery';
 import io from 'socket.io-client';
 
