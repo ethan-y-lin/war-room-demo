@@ -307,6 +307,14 @@ class DemoScene {
         folderControls.add(showDimensions, 'toggle').name('Show Dimensions').onChange(value => {
             this.toggleAllObjects(value, "label");
         });
+        const grassMesh = this.getGrass();
+        const showGrass ={
+            toggle: true
+        }
+        folderControls.add(showGrass, 'toggle').name('Show Grass').onChange(value => {
+            grassMesh.visible = value;
+        })
+
 
         //changing material color?
         // const folderColors = folderControls.addFolder('Furniture Colors');
@@ -472,8 +480,8 @@ class DemoScene {
                 console.log("full screen")
                 if (domElement.requestFullscreen){
                     domElement.requestFullscreen();
-                } else if (domElement.webkitRequestFullscreen){
-                    domElement.webkitRequestFullscreen();
+                } else if (domElement.webkitEnterFullscreen){
+                    domElement.webkitEnterFullscreen();
                 } else if (domElement.msRequestFullscreen){
                     domElement.msRequestFullscreen();
                 } else if (domElement.mozRequestFullScreen){
@@ -488,8 +496,19 @@ class DemoScene {
                 this.isFullScreen = true;
             } else {
                 this.isFullScreen = false;
-                document.exitFullscreen();
+                if (document.exitFullscreen){
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen){
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen){
+                    document.mozExitFullscreen();
+                } else if (document.msExitFullscreen){
+                    document.msExitFullscreen();
+                }
+
             }
+
+            
         });
     }
 
@@ -676,15 +695,13 @@ class DemoScene {
         // GRASS
         // Parameters
         const PLANE_SIZE = 30;
-        const BLADE_COUNT = 100000;
-        const BLADE_WIDTH = 0.1;
-        const BLADE_HEIGHT = 0.5;
-        const BLADE_HEIGHT_VARIATION = 0.2;
+        const BLADE_COUNT = 150000;
+        const BLADE_WIDTH = 0.05;
+        const BLADE_HEIGHT = 0.15;
+        const BLADE_HEIGHT_VARIATION = 0.3;
 
         // Grass Texture
-        const grassTexture = new THREE.TextureLoader().load('../img/grass.jpg');
-        const cloudTexture = new THREE.TextureLoader().load('../img/cloud.jpg');
-        cloudTexture.wrapS = cloudTexture.wrapT = THREE.RepeatWrapping;
+        const grassTexture = new THREE.TextureLoader().load('../img/grass2.jpg');
 
         // Time Uniform
         this.#startTime = Date.now();
@@ -692,7 +709,7 @@ class DemoScene {
 
         // Grass Shader
         this.#grassUniforms = {
-            textures: { value: [grassTexture, cloudTexture] },
+            textures: { value: [grassTexture] },
             iTime: timeUniform
         };
 
@@ -758,6 +775,8 @@ class DemoScene {
                 const grassGeo = generateFieldGeo(PLANE_SIZE, BLADE_COUNT, BLADE_WIDTH, BLADE_HEIGHT, BLADE_HEIGHT_VARIATION, NO_GRASS_RECT)
                 this.resources.push(grassGeo)
                 const grassMesh = new THREE.Mesh(grassGeo, grassMaterial);
+                grassMesh.receiveShadow = true;
+                grassMesh.castShadow = true;
                 this.#grassMesh = grassMesh;
 
                 // initializes grid
@@ -1061,7 +1080,7 @@ class DemoScene {
      */
     setOutsideViewMode() {
         this.view = "outside";
-        // this.#scene.add(this.#grassMesh);
+        this.#scene.add(this.#grassMesh);
         this.#camera.setOutsideCamera(this.#canvas);
         this.current_camera = this.#camera.outside;
         this.#controls.switchControls("outside");
@@ -1197,6 +1216,9 @@ class DemoScene {
     }
     getSpotLight(){
         return this.#lights.spot;
+    }
+    getGrass(){
+        return this.#grassMesh;
     }
 
     clear() {
