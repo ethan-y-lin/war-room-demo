@@ -9,7 +9,6 @@ import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
 import grassShader from '../shaders/grass.js'
 import { Sky } from 'three/addons/objects/Sky.js';
 import SunCalc from 'suncalc';
-// import { Sky } from 'three/addons/objects/Sky.js'
 
 const boxMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
 const sphereGeometry = new THREE.SphereGeometry( 0.1, 32,16 ); 
@@ -122,6 +121,7 @@ class DemoScene {
     #sky;
     #skyController;
     #sunSim;
+    #sun;
     /**
      * Calls for the initialization the DemoScene object and then
      * calls the animation loop when initialization is completed.
@@ -378,6 +378,12 @@ class DemoScene {
         this.#sky.scale.setScalar( 45000 );
         scene.add( this.#sky );
 
+        // Add Sun 
+        this.#sun = new THREE.DirectionalLight(0xffffff, 10);
+        this.#sun.castShadow = true;
+        
+        scene.add(this.#sun);
+
         this.#skyController = {
             turbidity: 20,
             rayleigh: 0.558,
@@ -440,16 +446,32 @@ class DemoScene {
         const sunPosition = SunCalc.getPosition(this.#skyController.dateTime, this.#skyController.latitude, this.#skyController.longitude);
         const phi = Math.PI / 2 - sunPosition.altitude; // Altitude to polar angle
         const theta = Math.PI - sunPosition.azimuth; // Azimuth adjustment
+        if (phi > Math.PI / 2) {
+            console.log("night")
+            this.#sun.intensity = 0;
+        } else {
+            this.#sun.intensity = this.#solar_intensity(this.#air_mass_kasten_young(sunPosition.altitude)) * 0.03;
+            console.log(Math.round(this.#sun.intensity));
+        }
 
         const sun = new THREE.Vector3();
         sun.setFromSphericalCoords( 1, phi, theta );
-
+        this.#sun.position.set(sun.x, sun.y, sun.z)
         uniforms[ 'sunPosition' ].value.copy( sun );
 
         this.#renderer.toneMappingExposure = this.#skyController.exposure;
         if (this.#current_camera) {
             this.#renderer.render( this.#scene, this.#current_camera );
         }
+    }
+
+    #air_mass_kasten_young(solar_elevation) {
+        const alpha = solar_elevation
+        return 1 / (Math.sin(alpha) + 0.50572 * (6.07995 + alpha * 180 / Math.PI) ** -1.6364)
+    }
+
+    #solar_intensity(air_mass, kappa=0.14, solar_constant=1361) {
+        return solar_constant * Math.exp(-kappa * air_mass);
     }
 
     /**
@@ -888,7 +910,7 @@ class DemoScene {
      * Sets the scene view to outside mode by updating camera, controls, and objects.
      */
     setOutsideViewMode() {
-        this.#scene.add(this.#grassMesh);
+        // this.#scene.add(this.#grassMesh);
         this.#camera.setOutsideCamera(this.#canvas);
         this.#current_camera = this.#camera.outside;
         this.#controls.switchControls("outside", this.#camera.outside, this.#canvas);
