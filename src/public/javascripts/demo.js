@@ -235,12 +235,12 @@ class DemoScene {
         // folderSky.add( this.skyController, 'exposure', 0, 1, 0.0001 ).onChange( this.onSkyChange());
         
         // Add latitude and longitude inputs to the GUI
-        folderSky.add(this.skyController, 'latitude', -90, 90).onChange(this.onSkyChange())
-        folderSky.add(this.skyController, 'longitude', -180, 180).onChange(this.onSkyChange());
+        folderSky.add(this.skyController, 'latitude', -90, 90).onChange(this.onSkyChange()).disable();
+        folderSky.add(this.skyController, 'longitude', -180, 180).onChange(this.onSkyChange()).disable();
         const sunSimToggle = {
             toggle: false
         }
-        folderSky.add(sunSimToggle, 'toggle').name("Sun Simulation").onChange( (value) => this.sunSim = value);
+        folderSky.add(sunSimToggle, 'toggle').name("Sun Simulation").onChange( (value) => this.sunSim = value).disable();
 
         //toggling object controls (translate/rotate)
         const folderControls = gui.addFolder('Object Controls');
@@ -277,11 +277,11 @@ class DemoScene {
         });
         
         const showGrass ={
-            toggle: true
+            toggle: false
         }
         folderControls.add(showGrass, 'toggle').name('Show Grass').onChange(value => {
             this.#grassMesh.visible = value;
-        })
+        }).disable();
 
 
         //changing material color?
@@ -322,16 +322,14 @@ class DemoScene {
             if (setInsideMode[selectedFunction]) {
                 setInsideMode[selectedFunction]();
             }
-        });
+        }).disable();
         // Inside view lighting control
         const showRoomLight ={
             toggle: true
         }
         folderInsideControls.add(showRoomLight, 'toggle').name('Room Light').onChange(value => {
             this.#lights.room.visible = value;
-        })
-        
-        
+        }).disable();
     
         //changing measurement units
         const folderMeasurements = gui.addFolder('Measurement');
@@ -1030,6 +1028,14 @@ class DemoScene {
         roomLight.castShadow = true;
         this.#scene.add(roomLight);
         this.#lights.room = roomLight;
+
+        this.gui.children[2].children.forEach(child =>{
+            child.enable();
+        })
+        this.gui.children[1].children[3].enable().setValue(true);
+        this.gui.children[0].children.forEach(child =>{
+            child.enable();
+        })
     }
     /**
      * Sets the scene view to outside mode by updating camera, controls, and objects.
@@ -1037,6 +1043,7 @@ class DemoScene {
     setOutsideViewMode() {
         this.view = "outside";
         this.#scene.add(this.#grassMesh);
+        this.#grassMesh.visible = false;
         this.#scene.add(this.#sun);
         this.#scene.remove(this.#lights.spot);
         this.#camera.setOutsideCamera(this.#canvas);
@@ -1047,6 +1054,14 @@ class DemoScene {
         window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.outside)} );
         this.#scene.remove(this.#objects.ceiling);
         this.#scene.remove(this.#lights.room);
+        
+        this.gui.children[1].children[3].enable().setValue(false);
+        this.gui.children[2].children.forEach(child =>{
+            child.disable();
+        })
+        this.gui.children[0].children.forEach(child =>{
+            child.enable();
+        })
     }
     /**
      * Sets the scene view to ortho mode by updating camera, controls, and objects.
@@ -1064,6 +1079,15 @@ class DemoScene {
         window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.ortho)} );
         this.#scene.remove(this.#objects.ceiling);
         this.#scene.remove(this.#lights.room);
+
+        this.gui.children[2].children.forEach(child =>{
+            child.disable();
+        })
+
+        this.gui.children[0].children.forEach(child =>{
+            child.disable();
+        })
+        this.gui.children[1].children[3].setValue(false).disable();
     }
 
     toggleAllObjects (value, target) {
