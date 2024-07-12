@@ -1,6 +1,5 @@
 import category from "../../models/category.js";
 import {DemoScene} from "./demo.js";
-// import { DemoGui } from "./demoGui.js";
 import $ from 'jquery';
 import io from 'socket.io-client';
 
@@ -10,7 +9,7 @@ let APP = null;
 let start = true;
 
 function init(model, objects = []) {
-    if (APP !== null) {
+    if (APP) {
         APP.dispose();
     }
 

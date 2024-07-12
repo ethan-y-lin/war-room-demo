@@ -192,7 +192,6 @@ class DemoScene {
         this.#scene.add(this.#measurement_objects.edges);
 
         this.isFullScreen = false;
-        this.#initListeners();
 
         this.#labelRenderer = new CSS2DRenderer();
         this.#labelRenderer.setSize(this.#canvas.offsetWidth, this.#canvas.offsetHeight );
@@ -207,14 +206,27 @@ class DemoScene {
 
         this.gui = new GUI({autoPlace: false});
         this.initGui(this.gui);
+        this.#initListeners();
     }
 
     initGui(gui){
-        const previousGui = document.getElementById("gui")
-        if (previousGui) {
-            $("#gui").remove();
-        }
-        
+        $("#gui-container").empty()
+
+        // // Create input elements
+        const dateInput = document.createElement('input');
+        const timeInput = document.createElement('input');
+
+        // Set attributes for the date input
+        dateInput.type = 'date';
+        dateInput.id = 'date-input';
+
+        // Set attributes for the time input
+        timeInput.type = 'time';
+        timeInput.id = 'time-input';
+
+        // Append inputs to the body (or any other desired parent element)
+        $("#gui-container").append(dateInput);
+        $("#gui-container").append(timeInput);
         const folderSky = gui.addFolder('Sky Conditions');
         // folderSky.add( this.skyController, 'turbidity', 0.0, 20.0, 0.1 ).onChange( this.onSkyChange());
         // folderSky.add( this.skyController, 'rayleigh', 0.0, 4, 0.001 ).onChange( this.onSkyChange());
@@ -349,10 +361,6 @@ class DemoScene {
     }
     
     #initListeners() {
-        $('#inside-view').off('click');
-        $('#outside-view').off('click');
-        $('#ortho-view').off('click');
-        $('#fullscreen-button').off('click');
 
         $('#inside-view').on('click', () => {
             this.setInsideViewMode();
@@ -391,11 +399,32 @@ class DemoScene {
                 document.exitFullscreen();
             }
         });
-        window.addEventListener("fullscreenchange", (event) => {
+        $(window).on("fullscreenchange", (event) => {
             if (this.isFullScreen) {
                 this.isFullScreen = false;
             }
         });
+
+        $("#date-input").on('change', (event) => {
+            console.log("changed")
+            const time = document.getElementById('time-input').value;
+            const date = event.target.value;
+            if (date && time) {
+                this.skyController.dateTime = new Date(`${date}T${time}:00`);
+            }
+            this.onSkyChange();
+        });
+
+        $('#time-input').on('change', (event) => {
+            console.log("changed")
+            const date = document.getElementById('date-input').value;
+            const time = event.target.value;
+            if (date && time) {
+                this.skyController.dateTime = new Date(`${date}T${time}:00`);
+            }
+            this.onSkyChange();
+        });
+
         $('#fullscreen-button').on('click', () => {
             // Clear event listeners
             this.#renderer.domElement.removeEventListener( 'mousemove', this.#controls.getLock());
@@ -539,27 +568,6 @@ class DemoScene {
             longitude: -76.4857, // Example longitude for New York City
           }
 
-
-
-        document.getElementById('date-input').addEventListener('change', (event) => {
-            console.log("changed")
-            const time = document.getElementById('time-input').value;
-            const date = event.target.value;
-            if (date && time) {
-                this.skyController.dateTime = new Date(`${date}T${time}:00`);
-            }
-            this.onSkyChange();
-        });
-
-        document.getElementById('time-input').addEventListener('change', (event) => {
-            console.log("changed")
-            const date = document.getElementById('date-input').value;
-            const time = event.target.value;
-            if (date && time) {
-                this.skyController.dateTime = new Date(`${date}T${time}:00`);
-            }
-            this.onSkyChange();
-        });
         this.onSkyChange();
     }
 
@@ -1179,6 +1187,19 @@ class DemoScene {
         }
         this.resources = [];
         this.#controls.dispose();
+        $('#inside-view').off('click');
+        $('#outside-view').off('click');
+        $('#ortho-view').off('click');
+        $('#m').off('click')
+        $('#p3').off('click')
+        $('#reset').off('click')
+        $(document).off('keydown')
+        $(window).off("fullscreenchange")
+        $("#date-input").off('change')
+        $('#time-input').off('change')
+        $('#fullscreen-button').off('click');
+        $(document).off('')
+        $("#gui-container").empty()
     }
 }
 
