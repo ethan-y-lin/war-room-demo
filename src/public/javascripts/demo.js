@@ -214,54 +214,21 @@ class DemoScene {
         if (previousGui) {
             $("#gui").remove();
         }
-
         
         const folderSky = gui.addFolder('Sky Conditions');
-        folderSky.add( this.skyController, 'turbidity', 0.0, 20.0, 0.1 ).onChange( this.onSkyChange());
-        folderSky.add( this.skyController, 'rayleigh', 0.0, 4, 0.001 ).onChange( this.onSkyChange());
-        folderSky.add( this.skyController, 'mieCoefficient', 0.0, 0.1, 0.001 ).onChange( this.onSkyChange());
-        folderSky.add( this.skyController, 'mieDirectionalG', 0.0, 1, 0.001 ).onChange( this.onSkyChange());
-        folderSky.add( this.skyController, 'exposure', 0, 1, 0.0001 ).onChange( this.onSkyChange());
+        // folderSky.add( this.skyController, 'turbidity', 0.0, 20.0, 0.1 ).onChange( this.onSkyChange());
+        // folderSky.add( this.skyController, 'rayleigh', 0.0, 4, 0.001 ).onChange( this.onSkyChange());
+        // folderSky.add( this.skyController, 'mieCoefficient', 0.0, 0.1, 0.001 ).onChange( this.onSkyChange());
+        // folderSky.add( this.skyController, 'mieDirectionalG', 0.0, 1, 0.001 ).onChange( this.onSkyChange());
+        // folderSky.add( this.skyController, 'exposure', 0, 1, 0.0001 ).onChange( this.onSkyChange());
+        
         // Add latitude and longitude inputs to the GUI
         folderSky.add(this.skyController, 'latitude', -90, 90).onChange(this.onSkyChange())
         folderSky.add(this.skyController, 'longitude', -180, 180).onChange(this.onSkyChange());
         const sunSimToggle = {
             toggle: false
         }
-        folderSky.add(sunSimToggle, 'toggle').name("Sun Sim").onChange( (value) => this.sunSim = value);
-
-        // toggling light sources
-        const hLight = this.getHemiLight();
-        const aLight = this.getAmbientLight();
-        const dLight = this.getDirectionalLight();
-        const sLight = this.getSpotLight();
-        const folderLights = gui.addFolder('Light Conditions');
-
-        const hToggle = {
-            toggle: true
-        };
-        const aToggle = {
-            toggle: true
-        };
-        const dToggle = {
-            toggle: true
-        };
-        const sToggle = {
-            toggle: true
-        };
-
-        folderLights.add(hToggle, 'toggle').name('Hemisphere light').onChange(value =>{
-            hLight.visible = value;
-        });
-        folderLights.add(aToggle, 'toggle').name('Ambient light').onChange(value =>{
-            aLight.visible = value;
-        });
-        folderLights.add(dToggle, 'toggle').name('Directional light').onChange(value =>{
-            dLight.visible = value;
-        });
-        folderLights.add(sToggle, 'toggle').name('Spot light').onChange(value =>{
-            sLight.visible = value;
-        });
+        folderSky.add(sunSimToggle, 'toggle').name("Sun Simulation").onChange( (value) => this.sunSim = value);
 
         //toggling object controls (translate/rotate)
         const folderControls = gui.addFolder('Object Controls');
@@ -296,12 +263,12 @@ class DemoScene {
         folderControls.add(showDimensions, 'toggle').name('Show Dimensions').onChange(value => {
             this.toggleAllObjects(value, "label");
         });
-        const grassMesh = this.getGrass();
+        
         const showGrass ={
             toggle: true
         }
         folderControls.add(showGrass, 'toggle').name('Show Grass').onChange(value => {
-            grassMesh.visible = value;
+            this.#grassMesh.visible = value;
         })
 
 
@@ -309,24 +276,9 @@ class DemoScene {
         // const folderColors = folderControls.addFolder('Furniture Colors');
         // folderColors.close();
 
-        // Moving Controls
-        const folderMoving = gui.addFolder('General Controls');
-        // const setOrthoMode = {
-        //     drag: () => {
-        //         this.#controls.orthoMode = "drag";
-        //     },
-        //     measure: () => {
-        //         this.#controls.orthoMode = "measure";
-        //     }
-        // }
-        // folderMoving.add({selectedFunction: 'drag'}, 'selectedFunction', Object.keys(setOrthoMode))
-        // .name('Orthographic').listen()
-        // .onChange((selectedFunction) => {
-        //     if (setOrthoMode[selectedFunction]) {
-        //         setOrthoMode[selectedFunction]();
-        //     }
-        // });
-
+        // Inside view controls
+        const folderInsideControls = gui.addFolder('Inside Controls');
+        // Inside view moving controls
         const setInsideMode = {
             keyboard: () => {
                 this.#controls.insideMode = "keyboard";
@@ -352,16 +304,25 @@ class DemoScene {
             }
         }
 
-        folderMoving.add({selectedFunction: 'teleport'}, 'selectedFunction', Object.keys(setInsideMode))
-        .name('Inside')
+        folderInsideControls.add({selectedFunction: 'teleport'}, 'selectedFunction', Object.keys(setInsideMode))
+        .name('Moving')
         .onChange((selectedFunction) => {
             if (setInsideMode[selectedFunction]) {
                 setInsideMode[selectedFunction]();
             }
         });
+        // Inside view lighting control
+        const showRoomLight ={
+            toggle: true
+        }
+        folderInsideControls.add(showRoomLight, 'toggle').name('Room Light').onChange(value => {
+            this.#lights.room.visible = value;
+        })
+        
+        
     
         //changing measurement units
-        const folderMeasurements = gui.addFolder('Units');
+        const folderMeasurements = gui.addFolder('Measurement');
         const measurementUnits = {
             'meter': () => {
                 this.setUnits("meter")
@@ -563,7 +524,7 @@ class DemoScene {
         this.#sun = new THREE.DirectionalLight(0xffffff, 10);
         this.#sun.castShadow = true;
         
-        scene.add(this.#sun);
+        // scene.add(this.#sun);
 
         this.skyController = {
             turbidity: 20,
@@ -650,24 +611,16 @@ class DemoScene {
      * @returns {Promise<void>} A promise that resolves when the geometries and model have been added to the scene.
      */
     async #initGeometries(scene) {
-        const hemiLight = new THREE.HemisphereLight(0xffffff, 2);
+        const hemiLight = new THREE.HemisphereLight(0xffffff);
         hemiLight.position.set(0, 50, 0);
         this.#lights.hemi = hemiLight;
         scene.add(hemiLight);
 
-        const ambientLight = new THREE.AmbientLight(0x7c7c7c, 8);
+        const ambientLight = new THREE.AmbientLight(0x7c7c7c, 1);
         this.#lights.ambi = ambientLight;
         scene.add(ambientLight);
-    
-        const directionalLight = new THREE.DirectionalLight(0xfdfbd3, 10);
-        // directionalLight.color.setHSL(0.1, 1, 0.95);
-        directionalLight.castShadow = true;
-        directionalLight.position.set(-20, 70, 100);
-        directionalLight.shadow.camera.bottom = -12;
-        this.#lights.direct = directionalLight;
-        scene.add(directionalLight);
 
-        const spotLight = new THREE.SpotLight(0xFFFFFF, 10000);
+        const spotLight = new THREE.SpotLight(0xFFFFFF, 50000);
         spotLight.angle = 0.2;
         spotLight.position.set( 0, 80, 0 );
         spotLight.penumbra = 1;
@@ -1043,6 +996,8 @@ class DemoScene {
         this.#scene.remove(this.#lights.room);
         this.#scene.remove(this.#objects.ceiling);
         this.#scene.add(this.#grassMesh);
+        this.#scene.remove(this.#lights.spot);
+        this.#scene.add(this.#sun);
         this.#camera.setInsideCamera(this.#canvas);
         this.current_camera = this.#camera.inside;
         this.#controls.switchControls("inside");
@@ -1062,7 +1017,7 @@ class DemoScene {
         this.#objects.ceiling = ceiling;
         this.#scene.add(ceiling);
 
-        const roomLight = new THREE.DirectionalLight(0xe0f1ff, 8);
+        const roomLight = new THREE.DirectionalLight(0xe0f1ff, 20);
         roomLight.position.set(0, ceiling.position.y-0.1, 0);
         roomLight.castShadow = true;
         this.#scene.add(roomLight);
@@ -1074,6 +1029,8 @@ class DemoScene {
     setOutsideViewMode() {
         this.view = "outside";
         this.#scene.add(this.#grassMesh);
+        this.#scene.add(this.#sun);
+        this.#scene.remove(this.#lights.spot);
         this.#camera.setOutsideCamera(this.#canvas);
         this.current_camera = this.#camera.outside;
         this.#controls.switchControls("outside");
@@ -1089,13 +1046,14 @@ class DemoScene {
     setOrthoViewMode() {
         this.view = "ortho";
         this.#scene.remove(this.#grassMesh);
+        this.#scene.remove(this.#sun);
+        this.#scene.add(this.#lights.spot);
         this.#camera.setOrthoCamera(this.#canvas, this.#modelSize, 2);
         this.current_camera = this.#camera.ortho;
         this.#controls.switchControls("ortho");
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.outside)} );
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.inside)} );
         window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.ortho)} );
-
         this.#scene.remove(this.#objects.ceiling);
         this.#scene.remove(this.#lights.room);
     }
@@ -1197,21 +1155,6 @@ class DemoScene {
     }
     getRenderer() {
         return this.#renderer;
-    }
-    getHemiLight(){
-        return this.#lights.hemi;
-    }
-    getAmbientLight(){
-        return this.#lights.ambi;
-    }
-    getDirectionalLight(){
-        return this.#lights.direct;
-    }
-    getSpotLight(){
-        return this.#lights.spot;
-    }
-    getGrass(){
-        return this.#grassMesh;
     }
 
     clear() {
