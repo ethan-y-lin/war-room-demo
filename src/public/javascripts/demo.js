@@ -1093,6 +1093,8 @@ class DemoScene {
         })
         //enable show grass checkbox + set it to true at first
         this.#guiControllers.objControls.children[3].enable().setValue(true);
+        //disable dimension checkbox + set it to false
+        this.#guiControllers.objControls.children[2].disable().setValue(false);
         
         //enable sky conditions control panel
         this.#guiControllers.skyControls.children.forEach(child =>{
@@ -1124,6 +1126,8 @@ class DemoScene {
         
         //enable show grass + set it to false at first
         this.#guiControllers.objControls.children[3].enable().setValue(false);
+        //enable dimentsion + set it to true at first
+        this.#guiControllers.objControls.children[2].enable().setValue(true);
         // console.log(this.gui.children[1].children[3]);
         //disable inside control panel
         this.#guiControllers.insideControls.children.forEach(child =>{
@@ -1164,6 +1168,8 @@ class DemoScene {
         })
         //disable show grass
         this.#guiControllers.objControls.children[3].disable().setValue(false);
+        //enable dimentsion + set it to true at first
+        this.#guiControllers.objControls.children[2].enable().setValue(true);
     }
 
     toggleAllObjects (value, target) {
