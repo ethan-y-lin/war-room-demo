@@ -397,11 +397,13 @@ class DemoScene {
                 document.exitFullscreen();
             }
         });
-        $(window).on("fullscreenchange", (event) => {
-            if (this.isFullScreen) {
-                this.isFullScreen = false;
-            }
-        });
+        // $(window).on("fullscreenchange", (event) => {
+        //     console.log("changed");
+        //     if (this.isFullScreen) {
+        //         console.log("change full screen true to false");
+        //         this.isFullScreen = false;
+        //     }
+        // });
 
         $("#date-input").on('change', (event) => {
             console.log("changed")
@@ -426,20 +428,19 @@ class DemoScene {
         $('#fullscreen-button').on('click', () => {
             // Clear event listeners
             this.#renderer.domElement.removeEventListener( 'mousemove', this.#controls.getLock());
-
-            if (!this.isFullScreen) {
-                // set dom element
-                let domElement;
-                if (this.#camera.name == "inside") {
-                    domElement = this.#renderer.domElement;
-                } else {
-                    domElement = this.#canvas;
-                }
-
+            // set dom element
+            let domElement;
+            if (this.#camera.name == "inside") {
+                domElement = this.#renderer.domElement;
+            } else {
+                domElement = this.#canvas;
+            }
+            if (!this.isFullScreen) {            
                 // trigger full screen
-                console.log("full screen")
+                console.log("set to full screen")
                 if (domElement.requestFullscreen){
                     domElement.requestFullscreen();
+                    console.log(domElement.offsetWidth, domElement.offsetHeight);
                 } else if (domElement.webkitEnterFullscreen){
                     domElement.webkitEnterFullscreen();
                 } else if (domElement.msRequestFullscreen){
@@ -447,15 +448,16 @@ class DemoScene {
                 } else if (domElement.mozRequestFullScreen){
                     domElement.mozRequestFullScreen();
                 }
-
                 if (this.#camera.name == "inside") {
                     this.#controls.hideBlocker();
                     this.#controls.getPointerLock().isLocked = true;
                     domElement.addEventListener( 'mousemove', this.#controls.getLock());
                 }
                 this.isFullScreen = true;
-            } else {
+            } else if (this.isFullScreen){
+                console.log("in full screen");
                 this.isFullScreen = false;
+                console.log(domElement.offsetWidth, domElement.offsetHeight);
                 if (document.exitFullscreen){
                     document.exitFullscreen();
                 } else if (document.webkitExitFullscreen){
@@ -465,10 +467,7 @@ class DemoScene {
                 } else if (document.msExitFullscreen){
                     document.msExitFullscreen();
                 }
-
-            }
-
-            
+            }            
         });
     }
 
@@ -1028,11 +1027,14 @@ class DemoScene {
         roomLight.castShadow = true;
         this.#scene.add(roomLight);
         this.#lights.room = roomLight;
-
+        
+        //enable inside control panel
         this.gui.children[2].children.forEach(child =>{
             child.enable();
         })
+        //enable show grass checkbox + set it to true at first
         this.gui.children[1].children[3].enable().setValue(true);
+        //enable sky conditions control panel
         this.gui.children[0].children.forEach(child =>{
             child.enable();
         })
@@ -1055,10 +1057,13 @@ class DemoScene {
         this.#scene.remove(this.#objects.ceiling);
         this.#scene.remove(this.#lights.room);
         
+        //enable show grass + set it to false at first
         this.gui.children[1].children[3].enable().setValue(false);
+        //disable inside control panel
         this.gui.children[2].children.forEach(child =>{
             child.disable();
         })
+        //enable sky conditions control panel
         this.gui.children[0].children.forEach(child =>{
             child.enable();
         })
@@ -1079,14 +1084,16 @@ class DemoScene {
         window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.ortho)} );
         this.#scene.remove(this.#objects.ceiling);
         this.#scene.remove(this.#lights.room);
-
+        
+        //disable inside control panel
         this.gui.children[2].children.forEach(child =>{
             child.disable();
         })
-
+        //disable sky conditions control panel
         this.gui.children[0].children.forEach(child =>{
             child.disable();
         })
+        //disable show grass
         this.gui.children[1].children[3].setValue(false).disable();
     }
 
