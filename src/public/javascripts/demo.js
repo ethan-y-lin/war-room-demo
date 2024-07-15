@@ -118,6 +118,8 @@ class DemoScene {
     #objectGroups;
     #sky;
     #sun;
+
+    #guiControllers;
     /**
      * Calls for the initialization the DemoScene object and then
      * calls the animation loop when initialization is completed.
@@ -205,6 +207,7 @@ class DemoScene {
         }
 
         this.gui = new GUI({autoPlace: false});
+        this.#guiControllers = {};
         this.initGui(this.gui);
         this.#initListeners();
     }
@@ -241,7 +244,7 @@ class DemoScene {
             toggle: false
         }
         folderSky.add(sunSimToggle, 'toggle').name("Sun Simulation").onChange( (value) => this.sunSim = value).disable();
-
+        this.#guiControllers.skyControls = folderSky;
         //toggling object controls (translate/rotate)
         const folderControls = gui.addFolder('Object Controls');
         const controlToggle = {
@@ -275,15 +278,14 @@ class DemoScene {
         folderControls.add(showDimensions, 'toggle').name('Show Dimensions').onChange(value => {
             this.toggleAllObjects(value, "label");
         });
-        
+        //toggling grass
         const showGrass ={
             toggle: false
         }
         folderControls.add(showGrass, 'toggle').name('Show Grass').onChange(value => {
             this.#grassMesh.visible = value;
         }).disable();
-
-
+        this.#guiControllers.objControls = folderControls;
         //changing material color?
         // const folderColors = folderControls.addFolder('Furniture Colors');
         // folderColors.close();
@@ -330,7 +332,8 @@ class DemoScene {
         folderInsideControls.add(showRoomLight, 'toggle').name('Room Light').onChange(value => {
             this.#lights.room.visible = value;
         }).disable();
-    
+        this.#guiControllers.insideControls = folderInsideControls;
+
         //changing measurement units
         const folderMeasurements = gui.addFolder('Measurement');
         const measurementUnits = {
@@ -440,7 +443,7 @@ class DemoScene {
                 console.log("set to full screen")
                 if (domElement.requestFullscreen){
                     domElement.requestFullscreen();
-                    console.log(domElement.offsetWidth, domElement.offsetHeight);
+                    // console.log(domElement.offsetWidth, domElement.offsetHeight);
                 } else if (domElement.webkitEnterFullscreen){
                     domElement.webkitEnterFullscreen();
                 } else if (domElement.msRequestFullscreen){
@@ -457,7 +460,7 @@ class DemoScene {
             } else if (this.isFullScreen){
                 console.log("in full screen");
                 this.isFullScreen = false;
-                console.log(domElement.offsetWidth, domElement.offsetHeight);
+                // console.log(domElement.offsetWidth, domElement.offsetHeight);
                 if (document.exitFullscreen){
                     document.exitFullscreen();
                 } else if (document.webkitExitFullscreen){
@@ -1029,13 +1032,15 @@ class DemoScene {
         this.#lights.room = roomLight;
         
         //enable inside control panel
-        this.gui.children[2].children.forEach(child =>{
+        // console.log(this.gui.children[2]);
+        this.#guiControllers.insideControls.children.forEach(child =>{
             child.enable();
         })
         //enable show grass checkbox + set it to true at first
-        this.gui.children[1].children[3].enable().setValue(true);
+        this.#guiControllers.objControls.children[3].enable().setValue(true);
+        
         //enable sky conditions control panel
-        this.gui.children[0].children.forEach(child =>{
+        this.#guiControllers.skyControls.children.forEach(child =>{
             child.enable();
         })
     }
@@ -1058,13 +1063,14 @@ class DemoScene {
         this.#scene.remove(this.#lights.room);
         
         //enable show grass + set it to false at first
-        this.gui.children[1].children[3].enable().setValue(false);
+        this.#guiControllers.objControls.children[3].enable().setValue(false);
+        // console.log(this.gui.children[1].children[3]);
         //disable inside control panel
-        this.gui.children[2].children.forEach(child =>{
+        this.#guiControllers.insideControls.children.forEach(child =>{
             child.disable();
         })
         //enable sky conditions control panel
-        this.gui.children[0].children.forEach(child =>{
+        this.#guiControllers.skyControls.children.forEach(child =>{
             child.enable();
         })
     }
@@ -1086,15 +1092,15 @@ class DemoScene {
         this.#scene.remove(this.#lights.room);
         
         //disable inside control panel
-        this.gui.children[2].children.forEach(child =>{
+        this.#guiControllers.insideControls.children.forEach(child =>{
             child.disable();
         })
         //disable sky conditions control panel
-        this.gui.children[0].children.forEach(child =>{
+        this.#guiControllers.skyControls.children.forEach(child =>{
             child.disable();
         })
         //disable show grass
-        this.gui.children[1].children[3].setValue(false).disable();
+        this.#guiControllers.objControls.children[3].disable().setValue(false);
     }
 
     toggleAllObjects (value, target) {
