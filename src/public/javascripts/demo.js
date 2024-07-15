@@ -119,6 +119,8 @@ class DemoScene {
     #objectGroups;
     #sky;
     #sun;
+
+    #guiControllers;
     /**
      * Calls for the initialization the DemoScene object and then
      * calls the animation loop when initialization is completed.
@@ -207,6 +209,7 @@ class DemoScene {
         }
 
         this.gui = new GUI({autoPlace: false});
+        this.#guiControllers = {};
         this.initGui(this.gui);
         this.#initListeners();
         console.log(this.#model)
@@ -232,52 +235,20 @@ class DemoScene {
         $("#gui-container").append(dateInput);
         $("#gui-container").append(timeInput);
         const folderSky = gui.addFolder('Sky Conditions');
-        folderSky.add( this.skyController, 'turbidity', 0.0, 20.0, 0.1 ).onChange( this.onSkyChange());
-        folderSky.add( this.skyController, 'rayleigh', 0.0, 4, 0.001 ).onChange( this.onSkyChange());
-        folderSky.add( this.skyController, 'mieCoefficient', 0.0, 0.1, 0.001 ).onChange( this.onSkyChange());
-        folderSky.add( this.skyController, 'mieDirectionalG', 0.0, 1, 0.001 ).onChange( this.onSkyChange());
-        folderSky.add( this.skyController, 'exposure', 0, 1, 0.0001 ).onChange( this.onSkyChange());
+        // folderSky.add( this.skyController, 'turbidity', 0.0, 20.0, 0.1 ).onChange( this.onSkyChange());
+        // folderSky.add( this.skyController, 'rayleigh', 0.0, 4, 0.001 ).onChange( this.onSkyChange());
+        // folderSky.add( this.skyController, 'mieCoefficient', 0.0, 0.1, 0.001 ).onChange( this.onSkyChange());
+        // folderSky.add( this.skyController, 'mieDirectionalG', 0.0, 1, 0.001 ).onChange( this.onSkyChange());
+        // folderSky.add( this.skyController, 'exposure', 0, 1, 0.0001 ).onChange( this.onSkyChange());
+        
         // Add latitude and longitude inputs to the GUI
-        folderSky.add(this.skyController, 'latitude', -90, 90).onChange(this.onSkyChange())
-        folderSky.add(this.skyController, 'longitude', -180, 180).onChange(this.onSkyChange());
+        folderSky.add(this.skyController, 'latitude', -90, 90).onChange(this.onSkyChange()).disable();
+        folderSky.add(this.skyController, 'longitude', -180, 180).onChange(this.onSkyChange()).disable();
         const sunSimToggle = {
             toggle: false
         }
-        folderSky.add(sunSimToggle, 'toggle').name("Sun Sim").onChange( (value) => this.sunSim = value);
-
-        // toggling light sources
-        const hLight = this.getHemiLight();
-        const aLight = this.getAmbientLight();
-        const dLight = this.getDirectionalLight();
-        const sLight = this.getSpotLight();
-        const folderLights = gui.addFolder('Light Conditions');
-
-        const hToggle = {
-            toggle: true
-        };
-        const aToggle = {
-            toggle: true
-        };
-        const dToggle = {
-            toggle: true
-        };
-        const sToggle = {
-            toggle: true
-        };
-
-        folderLights.add(hToggle, 'toggle').name('Hemisphere light').onChange(value =>{
-            hLight.visible = value;
-        });
-        folderLights.add(aToggle, 'toggle').name('Ambient light').onChange(value =>{
-            aLight.visible = value;
-        });
-        folderLights.add(dToggle, 'toggle').name('Directional light').onChange(value =>{
-            dLight.visible = value;
-        });
-        folderLights.add(sToggle, 'toggle').name('Spot light').onChange(value =>{
-            sLight.visible = value;
-        });
-
+        folderSky.add(sunSimToggle, 'toggle').name("Sun Simulation").onChange( (value) => this.sunSim = value).disable();
+        this.#guiControllers.skyControls = folderSky;
         //toggling object controls (translate/rotate)
         const folderControls = gui.addFolder('Object Controls');
         const controlToggle = {
@@ -312,37 +283,21 @@ class DemoScene {
         folderControls.add(showDimensions, 'toggle').name('Show Dimensions').onChange(value => {
             this.toggleAllObjects(value, "label");
         });
-        const grassMesh = this.getGrass();
+        //toggling grass
         const showGrass ={
-            toggle: true
+            toggle: false
         }
         folderControls.add(showGrass, 'toggle').name('Show Grass').onChange(value => {
-            grassMesh.visible = value;
-        })
-
-
+            this.#grassMesh.visible = value;
+        }).disable();
+        this.#guiControllers.objControls = folderControls;
         //changing material color?
         // const folderColors = folderControls.addFolder('Furniture Colors');
         // folderColors.close();
 
-        // Moving Controls
-        const folderMoving = gui.addFolder('General Controls');
-        // const setOrthoMode = {
-        //     drag: () => {
-        //         this.#controls.orthoMode = "drag";
-        //     },
-        //     measure: () => {
-        //         this.#controls.orthoMode = "measure";
-        //     }
-        // }
-        // folderMoving.add({selectedFunction: 'drag'}, 'selectedFunction', Object.keys(setOrthoMode))
-        // .name('Orthographic').listen()
-        // .onChange((selectedFunction) => {
-        //     if (setOrthoMode[selectedFunction]) {
-        //         setOrthoMode[selectedFunction]();
-        //     }
-        // });
-
+        // Inside view controls
+        const folderInsideControls = gui.addFolder('Inside Controls');
+        // Inside view moving controls
         const setInsideMode = {
             keyboard: () => {
                 this.#controls.insideMode = "keyboard";
@@ -368,16 +323,24 @@ class DemoScene {
             }
         }
 
-        folderMoving.add({selectedFunction: 'teleport'}, 'selectedFunction', Object.keys(setInsideMode))
-        .name('Inside')
+        folderInsideControls.add({selectedFunction: 'teleport'}, 'selectedFunction', Object.keys(setInsideMode))
+        .name('Moving')
         .onChange((selectedFunction) => {
             if (setInsideMode[selectedFunction]) {
                 setInsideMode[selectedFunction]();
             }
-        });
-    
+        }).disable();
+        // Inside view lighting control
+        const showRoomLight ={
+            toggle: true
+        }
+        folderInsideControls.add(showRoomLight, 'toggle').name('Room Light').onChange(value => {
+            this.#lights.room.visible = value;
+        }).disable();
+        this.#guiControllers.insideControls = folderInsideControls;
+
         //changing measurement units
-        const folderMeasurements = gui.addFolder('Units');
+        const folderMeasurements = gui.addFolder('Measurement');
         const measurementUnits = {
             'meter': () => {
                 this.setUnits("meter")
@@ -442,11 +405,13 @@ class DemoScene {
                 document.exitFullscreen();
             }
         });
-        $(window).on("fullscreenchange", (event) => {
-            if (this.isFullScreen) {
-                this.isFullScreen = false;
-            }
-        });
+        // $(window).on("fullscreenchange", (event) => {
+        //     console.log("changed");
+        //     if (this.isFullScreen) {
+        //         console.log("change full screen true to false");
+        //         this.isFullScreen = false;
+        //     }
+        // });
 
         $("#date-input").on('change', (event) => {
             console.log("changed")
@@ -471,20 +436,19 @@ class DemoScene {
         $('#fullscreen-button').on('click', () => {
             // Clear event listeners
             this.#renderer.domElement.removeEventListener( 'mousemove', this.#controls.getLock());
-
-            if (!this.isFullScreen) {
-                // set dom element
-                let domElement;
-                if (this.#camera.name == "inside") {
-                    domElement = this.#renderer.domElement;
-                } else {
-                    domElement = this.#canvas;
-                }
-
+            // set dom element
+            let domElement;
+            if (this.#camera.name == "inside") {
+                domElement = this.#renderer.domElement;
+            } else {
+                domElement = this.#canvas;
+            }
+            if (!this.isFullScreen) {            
                 // trigger full screen
-                console.log("full screen")
+                console.log("set to full screen")
                 if (domElement.requestFullscreen){
                     domElement.requestFullscreen();
+                    // console.log(domElement.offsetWidth, domElement.offsetHeight);
                 } else if (domElement.webkitEnterFullscreen){
                     domElement.webkitEnterFullscreen();
                 } else if (domElement.msRequestFullscreen){
@@ -492,15 +456,16 @@ class DemoScene {
                 } else if (domElement.mozRequestFullScreen){
                     domElement.mozRequestFullScreen();
                 }
-
                 if (this.#camera.name == "inside") {
                     this.#controls.hideBlocker();
                     this.#controls.getPointerLock().isLocked = true;
                     domElement.addEventListener( 'mousemove', this.#controls.getLock());
                 }
                 this.isFullScreen = true;
-            } else {
+            } else if (this.isFullScreen){
+                console.log("in full screen");
                 this.isFullScreen = false;
+                // console.log(domElement.offsetWidth, domElement.offsetHeight);
                 if (document.exitFullscreen){
                     document.exitFullscreen();
                 } else if (document.webkitExitFullscreen){
@@ -510,10 +475,7 @@ class DemoScene {
                 } else if (document.msExitFullscreen){
                     document.msExitFullscreen();
                 }
-
-            }
-
-            
+            }            
         });
     }
 
@@ -600,7 +562,7 @@ class DemoScene {
         this.#sun = new THREE.DirectionalLight(0xffffff, 10);
         this.#sun.castShadow = true;
         
-        scene.add(this.#sun);
+        // scene.add(this.#sun);
 
         this.skyController = {
             turbidity: 20,
@@ -667,24 +629,16 @@ class DemoScene {
      * @returns {Promise<void>} A promise that resolves when the geometries and model have been added to the scene.
      */
     async #initGeometries(scene) {
-        const hemiLight = new THREE.HemisphereLight(0xffffff, 2);
+        const hemiLight = new THREE.HemisphereLight(0xffffff);
         hemiLight.position.set(0, 50, 0);
         this.#lights.hemi = hemiLight;
         scene.add(hemiLight);
 
-        const ambientLight = new THREE.AmbientLight(0x7c7c7c, 8);
+        const ambientLight = new THREE.AmbientLight(0x7c7c7c, 1);
         this.#lights.ambi = ambientLight;
         scene.add(ambientLight);
-    
-        const directionalLight = new THREE.DirectionalLight(0xfdfbd3, 10);
-        // directionalLight.color.setHSL(0.1, 1, 0.95);
-        directionalLight.castShadow = true;
-        directionalLight.position.set(-20, 70, 100);
-        directionalLight.shadow.camera.bottom = -12;
-        this.#lights.direct = directionalLight;
-        scene.add(directionalLight);
 
-        const spotLight = new THREE.SpotLight(0xFFFFFF, 10000);
+        const spotLight = new THREE.SpotLight(0xFFFFFF, 50000);
         spotLight.angle = 0.2;
         spotLight.position.set( 0, 80, 0 );
         spotLight.penumbra = 1;
@@ -1034,6 +988,8 @@ class DemoScene {
         this.#scene.remove(this.#lights.room);
         this.#scene.remove(this.#objects.ceiling);
         this.#scene.add(this.#grassMesh);
+        this.#scene.remove(this.#lights.spot);
+        this.#scene.add(this.#sun);
         this.#camera.setInsideCamera(this.#canvas);
         this.current_camera = this.#camera.inside;
         this.#controls.switchControls("inside");
@@ -1053,11 +1009,24 @@ class DemoScene {
         this.#objects.ceiling = ceiling;
         this.#scene.add(ceiling);
 
-        const roomLight = new THREE.DirectionalLight(0xe0f1ff, 8);
+        const roomLight = new THREE.DirectionalLight(0xe0f1ff, 20);
         roomLight.position.set(0, ceiling.position.y-0.1, 0);
         roomLight.castShadow = true;
         this.#scene.add(roomLight);
         this.#lights.room = roomLight;
+        
+        //enable inside control panel
+        // console.log(this.gui.children[2]);
+        this.#guiControllers.insideControls.children.forEach(child =>{
+            child.enable();
+        })
+        //enable show grass checkbox + set it to true at first
+        this.#guiControllers.objControls.children[3].enable().setValue(true);
+        
+        //enable sky conditions control panel
+        this.#guiControllers.skyControls.children.forEach(child =>{
+            child.enable();
+        })
     }
     /**
      * Sets the scene view to outside mode by updating camera, controls, and objects.
@@ -1065,6 +1034,9 @@ class DemoScene {
     setOutsideViewMode() {
         this.view = "outside";
         this.#scene.add(this.#grassMesh);
+        this.#grassMesh.visible = false;
+        this.#scene.add(this.#sun);
+        this.#scene.remove(this.#lights.spot);
         this.#camera.setOutsideCamera(this.#canvas);
         this.current_camera = this.#camera.outside;
         this.#controls.switchControls("outside");
@@ -1073,6 +1045,18 @@ class DemoScene {
         window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.outside)} );
         this.#scene.remove(this.#objects.ceiling);
         this.#scene.remove(this.#lights.room);
+        
+        //enable show grass + set it to false at first
+        this.#guiControllers.objControls.children[3].enable().setValue(false);
+        // console.log(this.gui.children[1].children[3]);
+        //disable inside control panel
+        this.#guiControllers.insideControls.children.forEach(child =>{
+            child.disable();
+        })
+        //enable sky conditions control panel
+        this.#guiControllers.skyControls.children.forEach(child =>{
+            child.enable();
+        })
     }
     /**
      * Sets the scene view to ortho mode by updating camera, controls, and objects.
@@ -1080,15 +1064,27 @@ class DemoScene {
     setOrthoViewMode() {
         this.view = "ortho";
         this.#scene.remove(this.#grassMesh);
+        this.#scene.remove(this.#sun);
+        this.#scene.add(this.#lights.spot);
         this.#camera.setOrthoCamera(this.#canvas, this.#modelSize, 2);
         this.current_camera = this.#camera.ortho;
         this.#controls.switchControls("ortho");
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.outside)} );
         window.removeEventListener( 'resize', () => {this.#onWindowResize(this.#camera.inside)} );
         window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.ortho)} );
-
         this.#scene.remove(this.#objects.ceiling);
         this.#scene.remove(this.#lights.room);
+        
+        //disable inside control panel
+        this.#guiControllers.insideControls.children.forEach(child =>{
+            child.disable();
+        })
+        //disable sky conditions control panel
+        this.#guiControllers.skyControls.children.forEach(child =>{
+            child.disable();
+        })
+        //disable show grass
+        this.#guiControllers.objControls.children[3].disable().setValue(false);
     }
 
     toggleAllObjects (value, target) {
@@ -1192,21 +1188,6 @@ class DemoScene {
     }
     getRenderer() {
         return this.#renderer;
-    }
-    getHemiLight(){
-        return this.#lights.hemi;
-    }
-    getAmbientLight(){
-        return this.#lights.ambi;
-    }
-    getDirectionalLight(){
-        return this.#lights.direct;
-    }
-    getSpotLight(){
-        return this.#lights.spot;
-    }
-    getGrass(){
-        return this.#grassMesh;
     }
 
     clear() {
