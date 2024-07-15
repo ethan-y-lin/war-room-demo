@@ -8,6 +8,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
 import grassShader from '../shaders/grass.js'
 import { Sky } from 'three/addons/objects/Sky.js';
+import { OBB } from 'three/addons/math/OBB.js';
 import SunCalc from 'suncalc';
 
 const boxMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
@@ -143,10 +144,11 @@ class DemoScene {
         this.resources = [];
         this.#canvas = document.getElementById("scene-container");
         this.#objects = {walls: [], 
-                        furniture: [],
-                        doors: [],
-                        windows: [],
-                        uploaded: []};
+                         floor: [],
+                         furniture: [],
+                         doors: [],
+                         windows: [],
+                         uploaded: []};
         this.#objectGroups = [];
         this.#showBoundingBoxes = false;
         this.#lights = {};
@@ -178,7 +180,7 @@ class DemoScene {
         this.current_camera = this.#camera.ortho;
         this.view = "ortho";
         // initialize controls 
-        this.#controls = new DemoControls(this.#camera, this.#canvas, this.#scene, this.#objects, this.#modelSize); // initializes to orthoControls
+        this.#controls = new DemoControls(this.#camera, this.#canvas, this.#scene, this.#objects, this.#modelSize, this.#showBoundingBoxes); // initializes to orthoControls
         this.#controls.units = this.#units;
 
         window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.ortho) });
@@ -211,6 +213,8 @@ class DemoScene {
         this.#guiControllers = {};
         this.initGui(this.gui);
         this.#initListeners();
+        console.log(this.#model)
+        console.log(this.#objects)
     }
 
     initGui(gui){
@@ -270,6 +274,7 @@ class DemoScene {
             toggle: false
         }
         folderControls.add(boundingBoxToggle, 'toggle').name('Show bounding box').onChange(value => {
+            this.#controls.toggleWallBB();
             this.toggleAllObjects(value, "bounding_box");
         });
 
@@ -502,21 +507,25 @@ class DemoScene {
             if (position == null) {
                 const openPos = this.openPosition(newObject); // find an open position to display the box
                 newObject.position.set(openPos.x, openPos.y, openPos.z);
+                newObject.updateMatrixWorld(true);
             } else {
                 newObject.position.set(position.x, position.y, position.z);
+                newObject.updateMatrixWorld(true);
             }   
 
             if (rotation != null) {
                 newObject.rotation.x = rotation.x;
                 newObject.rotation.y = rotation.y;
                 newObject.rotation.z = rotation.z;
+                newObject.updateMatrixWorld(true);
             }
 
             // Compute the bounding box of the object
             const box = new THREE.Box3().setFromObject(newObject, true);
 
+            const size = new THREE.Vector3(box.max.x - box.min.x, box.max.y - box.min.y, box.max.z - box.min.z)
             // Create a box helper
-            const boxGeometry = new THREE.BoxGeometry(box.max.x - box.min.x, box.max.y - box.min.y, box.max.z - box.min.z);
+            const boxGeometry = new THREE.BoxGeometry(size.x, size.y, size.z);
             this.resources.push(boxGeometry);
             const boundingBox = new THREE.Mesh(boxGeometry, boxMaterial);
 
@@ -555,9 +564,19 @@ class DemoScene {
         // Add Sun 
         this.#sun = new THREE.DirectionalLight(0xffffff, 10);
         this.#sun.castShadow = true;
-        
+        this.#sun.shadow.mapSize.width = 2048;
+        this.#sun.shadow.mapSize.height = 2048;
+        this.#sun.shadow.bias = 0.0001;
+        // Define the shadow camera's frustum size
+        this.#sun.shadow.camera.left = -20;
+        this.#sun.shadow.camera.right = 20;
+        this.#sun.shadow.camera.top = 20;
+        this.#sun.shadow.camera.bottom = -20;
+        this.#sun.shadow.camera.near = -10;
+        this.#sun.shadow.camera.far = 10;
         // scene.add(this.#sun);
-
+        // const helper = new THREE.CameraHelper(this.#sun.shadow.camera);
+        // scene.add(helper);
         this.skyController = {
             turbidity: 20,
             rayleigh: 0.558,
@@ -594,6 +613,7 @@ class DemoScene {
         const sun = new THREE.Vector3();
         sun.setFromSphericalCoords( 1, phi, theta );
         this.#sun.position.set(sun.x, sun.y, sun.z)
+        this.#sun.updateMatrixWorld(true);
         uniforms[ 'sunPosition' ].value.copy( sun );
 
         this.#renderer.toneMappingExposure = this.skyController.exposure;
@@ -745,23 +765,12 @@ class DemoScene {
         
         this.#initSky(scene);
 
-        //skydome
-        // const skyGeo = new THREE.SphereGeometry(800, 32, 15);
-        // this.resources.push(skyGeo)
-        // const textureLoader = new THREE.TextureLoader();
-        // const skyTexture = textureLoader.load('../img/sky.png');
-        // const skyMat = new THREE.MeshBasicMaterial({map: skyTexture, side: THREE.BackSide});
-        // this.resources.push(skyMat);
-        // const sky = new THREE.Mesh(skyGeo, skyMat);
-        // scene.add(sky);
-        
-        // const axesHelper = new THREE.AxesHelper( 100 );
-        // scene.add( axesHelper );
         const assetLoader = new GLTFLoader();
 
         return new Promise((resolve, reject) => {
             assetLoader.load(this.#room.room_url.href, (gltf) => {
                 console.log("loading model");
+                console.log(gltf.scene)
                 this.#model = gltf.scene; // model
 
                 // get model dimensions
@@ -769,6 +778,7 @@ class DemoScene {
                 this.#modelSize = bbox.getSize(new THREE.Vector3());
                 if (this.#modelSize.x < this.#modelSize.z) {
                     this.#model.rotateOnAxis(new THREE.Vector3(0,1,0), Math.PI / 2);
+                    this.#model.updateMatrixWorld(true);
                     const temp = this.#modelSize.x;
                     this.#modelSize.x = this.#modelSize.z;
                     this.#modelSize.z = temp;
@@ -776,10 +786,14 @@ class DemoScene {
                 // add model to scene
                 scene.add(this.#model);
                 this.#model.position.set(0, this.#modelSize.y / 2, 0); // makes the ground at y = 0;
-
+                console.log(this.#model.children)
+                this.#model.updateMatrixWorld(true)
                 // initialize objects
                 const objects = [...this.#model.children]; // must be copy because removing directly will cause some to be skipped.
                 this.#organizeObjects(objects);
+
+                // color floor and walls
+                this.#addTextureToRoom();
 
                 const NO_GRASS_RECT = [-this.#modelSize.x / 2, this.#modelSize.x / 2, -this.#modelSize.z / 2, this.#modelSize.z / 2, ]
                 const grassGeo = generateFieldGeo(PLANE_SIZE, BLADE_COUNT, BLADE_WIDTH, BLADE_HEIGHT, BLADE_HEIGHT_VARIATION, NO_GRASS_RECT)
@@ -800,27 +814,6 @@ class DemoScene {
         });
     }
 
-    #getObjectInfo(name) {
-        let type = "";
-        let groupNum = "";
-        let soloNum = "";
-        let split1 = name.indexOf("_");
-        let split2 = name.lastIndexOf("_");
-        type = name.substring(0, split1);
-        if (split1 + 1 < name.length) {
-            if (split1 == split2) {
-                groupNum = name.substring(split1 + 1, name.length);
-                return {type: type, groupNum: groupNum, soloNum: "NA"};
-            } else {
-                groupNum = name.substring(split1 + 1, split2);
-                if (split2 + 1 < name.length) {
-                    soloNum = name.substring(split2 + 1, name.length);
-                    return {type: type, groupNum: groupNum, soloNum: soloNum};
-                }
-            }
-        }
-        return {type: type, groupNum: "NA", soloNum: "NA"}; 
-    }
     /**
      * Organizes objects in the scene by categorizing them into doors, windows, walls, and removing irrelevant objects.
      * The organization is based on the names of the objects. 
@@ -830,38 +823,44 @@ class DemoScene {
      * @param {Array<THREE.Object3D>} objects - The array of 3D objects to be organized.
      */
     #organizeObjects (objects) {
+        console.log(objects);
         objects.forEach((obj) =>  {
-            
-            if (obj.children.length > 0) {
-                this.#organizeObjects(obj.children);
-                return;
-            }  
-            const objInfo = this.#getObjectInfo(obj.name);
-            if (objInfo.type == "door") {
+            if (obj.name == '') {
+                obj.name = obj.children[0].name;
+            }
+            if (obj.name.includes("door")) {
                 this.#objects.doors.push(obj);
-            } else if (objInfo.type == "window") {
+            } else if (obj.name.includes("window")) {
                 this.#objects.windows.push(obj);
-            } else if (objInfo.type == "wall" || objInfo.type == "floor") {
-                const group = objInfo.type + objInfo.groupNum;
-                if (! (this.#objectGroups.includes(group))) {
-                    this.#objectGroups.push(group);
-                    obj.clear();
-                    this.#addDimensionLabels(obj);
-                }
+            } else if (obj.name.includes("wall")) {
+                this.#addDimensionLabels(obj);
                 this.#objects.walls.push(obj);
-                if(objInfo.type == "floor"){
-                    obj.material.color.setHex(0x8b5a2b);
-                    obj.receiveShadow = true;
-                } else if(objInfo.type == "wall"){
-                    obj.material.color.setHex(0xedeae5);
-                    obj.castShadow = true;
-                    obj.receiveShadow = true;
-                }
+            } else if (obj.name.includes("floor")) {
+                this.#objects.floor.push(obj);
             } else {
                 this.#model.remove(obj);
             }
-            this.#model.remove(obj);
         });
+    }
+
+    #addTextureToRoom() {
+        this.#objects.walls.forEach( (wall) => {
+            wall.children.forEach((child) => {
+                if (child.material) {
+                    child.material.color.setHex(0xedeae5);
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                }
+            });
+        })
+        this.#objects.floor.forEach( (floor) => {
+            floor.children.forEach((child) => {
+                if (child.material) {
+                    child.material.color.setHex(0x8b5a2b);
+                    child.receiveShadow = true;
+                }
+            });
+        })
     }
 
     #addDimensionLabels (obj) {
@@ -871,12 +870,6 @@ class DemoScene {
         // Create a box helper
         const boxGeometry = new THREE.BoxGeometry(bbox.max.x - bbox.min.x, bbox.max.y - bbox.min.y, bbox.max.z - bbox.min.z);
         this.resources.push(boxGeometry);
-        const boundingBox = new THREE.Mesh(boxGeometry, boxMaterial);
-
-        boundingBox.position.set((bbox.max.x + bbox.min.x) / 2, (bbox.max.y + bbox.min.y) / 2, (bbox.max.z + bbox.min.z) / 2);
-        boundingBox.name = "bounding_box";
-        boundingBox.visible = this.#showBoundingBoxes;
-        obj.add(boundingBox);
         if (size.x > 1) {
             // add label
             const text = document.createElement( 'div' );
@@ -974,6 +967,7 @@ class DemoScene {
                 const sphere = new THREE.Mesh( sphereGeometry, sphereMaterial ); 
                 const point = measure_points[measure_points.length-1];
                 sphere.position.set(point.x, point.y, point.z);
+                sphere.updateMatrixWorld(true);
                 this.#measurement_objects.vertices.add( sphere );
                 const lineGeometry = new THREE.BufferGeometry().setFromPoints( measure_points );
                 this.resources.push(lineGeometry);
@@ -1082,6 +1076,7 @@ class DemoScene {
         }
         ceiling.position.y = this.#modelSize.y;
         ceiling.castShadow = true;
+        ceiling.receiveShadow = true;
         this.#objects.ceiling = ceiling;
         this.#scene.add(ceiling);
 
@@ -1172,7 +1167,10 @@ class DemoScene {
     }
 
     toggleAllObjects (value, target) {
-        const allObjects = this.#objects.furniture.concat(this.#objects.walls).concat(this.#objects.uploaded).concat(this.#objects.windows);
+        const allObjects = this.#objects.furniture.concat(this.#objects.walls)
+                                                  .concat(this.#objects.uploaded)
+                                                  .concat(this.#objects.windows)
+                                                  .concat(this.#objects.floor);
         allObjects.forEach( (obj) => {
             obj.children.forEach((child) => {
                 if (child.name.includes(target)) {
@@ -1223,6 +1221,7 @@ class DemoScene {
             document.body.removeChild(link);
         }, { binary: true });
         this.#model.position.set(0, this.#modelSize.y / 2, 0);
+        this.#model.updateMatrixWorld(true);
     }
 
     reset () {

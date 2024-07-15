@@ -3,6 +3,7 @@ import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockCont
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
 import { MobileControls } from './mobileControls';
+import { OBB } from 'three/examples/jsm/math/OBB.js';
 
 const blackMaterial = new THREE.MeshBasicMaterial( {color: 0x000000} ); 
 const redMaterial = new THREE.MeshBasicMaterial( {color: 0xff0000} ); 
@@ -172,7 +173,8 @@ class DemoControls {
      * @type {Array.<THREE.Box3>}
      * @private
      */
-    #boundingBoxes;
+    #wallBBs;
+    #wallBBDisplays;
 
     /////// FOR DRAG CONTROLS (ORTHO VIEW) //////
     /**
@@ -226,13 +228,11 @@ class DemoControls {
      * @param {Array.<THREE.Object3D>} objects.windows - The window objects in the scene.
      * @param {THREE.Vector3} modelSize - The size of the model.
      */
-    #initialize(camera, canvas, scene, objects, modelSize){
+    #initialize(camera, canvas, scene, objects, modelSize, showBB){
         this.#canvas = canvas;
         this.#camera = camera;
         this.#scene = scene;
-        this.#objects = objects.furniture.concat(objects.walls).concat(objects.uploaded);
-        this.#pass_through_objects = objects.doors.concat(objects.windows);
-        this.#draggableObjects = objects.furniture.concat(objects.uploaded);
+        this.#objects = objects;
         this.#modelSize = modelSize;
         this.orthoMode = "drag";
         this.insideMode = "teleport";
@@ -252,7 +252,13 @@ class DemoControls {
         this.#moveLeft = false;
         this.#moveRight = false;
         this.#insideCameraBB = new THREE.Box3();
-        this.#boundingBoxes = this.#getBoundingBoxes(this.#objects);
+        const wallBBInfo = this.#getWallBB(objects, scene);
+        this.#wallBBs = wallBBInfo.boxes;
+        this.#wallBBDisplays = wallBBInfo.displays;
+        if (!this.showBB){
+            this.toggleWallBB();
+        }
+
         this.#raycaster = new THREE.Raycaster();
         this.#dragOrigin = new THREE.Vector3();
         this.#measureGroup = new THREE.Group();
@@ -331,7 +337,7 @@ class DemoControls {
         if (this.insideMode == "teleport") {
             this.#scene.add(this.#insidePointer);   
         } else {
-            this.#boundingBoxes = this.#getBoundingBoxes(this.#objects);
+            const collisionObjects = this.#objects.walls;
         }
         console.log("Set to Non Mobile")
         this.#pointerLock = new PointerLockControls(this.#camera.inside, this.#canvas);
@@ -355,14 +361,14 @@ class DemoControls {
         this.#view = newControl;
         if (newControl == "ortho") {
             this.#reset();
-            this.#boundingBoxes = this.#getBoundingBoxes(this.#objects);
+            const allObjects = this.getAllObjects();
             document.addEventListener('keydown', this.#toggleGumball);
             this.#canvas.addEventListener('click', this.#orthoOnClick);
             this.#canvas.addEventListener('mousemove', this.#orthoOnMove);
             this.hideBlocker();
         } else if (newControl == "outside") {
             this.#reset();
-            this.#boundingBoxes = this.#getBoundingBoxes(this.#objects);
+            const allObjects = this.getAllObjects();
             this.#canvas.addEventListener('click', this.#outsideOnClick);
             document.addEventListener('keydown', this.#toggleGumball);
             this.#orbit = new OrbitControls(this.#camera.outside, this.#canvas);
@@ -378,10 +384,19 @@ class DemoControls {
         }
     }
 
+    getAllObjects() {
+        return this.#objects.furniture.concat(this.#objects.walls)
+        .concat(this.#objects.uploaded)
+        .concat(this.#objects.windows)
+        .concat(this.#objects.floor);
+    }
+
+    getDraggableObjects() {
+        return this.#objects.furniture.concat(this.#objects.uploaded);
+    }
+
     updateObjects(objects) {
-        this.#objects = objects.furniture.concat(objects.walls).concat(objects.uploaded);
-        this.#pass_through_objects = objects.doors.concat(objects.windows);
-        this.#draggableObjects = objects.furniture.concat(objects.uploaded);
+        this.#objects = objects;
     }
     /**
      * Updates the controls based on the current camera view mode.
@@ -415,7 +430,7 @@ class DemoControls {
                 } else {
                     const newRaycaster = new THREE.Raycaster();
                     newRaycaster.setFromCamera(new THREE.Vector2(), this.#camera.inside);
-                    const intersects = newRaycaster.intersectObjects(this.#objects, true);
+                    const intersects = newRaycaster.intersectObjects(this.getAllObjects(), true);
                     if (intersects.length > 0) {
                         const firstObject = intersects[0].object;
                         this.#insidePointer.position.x = intersects[0].point.x;
@@ -450,8 +465,7 @@ class DemoControls {
                     this.#pointerLock.moveRight( - this.#velocity.x * delta );
                     this.#pointerLock.moveForward( - this.#velocity.z * delta );
                     this.#setCameraBB(this.#insideCameraBB, camera.inside);
-                    let collision = this.#checkCollisions(this.#insideCameraBB, this.#boundingBoxes)
-                    if (collision.hasCollision && collision.collidedBox.name != "wall_11_3" && collision.collidedBox.name != "wall_11_4" ) {
+                    if (this.#checkWallCollisions(this.#insideCameraBB, this.#wallBBs)) {
                         this.#pointerLock.moveRight(this.#velocity.x * delta );
                         this.#pointerLock.moveForward(this.#velocity.z * delta );
                         this.#setCameraBB(this.#insideCameraBB, camera.inside);
@@ -477,7 +491,8 @@ class DemoControls {
                         
                         const newRaycaster = new THREE.Raycaster();
                         newRaycaster.setFromCamera(new THREE.Vector2(), this.#camera.inside);
-                        const intersects = newRaycaster.intersectObjects(this.#objects, true);
+                        
+                        const intersects = newRaycaster.intersectObjects(this.getAllObjects(), true);
                         if (intersects.length > 0) {
                             const firstObject = intersects[0].object;
                             this.#insidePointer.position.x = intersects[0].point.x;
@@ -504,15 +519,14 @@ class DemoControls {
                 const object = this.#gumball.object;
                 this.#setToGroundHeight(object)
                 const boundingBox = new THREE.Box3().setFromObject( object);
-                const isCollided = this.#checkCollisions(boundingBox, this.#boundingBoxes);
-                if (isCollided.hasCollision && isCollided.collidedBox.name != object.name) {
+                if (this.#checkWallCollisions(boundingBox, this.#wallBBs) || 
+                    this.#checkObjectCollisions(object, this.#objects.uploaded)) {
                     this.#colorObject(object, 0xFF0000);
                 } else {
                     this.#colorObject(object, 0x000000);
-                    this.#dragOrigin = object.position.clone();
                 }
-                this.#boundingBoxes = this.#getBoundingBoxes(this.#objects); // update boundingBoxes
             }
+            
         }
     }
 
@@ -520,7 +534,8 @@ class DemoControls {
     #setToGroundHeight (object) {
         let boundingBox = new THREE.Box3().setFromObject( object);
         const newRaycaster = new THREE.Raycaster(new THREE.Vector3(0, boundingBox.max.y, 0 ), new THREE.Vector3(0,-1,0));
-        const intersects = newRaycaster.intersectObjects(this.#objects,true);
+
+        const intersects = newRaycaster.intersectObjects(this.getAllObjects(),true);
         if (intersects.length > 0) {
             let firstObject;
             if (intersects.length > 1) {
@@ -534,7 +549,7 @@ class DemoControls {
                 object.position.z);
         } else {
             const newRaycaster = new THREE.Raycaster(new THREE.Vector3(0, boundingBox.max.y, 0 ), new THREE.Vector3(0,1,0));
-            const intersects2 = newRaycaster.intersectObjects(this.#objects,true);
+            const intersects2 = newRaycaster.intersectObjects(this.getAllObjects(),true);
             if (intersects2.length > 0) {
                 let firstObject;
                 if (intersects2.length > 1) {
@@ -653,7 +668,7 @@ class DemoControls {
         mouse.x = ( event.clientX - rect.left ) / rect.width * 2 - 1;
         mouse.y = - ( event.clientY - rect.top ) / rect.height * 2 + 1;  
         this.#raycaster.setFromCamera( mouse, this.#camera.outside );
-        const intersections = this.#raycaster.intersectObjects( this.#draggableObjects, true );
+        const intersections = this.#raycaster.intersectObjects( this.getDraggableObjects(), true );
         if (intersections.length > 0) {
             if (intersections[0].object.parent != null) {
                 this.#clickObject(intersections[0].object.parent, this.#camera.outside);
@@ -671,7 +686,7 @@ class DemoControls {
             if (this.#pointerLock.isLocked) {
                 const newRaycaster = new THREE.Raycaster();
                 newRaycaster.setFromCamera(new THREE.Vector2(), this.#camera.inside);
-                const intersects = newRaycaster.intersectObjects(this.#objects, true);
+                const intersects = newRaycaster.intersectObjects(this.getAllObjects(), true);
                 if (intersects.length > 0) {
                     const firstObject = intersects[0].object;
                     if (firstObject.name.includes("floor")) {
@@ -691,7 +706,7 @@ class DemoControls {
         console.log("double click")
         const newRaycaster = new THREE.Raycaster();
         newRaycaster.setFromCamera(new THREE.Vector2(), this.#camera.inside);
-        const intersects = newRaycaster.intersectObjects(this.#objects, true);
+        const intersects = newRaycaster.intersectObjects(this.getAllObjects(), true);
         if (intersects.length > 0) {
             const firstObject = intersects[0].object;
             if (firstObject.name.includes("floor")) {
@@ -739,7 +754,239 @@ class DemoControls {
         }
     }
 
+    #splitWallVertices(object, draw) {
+        const geometry = object.geometry;
+        const positionAttribute = geometry.attributes.position;
+        const leftVertices = [];
+        const rightVertices = [];
+        const topVertices = [];
+        const bottomVertices = [];
+  
 
+        // get vertices
+        const vertices = [];
+        for (let i = 0; i < positionAttribute.count; i++) {
+            const localVertex = new THREE.Vector3().fromBufferAttribute(positionAttribute, i);
+            const worldVertex = localVertex.applyMatrix4(object.matrixWorld);
+            vertices.push(worldVertex);
+        }
+
+        // get standard bounding box
+        const boundingBox = new THREE.Box3();
+        boundingBox.setFromPoints(vertices)
+        let isDirX = (boundingBox.max.z - boundingBox.min.z) < (boundingBox.max.x - boundingBox.min.x)
+        if (!isDirX) {
+            if (Math.abs(boundingBox.max.x - boundingBox.min.x) > 0.1) {
+                return {top: topVertices, bottom: bottomVertices, right: rightVertices, left: leftVertices};
+            }
+            let x = boundingBox.max.x;
+            const upperRightVertex = new THREE.Vector3(x, boundingBox.max.y, boundingBox.max.z);
+            const upperLeftVertex = new THREE.Vector3(x, boundingBox.max.y, boundingBox.min.z);
+            const lowerRightVertex = new THREE.Vector3(x, boundingBox.min.y, boundingBox.max.z);
+            const lowerLeftVertex = new THREE.Vector3(x, boundingBox.min.y, boundingBox.min.z);
+            
+            let topEdge = null;
+            let bottomEdge = null;
+            let rightEdge = null;
+            let leftEdge = null;
+            for (let i = 0; i < vertices.length; i ++) {
+                if (this.#eqV3(vertices[i], upperLeftVertex, 0.1) || 
+                    this.#eqV3(vertices[i], upperRightVertex, 0.1) || 
+                    this.#eqV3(vertices[i], lowerRightVertex, 0.1) ||
+                    this.#eqV3(vertices[i], lowerLeftVertex, 0.1)  ) {
+                        continue;
+                }
+                if (topEdge == null || vertices[i].y > topEdge) {
+                    topEdge = vertices[i].y;
+                }
+                if (bottomEdge == null || vertices[i].y < bottomEdge) {
+                    bottomEdge = vertices[i].y;
+                }
+                if (rightEdge == null || vertices[i].z > rightEdge) {
+                    rightEdge = vertices[i].z;
+                }
+                if (leftEdge == null || vertices[i].z < leftEdge) {
+                    leftEdge = vertices[i].z;
+                }
+            }
+            if ((Math.abs(leftEdge - rightEdge) > 0.02) && (Math.abs(topEdge - bottomEdge) > 0.02)) {
+                topVertices.push(upperRightVertex);
+                topVertices.push(new THREE.Vector3(x, topEdge, upperRightVertex.z));
+                topVertices.push(upperLeftVertex);
+                topVertices.push(new THREE.Vector3(x, topEdge, upperLeftVertex.z));
+
+                rightVertices.push(upperRightVertex);
+                rightVertices.push(new THREE.Vector3(x, upperRightVertex.y, rightEdge));
+                rightVertices.push(lowerRightVertex);
+                rightVertices.push(new THREE.Vector3(x, lowerRightVertex.y, rightEdge));
+
+                bottomVertices.push(lowerRightVertex);
+                bottomVertices.push(new THREE.Vector3(x, bottomEdge, lowerRightVertex.z));
+                bottomVertices.push(lowerLeftVertex);
+                bottomVertices.push(new THREE.Vector3(x, bottomEdge, lowerLeftVertex.z));
+
+                leftVertices.push(upperLeftVertex);
+                leftVertices.push(new THREE.Vector3(x, upperLeftVertex.y, leftEdge));
+                leftVertices.push(lowerLeftVertex);
+                leftVertices.push(new THREE.Vector3(x, lowerLeftVertex.y, leftEdge));
+            }
+        } else {
+            if (Math.abs(boundingBox.max.z - boundingBox.min.z) > 0.1) {
+                return {top: topVertices, bottom: bottomVertices, right: rightVertices, left: leftVertices};
+            }
+            let z = boundingBox.max.z;
+            const upperRightVertex = new THREE.Vector3(boundingBox.max.x, boundingBox.max.y, z);
+            const upperLeftVertex = new THREE.Vector3(boundingBox.min.x, boundingBox.max.y, z);
+            const lowerRightVertex = new THREE.Vector3(boundingBox.max.x, boundingBox.min.y, z);
+            const lowerLeftVertex = new THREE.Vector3(boundingBox.min.x, boundingBox.min.y, z);
+            
+            let topEdge = null;
+            let bottomEdge = null;
+            let rightEdge = null;
+            let leftEdge = null;
+            for (let i = 0; i < vertices.length; i ++) {
+                if (this.#eqV3(vertices[i], upperLeftVertex, 0.1) || 
+                    this.#eqV3(vertices[i], upperRightVertex, 0.1) || 
+                    this.#eqV3(vertices[i], lowerRightVertex, 0.1) ||
+                    this.#eqV3(vertices[i], lowerLeftVertex, 0.1)  ) {
+                        continue;
+                }
+                if (topEdge == null || vertices[i].y > topEdge) {
+                    topEdge = vertices[i].y;
+                }
+                if (bottomEdge == null || vertices[i].y < bottomEdge) {
+                    bottomEdge = vertices[i].y;
+                }
+                if (rightEdge == null || vertices[i].x > rightEdge) {
+                    rightEdge = vertices[i].x;
+                }
+                if (leftEdge == null || vertices[i].x < leftEdge) {
+                    leftEdge = vertices[i].x;
+                }
+            }
+            if ((Math.abs(leftEdge - rightEdge)) > 0.02 && (Math.abs(topEdge - bottomEdge) > 0.02)) {
+                topVertices.push(upperRightVertex);
+                topVertices.push(new THREE.Vector3(upperRightVertex.x, topEdge, z));
+                topVertices.push(upperLeftVertex);
+                topVertices.push(new THREE.Vector3(upperLeftVertex.x, topEdge, z));
+
+                rightVertices.push(upperRightVertex);
+                rightVertices.push(new THREE.Vector3(rightEdge, upperRightVertex.y, z));
+                rightVertices.push(lowerRightVertex);
+                rightVertices.push(new THREE.Vector3(rightEdge, lowerRightVertex.y, z));
+
+                bottomVertices.push(lowerRightVertex);
+                bottomVertices.push(new THREE.Vector3(lowerRightVertex.x, bottomEdge, z));
+                bottomVertices.push(lowerLeftVertex);
+                bottomVertices.push(new THREE.Vector3(lowerLeftVertex.x, bottomEdge, z));
+                
+                leftVertices.push(upperLeftVertex);
+                leftVertices.push(new THREE.Vector3(leftEdge, upperLeftVertex.y, z));
+                leftVertices.push(lowerLeftVertex);
+                leftVertices.push(new THREE.Vector3(leftEdge, lowerLeftVertex.y, z));
+            }
+        }
+        if (draw) {
+            this.#drawVertices(topVertices, 0x00ff00)
+            this.#drawVertices(bottomVertices, 0x0000ff)
+            this.#drawVertices(leftVertices, 0xff00ff)
+            this.#drawVertices(rightVertices, 0x000000)
+        }
+        return {top: topVertices, bottom: bottomVertices, right: rightVertices, left: leftVertices};
+
+    }
+
+    #eqV3(v1, v2, epsilon) {
+        return ( ( Math.abs( v1.x - v2.x ) < epsilon ) && ( Math.abs( v1.y - v2.y ) < epsilon ) && ( Math.abs( v1.z - v2.z ) < epsilon ) );
+    }
+
+    #drawVertices(vertices, color=0xff0000) {
+        // Optionally visualize the vertices
+        const pointsGeometry = new THREE.BufferGeometry().setFromPoints(vertices);
+        const pointsMaterial = new THREE.PointsMaterial({ color: color, size: 0.2 });
+        const points = new THREE.Points(pointsGeometry, pointsMaterial);
+        this.#scene.add(points);
+    }
+    
+    #splitWall(wall) {
+        let topVertices = [];
+        let bottomVertices = [];
+        let rightVertices = [];
+        let leftVertices = [];
+
+        wall.children.forEach((child) => {
+            if (child.name.includes("wall")) {
+                const split = this.#splitWallVertices(child, false);
+                topVertices = topVertices.concat(split.top);
+                bottomVertices = bottomVertices.concat(split.bottom);
+                rightVertices = rightVertices.concat(split.right);
+                leftVertices = leftVertices.concat(split.left);
+            }
+        })
+        const leftGeometry = new THREE.BufferGeometry().setFromPoints(leftVertices);
+        leftGeometry.computeBoundingBox();
+
+        const rightGeometry = new THREE.BufferGeometry().setFromPoints(rightVertices);
+        rightGeometry.computeBoundingBox();
+
+        const topGeometry = new THREE.BufferGeometry().setFromPoints(topVertices);
+        topGeometry.computeBoundingBox();
+
+        const bottomGeometry = new THREE.BufferGeometry().setFromPoints(bottomVertices, 0x0000ff);
+        bottomGeometry.computeBoundingBox();
+
+        let displays = [];
+        const leftBoxHelper = new THREE.Box3Helper(leftGeometry.boundingBox, 0xff00ff);
+        displays.push(leftBoxHelper);
+        const rightBoxHelper = new THREE.Box3Helper(rightGeometry.boundingBox, 0x000000);
+        displays.push(rightBoxHelper);
+        const topBoxHelper = new THREE.Box3Helper(topGeometry.boundingBox, 0x00ff00);
+        displays.push(topBoxHelper);
+        const bottomBoxHelper = new THREE.Box3Helper(bottomGeometry.boundingBox);
+        displays.push(bottomBoxHelper);
+        
+        // if (topVertices.length != 0) {
+        //     this.#scene.add(topBoxHelper);
+        // }
+        // if (bottomVertices.length != 0) {
+        //     this.#scene.add(bottomBoxHelper);
+        // }
+        // if (leftVertices.length != 0) {
+        //     this.#scene.add(leftBoxHelper);
+        // }
+        // if (rightVertices.length != 0) {
+        //     this.#scene.add(rightBoxHelper);
+        // }
+        this.#scene.add(topBoxHelper);
+        this.#scene.add(bottomBoxHelper);
+        this.#scene.add(leftBoxHelper);
+        this.#scene.add(rightBoxHelper);
+        return {top: topGeometry.boundingBox, 
+                bottom: bottomGeometry.boundingBox, 
+                right: rightGeometry.boundingBox, 
+                left: leftGeometry.boundingBox,
+                displays: displays
+               };
+    }
+
+    #normalWall(wall) {
+        let count = 0;
+        wall.children.forEach( (child) => {
+            if (child.name.includes("wall")) {
+                if (child.geometry.attributes.position.count != 4) {
+                    if (child.geometry.attributes.position.count == 8) {
+                        console.log(child.name)
+                        console.log(child.geometry.attributes.position.count)
+                    } else {
+                        return false;
+                    }
+
+                }
+                count += 1
+            }
+        });
+        return count == 4;
+    }
     /**
      * Computes and returns an array of bounding boxes for the given objects.
      * 
@@ -753,16 +1000,70 @@ class DemoControls {
      * @param {THREE.Object3D[]} objects - The array of objects for which bounding boxes are computed.
      * @returns {Array<{ box: THREE.Box3, name: string, index: number }>} Array of objects containing bounding boxes, object names, and indices.
      */
-    #getBoundingBoxes(objects) {
+    #getWallBB () {
         let boxes = [];
-        for (let i = 0; i < objects.length; i++) {
-                const boundingBox = new THREE.Box3().setFromObject( objects[i] );
-                boxes.push({box: boundingBox, name: objects[i].name, index: i});
-    
+        let displays = [];
+        for (let i = 0; i < this.#objects.walls.length; i++) {
+            if (this.#normalWall(this.#objects.walls[i])) {
+                const boundingBox = new THREE.Box3().setFromObject( this.#objects.walls[i] );
+                const boundingBoxHelper = new THREE.Box3Helper(boundingBox);
+                this.#scene.add(boundingBoxHelper);
+                boxes.push(boundingBox)  
+                displays.push(boundingBoxHelper)
+
+            } else {
+                const split = this.#splitWall(this.#objects.walls[i]);
+                boxes.push(split.top);
+                boxes.push(split.bottom);
+                boxes.push(split.right);
+                boxes.push(split.left);
+                displays = displays.concat(split.displays);
+            }
         }
-        return boxes;
+
+        return {boxes: boxes, displays: displays};
+        // let boxes = [];
+        // for (let i = 0; i < objects.length; i++) {
+        //     // if (objects.name.includes("wall"))
+        //     if (objects[i].name.includes("wall")) {
+                
+        //         if (objects[i].geometry.attributes.position.count > 4) {
+
+        //             const splitBoundingBoxes = this.#splitWallVertices(objects[i], objects[i].name.includes("11_4"));
+        //             for (let i = 0; i < splitBoundingBoxes.length ; i++) {
+        //                 if (objects[i].name.includes("11_4")) {
+        //                     const boxHelper1 = new THREE.Box3Helper(splitBoundingBoxes[i]);
+        //                     this.#scene.add(boxHelper1);
+        //                 }
+
+        //                 boxes.push({box: splitBoundingBoxes[i], name: objects[i].name, index: i})
+        //             }
+        //         }else{
+        //             const boundingBox = objects[i].geometry.boundingBox.clone();
+        //             boundingBox.min.y += (this.#modelSize.y / 2);
+        //             boundingBox.max.y += (this.#modelSize.y / 2);
+        //             if (objects[i].name.includes("11_4")) {
+        //                 const boxHelper1 = new THREE.Box3Helper(boundingBox);
+        //                 this.#scene.add(boxHelper1);
+        //             }
+        //             boxes.push({box: boundingBox, name: objects[i].name, index: i});
+        //         }
+
+                
+        //     } else {
+        //         const boundingBox = new THREE.Box3().setFromObject( objects[i] );
+        //         boxes.push({box: boundingBox, name: objects[i].name, index: i})
+        //     }
+    
+        // }
+        // return boxes;
     }
 
+    toggleWallBB(){
+        this.#wallBBDisplays.forEach( (wallBB) => {
+            wallBB.visible = !wallBB.visible
+        });
+    }
     /**
      * Checks for collisions between a given bounding box and an array of bounding boxes.
      * 
@@ -776,13 +1077,42 @@ class DemoControls {
      * @returns {{ hasCollision: boolean, collidedBox: { box: THREE.Box3, name: string, index: number } }} 
      * Object indicating collision status and details of the collided bounding box.
      */
-    #checkCollisions(box, boundingBoxes){
+    #checkWallCollisions(box, boundingBoxes){
         for (let i = 0; i < boundingBoxes.length; i++) {
-            if (box.intersectsBox(boundingBoxes[i].box)) {
-                return {hasCollision: true, collidedBox: boundingBoxes[i]};
+            if (box.intersectsBox(boundingBoxes[i])) {
+                return true;
             }
         }
-        return {hasCollision: false, collidedObject: null} ;
+        return false;
+    }
+
+    createBoundingBoxHelper(object, color = 0x0000ff) {
+        const box = new THREE.Box3().setFromObject(object);
+        const helper = new THREE.Box3Helper(box, color);
+        return helper;
+    }
+    
+    #checkObjectCollisions(object, objects){
+        object.updateMatrixWorld(true);
+        
+        const obb = new OBB();
+        // Update the OBBs to match the meshes
+        obb.fromBox3(new THREE.Box3().setFromObject(object, true));
+        for (let i = 0; i < objects.length; i++) {
+            if (object == objects[i]) {
+                continue;
+            } 
+            objects[i].updateMatrixWorld(true)
+            const obb2 = new OBB();
+            obb2.fromBox3(new THREE.Box3().setFromObject(objects[i], true));
+            if (obb.intersectsOBB(obb2)) {
+                console.log(object.position)
+                console.log('Object OBB:', obb);
+                console.log('Comparing with:', obb2);
+                return true;
+            }
+        }
+        return false;
     }
 
     #toggleGumball = (event) => {
@@ -881,7 +1211,7 @@ class DemoControls {
      */
     #orthoOnClick = (event) => {
         // event.preventDefault();
-
+        console.log("ortho click")
         const rect = this.#canvas.getBoundingClientRect();
         const mouse = new THREE.Vector2();
         mouse.x = ( event.clientX - rect.left ) / rect.width * 2 - 1;
@@ -895,7 +1225,7 @@ class DemoControls {
             mouse.x = ( event.clientX - rect.left ) / rect.width * 2 - 1;
             mouse.y = - ( event.clientY - rect.top ) / rect.height * 2 + 1;  
             this.#raycaster.setFromCamera( mouse, this.#camera.ortho );
-            const intersections = this.#raycaster.intersectObjects( this.#draggableObjects, true );
+            const intersections = this.#raycaster.intersectObjects( this.getDraggableObjects(), true );
             if (intersections.length > 0) {
                 if (intersections[0].object.parent != null) {
                     this.#clickObject(intersections[0].object.parent, this.#camera.ortho);
@@ -922,7 +1252,7 @@ class DemoControls {
                 }
             } 
             if (this.#measure_points.length < 2) {
-                let intersections = this.#raycaster.intersectObjects( this.#objects, true );
+                let intersections = this.#raycaster.intersectObjects( this.getAllObjects(), true );
                 const planeIntersection = new THREE.Vector3();
                 const originPlane = new THREE.Plane (new THREE.Vector3(0,1,0));
                 this.#raycaster.ray.intersectPlane(originPlane, planeIntersection);
