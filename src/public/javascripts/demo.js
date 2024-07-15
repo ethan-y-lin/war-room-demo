@@ -671,8 +671,8 @@ class DemoScene {
         
         // GRASS
         // Parameters
-        const PLANE_SIZE = 30;
-        const BLADE_COUNT = 150000;
+        const PLANE_SIZE = 15;
+        const BLADE_COUNT = 80000;
         const BLADE_WIDTH = 0.05;
         const BLADE_HEIGHT = 0.15;
         const BLADE_HEIGHT_VARIATION = 0.3;
