@@ -8,6 +8,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
 import grassShader from '../shaders/grass.js'
 import { Sky } from 'three/addons/objects/Sky.js';
+import { OBB } from 'three/addons/math/OBB.js';
 import SunCalc from 'suncalc';
 
 const boxMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
@@ -557,8 +558,9 @@ class DemoScene {
             // Compute the bounding box of the object
             const box = new THREE.Box3().setFromObject(newObject, true);
 
+            const size = new THREE.Vector3(box.max.x - box.min.x, box.max.y - box.min.y, box.max.z - box.min.z)
             // Create a box helper
-            const boxGeometry = new THREE.BoxGeometry(box.max.x - box.min.x, box.max.y - box.min.y, box.max.z - box.min.z);
+            const boxGeometry = new THREE.BoxGeometry(size.x, size.y, size.z);
             this.resources.push(boxGeometry);
             const boundingBox = new THREE.Mesh(boxGeometry, boxMaterial);
 
@@ -743,18 +745,6 @@ class DemoScene {
         
         this.#initSky(scene);
 
-        //skydome
-        // const skyGeo = new THREE.SphereGeometry(800, 32, 15);
-        // this.resources.push(skyGeo)
-        // const textureLoader = new THREE.TextureLoader();
-        // const skyTexture = textureLoader.load('../img/sky.png');
-        // const skyMat = new THREE.MeshBasicMaterial({map: skyTexture, side: THREE.BackSide});
-        // this.resources.push(skyMat);
-        // const sky = new THREE.Mesh(skyGeo, skyMat);
-        // scene.add(sky);
-        
-        // const axesHelper = new THREE.AxesHelper( 100 );
-        // scene.add( axesHelper );
         const assetLoader = new GLTFLoader();
 
         return new Promise((resolve, reject) => {
@@ -804,27 +794,6 @@ class DemoScene {
         });
     }
 
-    #getObjectInfo(name) {
-        let type = "";
-        let groupNum = "";
-        let soloNum = "";
-        let split1 = name.indexOf("_");
-        let split2 = name.lastIndexOf("_");
-        type = name.substring(0, split1);
-        if (split1 + 1 < name.length) {
-            if (split1 == split2) {
-                groupNum = name.substring(split1 + 1, name.length);
-                return {type: type, groupNum: groupNum, soloNum: "NA"};
-            } else {
-                groupNum = name.substring(split1 + 1, split2);
-                if (split2 + 1 < name.length) {
-                    soloNum = name.substring(split2 + 1, name.length);
-                    return {type: type, groupNum: groupNum, soloNum: soloNum};
-                }
-            }
-        }
-        return {type: type, groupNum: "NA", soloNum: "NA"}; 
-    }
     /**
      * Organizes objects in the scene by categorizing them into doors, windows, walls, and removing irrelevant objects.
      * The organization is based on the names of the objects. 
@@ -846,57 +815,13 @@ class DemoScene {
             } else if (obj.name.includes("wall")) {
                 this.#addDimensionLabels(obj);
                 this.#objects.walls.push(obj);
-                // if(objInfo.type == "floor"){
-                //     obj.material.color.setHex(0x8b5a2b);
-                //     obj.receiveShadow = true;
-                // } else if(objInfo.type == "wall"){
-                //     obj.material.color.setHex(0xedeae5);
-                //     obj.castShadow = true;
-                //     obj.receiveShadow = true;
-                // }
             } else if (obj.name.includes("floor")) {
                 this.#objects.floor.push(obj);
             } else {
                 this.#model.remove(obj);
             }
-            // this.#model.remove(obj);
         });
     }
-
-    // #organizeObjects(objects){
-    //     objects.forEach((obj) =>  {
-
-    //         if (obj.children.length > 0) {
-    //             this.#organizeObjects(obj.children);
-    //             return;
-    //         }  
-    //         const objInfo = this.#getObjectInfo(obj.name);
-    //         if (objInfo.type == "door") {
-    //             this.#objects.doors.push(obj);
-    //         } else if (objInfo.type == "window") {
-    //             this.#objects.windows.push(obj);
-    //         } else if (objInfo.type == "wall" || objInfo.type == "floor") {
-    //             const group = objInfo.type + objInfo.groupNum;
-    //             if (! (this.#objectGroups.includes(group))) {
-    //                 this.#objectGroups.push(group);
-    //                 obj.clear();
-    //                 this.#addDimensionLabels(obj);
-    //             }
-    //             this.#objects.walls.push(obj);
-    //             if(objInfo.type == "floor"){
-    //                 obj.material.color.setHex(0x8b5a2b);
-    //                 obj.receiveShadow = true;
-    //             } else if(objInfo.type == "wall"){
-    //                 obj.material.color.setHex(0xedeae5);
-    //                 obj.castShadow = true;
-    //                 obj.receiveShadow = true;
-    //             }
-    //         } else {
-    //             this.#model.remove(obj);
-    //         }
-    //         this.#model.remove(obj);
-    //     });
-    // }
 
     #addTextureToRoom() {
         this.#objects.walls.forEach( (wall) => {
@@ -925,75 +850,56 @@ class DemoScene {
         // Create a box helper
         const boxGeometry = new THREE.BoxGeometry(bbox.max.x - bbox.min.x, bbox.max.y - bbox.min.y, bbox.max.z - bbox.min.z);
         this.resources.push(boxGeometry);
-        const boundingBox = new THREE.Mesh(boxGeometry, boxMaterial);
+        if (size.x > 1) {
+            // add label
+            const text = document.createElement( 'div' );
+            text.style.backgroundColor = 'rgba(50,50,50,0.5)';
+            text.style.color = 'white';
+            text.className = 'dim-label';
+            text.style.borderRadius = '5px';
+            text.style.padding = '5px';
+            text.dataset.value = size.x;
 
-        // boundingBox.position.set((bbox.max.x + bbox.min.x) / 2, (bbox.max.y + bbox.min.y) / 2, (bbox.max.z + bbox.min.z) / 2);
-        // boundingBox.name = "bounding_box";
-        // boundingBox.visible = this.#showBoundingBoxes;
-        // obj.add(boundingBox);
-        // if (size.x > 1) {
-        //     // add label
-        //     const text = document.createElement( 'div' );
-        //     text.style.backgroundColor = 'rgba(50,50,50,0.5)';
-        //     text.style.color = 'white';
-        //     text.className = 'dim-label';
-        //     text.style.borderRadius = '5px';
-        //     text.style.padding = '5px';
-        //     text.dataset.value = size.x;
-
-        //     if (this.#units == "meters") {
-        //         const roundDist = Math.round(size.x * 100) / 100;
-        //         text.textContent = roundDist + " m";
-        //     } else if (this.#units == "feet") {
-        //         const feet = size.x * 3.281;
-        //         const flooredFeet = Math.floor(feet);
-        //         const inches = Math.round((feet - flooredFeet) * 12);  
-        //         text.textContent = flooredFeet + " ft. " + inches + " in.";
-        //     }
+            if (this.#units == "meters") {
+                const roundDist = Math.round(size.x * 100) / 100;
+                text.textContent = roundDist + " m";
+            } else if (this.#units == "feet") {
+                const feet = size.x * 3.281;
+                const flooredFeet = Math.floor(feet);
+                const inches = Math.round((feet - flooredFeet) * 12);  
+                text.textContent = flooredFeet + " ft. " + inches + " in.";
+            }
     
-        //     const label = new CSS2DObject( text );
-        //     label.name = "xlabel";
-        //     label.position.set((bbox.min.x + bbox.max.x) / 2, bbox.min.y, bbox.min.z)
-        //     obj.add(label)
-        // } 
-        // if (size.z > 1) {
-        //     // add label
-        //     const text = document.createElement( 'div' );
-        //     text.style.backgroundColor = 'rgba(50,50,50,0.5)';
-        //     text.style.color = 'white';
-        //     text.className = 'dim-label';
-        //     text.style.borderRadius = '5px';
-        //     text.style.padding = '5px';
-        //     text.dataset.value = size.z;
+            const label = new CSS2DObject( text );
+            label.name = "xlabel";
+            label.position.set((bbox.min.x + bbox.max.x) / 2, bbox.min.y, bbox.min.z)
+            obj.add(label)
+        } 
+        if (size.z > 1) {
+            // add label
+            const text = document.createElement( 'div' );
+            text.style.backgroundColor = 'rgba(50,50,50,0.5)';
+            text.style.color = 'white';
+            text.className = 'dim-label';
+            text.style.borderRadius = '5px';
+            text.style.padding = '5px';
+            text.dataset.value = size.z;
 
-        //     if (this.#units == "meters") {
-        //         const roundDist = Math.round(size.z * 100) / 100;
-        //         text.textContent = roundDist + " m";
-        //     } else if (this.#units == "feet") {
-        //         const feet = size.z * 3.281;
-        //         const flooredFeet = Math.floor(feet);
-        //         const inches = Math.round((feet - flooredFeet) * 12);  
-        //         text.textContent = flooredFeet + " ft. " + inches + " in.";
-        //     }
+            if (this.#units == "meters") {
+                const roundDist = Math.round(size.z * 100) / 100;
+                text.textContent = roundDist + " m";
+            } else if (this.#units == "feet") {
+                const feet = size.z * 3.281;
+                const flooredFeet = Math.floor(feet);
+                const inches = Math.round((feet - flooredFeet) * 12);  
+                text.textContent = flooredFeet + " ft. " + inches + " in.";
+            }
             
-        //     const label = new CSS2DObject( text );
-        //     label.name = "zlabel";
-        //     label.position.set(bbox.min.x, bbox.min.y, (bbox.min.z + bbox.max.z) / 2)
-        //     obj.add(label)
-        // }
-        // add label
-        // const text = document.createElement( 'div' );
-        // text.style.backgroundColor = 'rgba(50,50,50,0.5)';
-        // text.style.color = 'white';
-        // text.className = 'dim-label';
-        // text.style.borderRadius = '5px';
-        // text.style.padding = '5px';
-        // text.textContent = obj.name;
-        
-        // const label = new CSS2DObject( text );
-        // label.name = "namelabel";
-        // label.position.set(bbox.min.x, bbox.min.y, (bbox.min.z + bbox.max.z) / 2)
-        // obj.add(label)
+            const label = new CSS2DObject( text );
+            label.name = "zlabel";
+            label.position.set(bbox.min.x, bbox.min.y, (bbox.min.z + bbox.max.z) / 2)
+            obj.add(label)
+        }
     }
 
     updateDateTime(date) {

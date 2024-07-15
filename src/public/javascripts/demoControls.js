@@ -3,8 +3,7 @@ import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockCont
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
 import { MobileControls } from './mobileControls';
-import { getAll } from 'three/examples/jsm/libs/tween.module.js';
-import { OctreeHelper } from 'three/examples/jsm/Addons.js';
+import { OBB } from 'three/examples/jsm/math/OBB.js';
 
 const blackMaterial = new THREE.MeshBasicMaterial( {color: 0x000000} ); 
 const redMaterial = new THREE.MeshBasicMaterial( {color: 0xff0000} ); 
@@ -528,6 +527,7 @@ class DemoControls {
                     this.#colorObject(object, 0x000000);
                 }
             }
+            
         }
     }
 
@@ -1087,11 +1087,29 @@ class DemoControls {
         return false;
     }
 
+    createBoundingBoxHelper(object, color = 0x0000ff) {
+        const box = new THREE.Box3().setFromObject(object);
+        const helper = new THREE.Box3Helper(box, color);
+        return helper;
+    }
+    
     #checkObjectCollisions(object, objects){
-        const boundingBox = new THREE.Box3().setFromObject(object);
+        object.updateMatrixWorld(true);
+        
+        const obb = new OBB();
+        // Update the OBBs to match the meshes
+        obb.fromBox3(new THREE.Box3().setFromObject(object, true));
         for (let i = 0; i < objects.length; i++) {
-            const other = new THREE.Box3().setFromObject(objects[i]);
-            if (boundingBox.intersectsBox(other) && object != objects[i]) {
+            if (object == objects[i]) {
+                continue;
+            } 
+            objects[i].updateMatrixWorld(true)
+            const obb2 = new OBB();
+            obb2.fromBox3(new THREE.Box3().setFromObject(objects[i], true));
+            if (obb.intersectsOBB(obb2)) {
+                console.log(object.position)
+                console.log('Object OBB:', obb);
+                console.log('Comparing with:', obb2);
                 return true;
             }
         }
