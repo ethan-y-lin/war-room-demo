@@ -561,9 +561,19 @@ class DemoScene {
         // Add Sun 
         this.#sun = new THREE.DirectionalLight(0xffffff, 10);
         this.#sun.castShadow = true;
-        
+        this.#sun.shadow.mapSize.width = 2048;
+        this.#sun.shadow.mapSize.height = 2048;
+        this.#sun.shadow.bias = 0.0001;
+        // Define the shadow camera's frustum size
+        this.#sun.shadow.camera.left = -20;
+        this.#sun.shadow.camera.right = 20;
+        this.#sun.shadow.camera.top = 20;
+        this.#sun.shadow.camera.bottom = -20;
+        this.#sun.shadow.camera.near = -10;
+        this.#sun.shadow.camera.far = 10;
         // scene.add(this.#sun);
-
+        // const helper = new THREE.CameraHelper(this.#sun.shadow.camera);
+        // scene.add(helper);
         this.skyController = {
             turbidity: 20,
             rayleigh: 0.558,
@@ -1006,6 +1016,7 @@ class DemoScene {
         }
         ceiling.position.y = this.#modelSize.y;
         ceiling.castShadow = true;
+        ceiling.receiveShadow = true;
         this.#objects.ceiling = ceiling;
         this.#scene.add(ceiling);
 

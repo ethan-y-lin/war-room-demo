@@ -465,8 +465,7 @@ class DemoControls {
                     this.#pointerLock.moveRight( - this.#velocity.x * delta );
                     this.#pointerLock.moveForward( - this.#velocity.z * delta );
                     this.#setCameraBB(this.#insideCameraBB, camera.inside);
-                    let collision = this.#checkWallCollisions(this.#insideCameraBB, this.#wallBBs)
-                    if (collision.hasCollision) {
+                    if (this.#checkWallCollisions(this.#insideCameraBB, this.#wallBBs)) {
                         this.#pointerLock.moveRight(this.#velocity.x * delta );
                         this.#pointerLock.moveForward(this.#velocity.z * delta );
                         this.#setCameraBB(this.#insideCameraBB, camera.inside);
