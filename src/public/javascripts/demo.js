@@ -133,8 +133,17 @@ class DemoScene {
      * Pointer to directional light that represents the sun.
      */
     #sun;
-    #ground1;
-    #ground2;
+
+    /**
+     * Array of pointers to objects in the scene that can be disposed of.
+     * All objects in the array are disposed when calling this.dispose()
+     */
+    resources
+
+
+    /**
+     * Map 
+     */
     #guiControllers;
 
     /**
@@ -309,8 +318,6 @@ class DemoScene {
         }
         folderControls.add(showGrass, 'toggle').name('Show Grass').onChange(value => {
             this.#grassMesh.visible = value;
-            this.#ground2.visible = value;
-            this.#ground1.visible = !value;
         }).disable();
         this.#guiControllers.objControls = folderControls;
         //changing material color?
@@ -714,8 +721,8 @@ class DemoScene {
         
         // GRASS
         // Parameters
-        const PLANE_SIZE = 15;
-        const BLADE_COUNT = 80000;
+        const PLANE_SIZE = 30;
+        const BLADE_COUNT = 150000;
         const BLADE_WIDTH = 0.05;
         const BLADE_HEIGHT = 0.15;
         const BLADE_HEIGHT_VARIATION = 0.3;
@@ -743,68 +750,15 @@ class DemoScene {
         this.resources.push(grassMaterial);
 
         //ground
-        const groundGeo = new THREE.PlaneGeometry(300, 300);
+        const groundGeo = new THREE.PlaneGeometry(1000, 1000);
         this.resources.push(groundGeo);
-        
-        const groundMat1 = new THREE.MeshLambertMaterial({color: 0x1c150d});
-
-        const groundTexture = new THREE.TextureLoader();
-        const groundAO = groundTexture.load("../img/patchy-meadow1_ao.png");
-        const groundColor = groundTexture.load("../img/patchy-meadow1_albedo.png");
-        groundColor.wrapS = groundColor.wrapT = THREE.RepeatWrapping;
-        groundColor.offset.set(0, 0);
-        groundColor.repeat.set(12, 12);
-        const groundHeight = groundTexture.load("../img/patchy-meadow1_height.png");
-        groundHeight.wrapS = groundHeight.wrapT = THREE.RepeatWrapping;
-        groundHeight.offset.set(0, 0);
-        groundHeight.repeat.set(12, 12);
-        const groundMetal = groundTexture.load("../img/patchy-meadow1_metallic.png");
-        groundMetal.wrapS = groundMetal.wrapT = THREE.RepeatWrapping;
-        groundMetal.offset.set(0, 0);
-        groundMetal.repeat.set(12, 12);
-        const groundNormal = groundTexture.load("../img/patchy-meadow1_normal-ogl.png");
-        groundNormal.wrapS = groundNormal.wrapT = THREE.RepeatWrapping;
-        groundNormal.offset.set(0, 0);
-        groundNormal.repeat.set(12, 12);
-        const groundRough = groundTexture.load("../img/patchy-meadow1_roughness.png");
-        groundRough.wrapS = groundRough.wrapT = THREE.RepeatWrapping;
-        groundRough.offset.set(0, 0);
-        groundRough.repeat.set(12, 12);
-        
-        const groundMat2 = new THREE.MeshStandardMaterial({
-            map: groundColor,
-            
-            normalMap: groundNormal,
-            normalScale: new THREE.Vector2(1,1),
-            
-            displacementMap: groundHeight,
-            displacementScale: 0.1,
-            displacementBias: -0.05,
-            
-            roughnessMap: groundRough,
-            roughness: 0.5,
-            
-            aoMap: groundAO,
-            aoMapIntensity: 1,
-            
-            metalnessMap: groundMetal,
-            metalness: 0,
-
-        })
-        //ground.geometry.attributes.uv2 = ground.geometry.attributes.uv;
-        this.resources.push(groundMat2);
-        
-        const ground1 = new THREE.Mesh(groundGeo, groundMat1);
-        ground1.rotation.x = -Math.PI/2;
-        ground1.position.y = -0.2;
-        ground1.receiveShadow = true;
-        scene.add(ground1);
-        this.#ground1 = ground1;
-        const ground2 = new THREE.Mesh(groundGeo, groundMat2);
-        ground2.rotation.x = -Math.PI/2;
-        ground2.position.y = -0.2;
-        ground2.receiveShadow = true;
-        this.#ground2 = ground2;
+        const groundMat = new THREE.MeshLambertMaterial({color: 0x1c150d});
+        this.resources.push(groundMat);
+        const ground = new THREE.Mesh(groundGeo, groundMat);
+        ground.rotation.x = -Math.PI/2;
+        ground.position.y = -0.2;
+        ground.receiveShadow = true;
+        scene.add(ground);
         
         this.#initSky(scene);
 
@@ -1117,10 +1071,6 @@ class DemoScene {
         this.#scene.add(this.#grassMesh);
         this.#scene.remove(this.#lights.spot);
         this.#scene.add(this.#sun);
-        this.#scene.add(this.#ground1);
-        this.#scene.add(this.#ground2);
-        this.#ground1.visible = false;
-        this.#ground2.visible = true;
         this.#camera.setInsideCamera(this.#canvas);
         this.current_camera = this.#camera.inside;
         this.#controls.switchControls("inside");
@@ -1154,8 +1104,6 @@ class DemoScene {
         })
         //enable show grass checkbox + set it to true at first
         this.#guiControllers.objControls.children[3].enable().setValue(true);
-        //disable dimension checkbox + set it to false
-        this.#guiControllers.objControls.children[2].disable().setValue(false);
         
         //enable sky conditions control panel
         this.#guiControllers.skyControls.children.forEach(child =>{
@@ -1168,11 +1116,7 @@ class DemoScene {
     setOutsideViewMode() {
         this.view = "outside";
         this.#scene.add(this.#grassMesh);
-        this.#scene.add(this.#ground1);
-        this.#scene.add(this.#ground2);
         this.#grassMesh.visible = false;
-        this.#ground1.visible = true;
-        this.#ground2.visible = false;
         this.#scene.add(this.#sun);
         this.#scene.remove(this.#lights.spot);
         this.#camera.setOutsideCamera(this.#canvas);
@@ -1184,11 +1128,8 @@ class DemoScene {
         this.#scene.remove(this.#objects.ceiling);
         this.#scene.remove(this.#lights.room);
         
-        
         //enable show grass + set it to false at first
         this.#guiControllers.objControls.children[3].enable().setValue(false);
-        //enable dimentsion + set it to true at first
-        this.#guiControllers.objControls.children[2].enable().setValue(true);
         // console.log(this.gui.children[1].children[3]);
         //disable inside control panel
         this.#guiControllers.insideControls.children.forEach(child =>{
@@ -1216,9 +1157,6 @@ class DemoScene {
         window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.ortho)} );
         this.#scene.remove(this.#objects.ceiling);
         this.#scene.remove(this.#lights.room);
-        this.#scene.add(this.#ground1);
-        this.#scene.remove(this.#ground2);
-        this.#ground1.visible = true;
         
         //disable inside control panel
         this.#guiControllers.insideControls.children.forEach(child =>{
@@ -1230,8 +1168,6 @@ class DemoScene {
         })
         //disable show grass
         this.#guiControllers.objControls.children[3].disable().setValue(false);
-        //enable dimentsion + set it to true at first
-        this.#guiControllers.objControls.children[2].enable().setValue(true);
     }
 
     /**
