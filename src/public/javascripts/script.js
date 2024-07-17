@@ -63,9 +63,6 @@ $(window).on('load', function() {
 
     designLinks.forEach(link => {
         link.addEventListener('click', function(event) {
-            if (APP != null) {
-                APP.clear();
-            }
             event.preventDefault(); // Prevent default link behavior
             
             const url = this.dataset.url; // Get the URL from data-url attribute
@@ -122,9 +119,6 @@ async function fetchAndAddObject(app, objURL) {
 }
 
 async function fetchAndInitRoom(roomURL) {
-    if (APP != null) {
-        APP.clear();
-    }
     try {
         const response = await fetch('/room' + roomURL); // Await the fetch call
         if (!response.ok) {
@@ -177,9 +171,6 @@ function addDesignToDOM(design){
     a.setAttribute('data-url', `${design.url}`);
     a.textContent = design.name;
     a.addEventListener('click', function(event) {
-        if (APP != null) {
-            APP.clear();
-        }
         event.preventDefault(); // Prevent default link behavior
         
         const url = this.dataset.url; // Get the URL from data-url attribute

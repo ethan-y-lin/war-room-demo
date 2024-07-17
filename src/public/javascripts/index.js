@@ -5,3 +5,4 @@ import './dynamicCamera.js';
 import './demo.js';
 import './script.js';
 import '../shaders/grass.js';
+import './grass.js'
