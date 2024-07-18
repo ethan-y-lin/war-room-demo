@@ -170,7 +170,7 @@ class DemoScene {
      */
     async #initialize(room, objects) {
         this.#rotated = false;
-        this.sunSim = false;
+        this.sunSim = {enabled: false}
         this.isFullScreen = false;
         this.resources = [];
         this.#canvas = document.getElementById("scene-container");
@@ -276,10 +276,10 @@ class DemoScene {
         // Add latitude and longitude inputs to the GUI
         folderSky.add(this.skyController, 'latitude', -90, 90).onChange(this.onSkyChange()).disable();
         folderSky.add(this.skyController, 'longitude', -180, 180).onChange(this.onSkyChange()).disable();
-        const sunSimToggle = {
-            toggle: false
-        }
-        folderSky.add(sunSimToggle, 'toggle').name("Sun Simulation").onChange( (value) => this.sunSim = value).disable();
+
+        folderSky.add(this.sunSim, 'enabled').name("Sun Simulation").onChange((value) => {
+            this.sunSim.enabled = value;
+        }).disable();
         this.#guiControllers.skyControls = folderSky;
         //toggling object controls (translate/rotate)
         const folderControls = gui.addFolder('Object Controls');
@@ -1032,7 +1032,7 @@ class DemoScene {
      * 
      */
     #updateScene() {
-        if (this.sunSim) {
+        if (this.sunSim.enabled) {
             this.skyController.dateTime.setMinutes(this.skyController.dateTime.getMinutes() + 1);
             this.updateDateTime(this.skyController.dateTime);
             this.onSkyChange();
@@ -1175,6 +1175,8 @@ class DemoScene {
         this.#guiControllers.objControls.children[3].enable().setValue(true);
         //disable dimension checkbox + set it to false
         this.#guiControllers.objControls.children[2].disable().setValue(false);
+        this.sunSim.enabled = false;
+        this.#guiControllers.skyControls.children[2].setValue(false).updateDisplay();
         //enable sky conditions control panel
         this.#guiControllers.skyControls.children.forEach(child =>{
             child.enable();
@@ -1211,6 +1213,8 @@ class DemoScene {
         this.#guiControllers.insideControls.children.forEach(child =>{
             child.disable();
         })
+        this.sunSim.enabled = false;
+        this.#guiControllers.skyControls.children[2].setValue(false).updateDisplay();
         //enable sky conditions control panel
         this.#guiControllers.skyControls.children.forEach(child =>{
             child.enable();
@@ -1241,6 +1245,8 @@ class DemoScene {
         this.#guiControllers.insideControls.children.forEach(child =>{
             child.disable();
         })
+        this.sunSim.enabled = false;
+        this.#guiControllers.skyControls.children[2].setValue(false).updateDisplay();
         //disable sky conditions control panel
         this.#guiControllers.skyControls.children.forEach(child =>{
             child.disable();
@@ -1333,6 +1339,8 @@ class DemoScene {
      * scene and resets the camera view.
      */
     reset () {
+        this.sunSim.enabled = false;
+        this.#guiControllers.skyControls.children[2].setValue(false).updateDisplay();
         this.#objects.uploaded.forEach( (obj) => {
             obj.clear();
             this.#model.remove(obj);
@@ -1395,6 +1403,8 @@ class DemoScene {
      * Disposes all resources possible to free GPU memory.
      */
     dispose () {
+        this.sunSim.enabled = false;
+        
         this.#controls.dispose();
         this.#scene.clear();
         const allObjects = this.#objects.furniture.concat(this.#objects.walls).concat(this.#objects.uploaded).concat(this.#objects.windows);

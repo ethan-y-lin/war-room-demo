@@ -1,5 +1,9 @@
 import * as THREE from 'three';
 
+/**
+ * This file contains functions required to generate the dynamic grass geometry.
+ */
+
 function convertRange (val, oldMin, oldMax, newMin, newMax) {
     return (((val - oldMin) * (newMax - newMin)) / (oldMax - oldMin)) + newMin;
 }

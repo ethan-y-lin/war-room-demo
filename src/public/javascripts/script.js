@@ -9,7 +9,6 @@ let APP = null;
 let start = true;
 
 function init(model, objects = []) {
-    console.log(model)
     if (APP) {
         APP.dispose();
     }
