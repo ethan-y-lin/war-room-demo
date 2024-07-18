@@ -53,7 +53,7 @@ class DynamicCamera {
             0.1,
             1000
         );
-        orthoCamera.position.set(0, 3, 0);
+        orthoCamera.position.set(0, 30, 0);
         orthoCamera.lookAt(0, 0, 0);
         orthoCamera.updateMatrixWorld();
         

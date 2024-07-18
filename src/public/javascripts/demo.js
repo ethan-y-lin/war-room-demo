@@ -8,7 +8,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
 import grassShader from '../shaders/grass.js'
 import { Sky } from 'three/addons/objects/Sky.js';
-import { OBB } from 'three/addons/math/OBB.js';
+import { generateFieldGeo } from './grass.js';
 import SunCalc from 'suncalc';
 
 const boxMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
@@ -30,22 +30,19 @@ class DemoScene {
 
     /**
      * The canvas HTML element with id: "#scene-container".
-     * @type {object} (HTML DOM element)
-     * @private 
+     * @type {object} (HTML DOM element) 
      */
     #canvas; 
 
     /**
      * The ThreeJS scene object that is rendered.
      * @type {Scene}
-     * @private
      */
     #scene;
 
     /**
      * The ThreeJS renderer object that renders the scene.
      * @type {Renderer}
-     * @private
      */
     #renderer;
 
@@ -53,75 +50,109 @@ class DemoScene {
      * The ThreeJs objects in the scene. All the objects are separated
      * into distinct groups upon calling organizeObjects. 
      * The groups are the following:
-     *  - walls (includes walls and floors)
+     *  - walls 
+     *  - floor
      *  - furniture 
      *  - doors
      *  - windows
      *  - uploaded
      * @type {Map<String, Array.<Object3D>>}
-     * @private
      */
-    #objects; // objects in the scene
+    #objects;
 
     /**
-     * An object containing information about the room
-     * including, _id, url, and name.
+     * An object containing information about the room including, _id, url, and name.
      * @type {Object}
-     * @private
      */
     #room; 
     
     /**
      * The loaded .glb/obj room/model.
-     * @type {}
-     * @private
+     * @type {Object}
      */
     #model;
 
     /**
      * The dimensions of the scene.
      * @type {Vector3}
-     * @private
      */
     #modelSize;
 
     /**
-     * The custom camera object that contains the camera information
-     * for each of the three views, "ortho", "outside", and "inside".
+     * The custom camera object that contains the camera information for each of the three views, "ortho", "outside", and "inside".
      * @type {DynamicCamera}
-     * @private
      */
     #camera;
 
     /**
-     * The custom controls object that directs the controls for 
-     * interacting with the scene depending on which view and mode.
+     * The custom controls object that directs the controls for interacting with the scene depending on which view and mode.
      * @type {DemoControls}
-     * @private
      */
     #controls;
 
     /**
-     * 
+     * The vertices and edges generated in measure mode. Has two properties: .vertices, .edges, which correspond to the two points
+     * and line created when measuring.
      */
     #measurement_objects;
 
+    /**
+     * Label Renderer object from 3js
+     *  @type {CSS2DRenderer}
+     */
     #labelRenderer;
-    #grid_scale;
+
+    /**
+     * Array of 3js light objects.
+     */
     #lights;
+
+    /**
+     * Units that the scene uses. Affects, measurement mode displays and dimension displays.
+     * @type {String}
+     */
     #units;
+
+    /**
+     * Boolean that toggles bounding box visibility.
+     * @type {boolean}
+     */
     #showBoundingBoxes;
 
+    // grass variables
     #grassUniforms;
     #grassMesh;
     #startTime;
 
-    #objectGroups;
+    /**
+     * Variable pointing to the Sky Object. See #initSky() for more details.
+     */
     #sky;
+
+    /**
+     * Pointer to directional light that represents the sun.
+     */
     #sun;
+
+    /**
+     * Array of pointers to objects in the scene that can be disposed of.
+     * All objects in the array are disposed when calling this.dispose()
+     */
+    resources
+
+
     #ground1;
     #ground2;
+    /**
+     * Map 
+     */
     #guiControllers;
+
+    /**
+     * Whether or not the scene is rotated
+     */
+    #rotated
+
     /**
      * Calls for the initialization the DemoScene object and then
      * calls the animation loop when initialization is completed.
@@ -133,14 +164,14 @@ class DemoScene {
         });
     }
 
-
-
     /**
      * Initializes the DemoScene object given the room URL.  
      * @param {URL} room 
      */
     async #initialize(room, objects) {
+        this.#rotated = false;
         this.sunSim = false;
+        this.isFullScreen = false;
         this.resources = [];
         this.#canvas = document.getElementById("scene-container");
         this.#objects = {walls: [], 
@@ -149,15 +180,11 @@ class DemoScene {
                          doors: [],
                          windows: [],
                          uploaded: []};
-        this.#objectGroups = [];
         this.#showBoundingBoxes = false;
         this.#lights = {};
         this.#scene = new THREE.Scene();
-        // this.room = new URL('../assets/warroom1.glb', import.meta.url);
         this.#room = room;
         this.#units = "feet";
-        // initialize geometries
-        this.#grid_scale = 0.1; // meter
 
         // // initialize renderer
         this.#renderer = new THREE.WebGLRenderer( { antialias: true } );
@@ -174,31 +201,27 @@ class DemoScene {
         this.#canvas.appendChild( this.#renderer.domElement );
 
         this.current_camera = null;
+
+        // initialize geometries
         await this.#initGeometries(this.#scene);
 
         // // initialize camera
         this.#camera = new DynamicCamera(this.#canvas, this.#modelSize); // initializes to orthoCamera
         this.current_camera = this.#camera.ortho;
         this.view = "ortho";
+
         // initialize controls 
         this.#controls = new DemoControls(this.#camera, this.#canvas, this.#scene, this.#objects, this.#modelSize, this.#showBoundingBoxes); // initializes to orthoControls
         this.#controls.units = this.#units;
 
-        window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.ortho) });
-        const hud = document.getElementById("hud");
-        const resizeObserer = new ResizeObserver(() => {
-            this.#onWindowResize(this.current_camera);
-        })
-        resizeObserer.observe(this.#canvas);
-
+        // initialize measurement objects
         this.#measurement_objects = {vertices: new THREE.Group(), edges: new THREE.Group()};
         this.#measurement_objects.vertices.name = "vertices";
         this.#measurement_objects.edges.name = "edges";
         this.#scene.add(this.#measurement_objects.vertices);
         this.#scene.add(this.#measurement_objects.edges);
 
-        this.isFullScreen = false;
-
+        // initialize label renderer
         this.#labelRenderer = new CSS2DRenderer();
         this.#labelRenderer.setSize(this.#canvas.offsetWidth, this.#canvas.offsetHeight );
         this.#labelRenderer.domElement.style.position = 'absolute';
@@ -206,18 +229,25 @@ class DemoScene {
         this.#labelRenderer.domElement.style.pointerEvents = 'none';
         this.#canvas.appendChild( this.#labelRenderer.domElement );
 
+        // adding stored objects
         for (let objData of objects) {
             this.addObject(objData.object, objData.position, objData.rotation);
         }
 
+        // initialize GUI
         this.gui = new GUI({autoPlace: false});
         this.#guiControllers = {};
         this.initGui(this.gui);
+
+        //initialize event listeners
         this.#initListeners();
-        console.log(this.#model)
-        console.log(this.#objects)
     }
 
+
+    /**
+     * Initializes the GUI for the object.
+     * @param {GUI} gui 
+     */
     initGui(gui){
         $("#gui-container").empty()
 
@@ -282,7 +312,7 @@ class DemoScene {
         const showDimensions = {
             toggle: true
         }
-        folderControls.add(showDimensions, 'toggle').name('Show Dimensions').onChange(value => {
+        folderControls.add(showDimensions, 'toggle').name('Show Labels').onChange(value => {
             this.toggleAllObjects(value, "label");
         });
         //toggling grass
@@ -370,7 +400,17 @@ class DemoScene {
         gui.open();
     }
     
+    /**
+     * Initializes event listeners for the scene.
+     */
     #initListeners() {
+
+        window.addEventListener( 'resize', () => {this.#onWindowResize(this.#camera.ortho) });
+        
+        const resizeObserer = new ResizeObserver(() => {
+            this.#onWindowResize(this.current_camera);
+        })
+        resizeObserer.observe(this.#canvas);
 
         $('#inside-view').on('click', () => {
             this.setInsideViewMode();
@@ -490,7 +530,16 @@ class DemoScene {
         return new THREE.Vector3(0, -shift + 0.01, 0);
     }
 
-    addObject (object, position = null, rotation = null) {
+    /**
+     * Adds a 3D object to the this.#scene from a specified URL, optionally setting its position and rotation.
+     *
+     * @param {Object} object - The object to be added, which must include an `obj_url` property.
+     * @param {Object} [position=null] - The optional position to place the object. If null, an open position will be determined.
+     *                                 - xyz coordinates can be accessed through position.x, position.y, etc... 
+     * @param {Object} [rotation=null] - The optional rotation to apply to the object (in radians). 
+     *                                 - xyz coordinates can be accessed through rotation.x, rotation.y, etc... 
+     */
+    addObject(object, position = null, rotation = null) {
 
         const addedObject = object;
         const loader = new GLTFLoader();
@@ -554,7 +603,13 @@ class DemoScene {
         });
     }
 
-
+    /**
+     * Initializes the sky and sun. The Sky Object comes from a 3js add on that is based on a 
+     * paper relating sky shading to various atmospheric constants and the position of the sun. 
+     * In this implementation, this position of the sun is based on its latitude, longitude, and date/time.
+     * The intensity of the sun is also based on date/time.
+     * @param {*} scene 
+     */
     #initSky(scene) {
 
         // Add Sky
@@ -594,6 +649,9 @@ class DemoScene {
         this.onSkyChange();
     }
 
+    /**
+     * Changes the displayed sky and sun when parameters are altered.
+     */
     onSkyChange = () => {
 
         const uniforms = this.#sky.material.uniforms;
@@ -634,11 +692,10 @@ class DemoScene {
 
     /**
      * Initializes the geometries and lights in the given scene.
-     * Adds various types of lights to the scene and sets up a GUI for toggling them.
+     * Adds various types of lights to the scene.
      * Loads a 3D model and adds it to the scene along with helper objects.
      *
      * @async
-     * @private
      * @param {THREE.Scene} scene - The scene to which the geometries and lights will be added.
      * @returns {Promise<void>} A promise that resolves when the geometries and model have been added to the scene.
      */
@@ -666,9 +723,6 @@ class DemoScene {
         spotLight.shadow.focus = 1;
         this.#lights.spot = spotLight;
         scene.add( spotLight );
-
-        // const lightHelper = new THREE.SpotLightHelper( spotLight );
-        // scene.add( lightHelper );
         
         // GRASS
         // Parameters
@@ -703,7 +757,6 @@ class DemoScene {
         //ground
         const groundGeo = new THREE.PlaneGeometry(100, 100);
         this.resources.push(groundGeo);
-        
         const groundMat1 = new THREE.MeshLambertMaterial({color: 0x1c150d});
 
         const groundTexture = new THREE.TextureLoader();
@@ -729,29 +782,33 @@ class DemoScene {
         groundRough.offset.set(0, 0);
         groundRough.repeat.set(10, 10);
         
+        groundRough.repeat.set(12, 12);
+
         const groundMat2 = new THREE.MeshStandardMaterial({
             map: groundColor,
-            
+
             normalMap: groundNormal,
             normalScale: new THREE.Vector2(1,1),
-            
+
             displacementMap: groundHeight,
             displacementScale: 0.1,
             displacementBias: -0.05,
-            
+
             roughnessMap: groundRough,
             roughness: 1,
             
+            roughness: 0.5,
+
             aoMap: groundAO,
             aoMapIntensity: 1,
-            
+
             metalnessMap: groundMetal,
             metalness: 1,
 
         })
         //ground.geometry.attributes.uv2 = ground.geometry.attributes.uv;
         this.resources.push(groundMat2);
-        
+
         const ground1 = new THREE.Mesh(groundGeo, groundMat1);
         ground1.rotation.x = -Math.PI/2;
         ground1.position.y = -0.2;
@@ -778,6 +835,7 @@ class DemoScene {
                 let bbox = new THREE.Box3().setFromObject(this.#model);
                 this.#modelSize = bbox.getSize(new THREE.Vector3());
                 if (this.#modelSize.x < this.#modelSize.z) {
+                    this.#rotated = true;
                     this.#model.rotateOnAxis(new THREE.Vector3(0,1,0), Math.PI / 2);
                     this.#model.updateMatrixWorld(true);
                     const temp = this.#modelSize.x;
@@ -788,7 +846,7 @@ class DemoScene {
                 scene.add(this.#model);
                 this.#model.position.set(0, this.#modelSize.y / 2, 0); // makes the ground at y = 0;
                 console.log(this.#model.children)
-                this.#model.updateMatrixWorld(true)
+                this.#model.updateWorldMatrix(true, true)
                 // initialize objects
                 const objects = [...this.#model.children]; // must be copy because removing directly will cause some to be skipped.
                 this.#organizeObjects(objects);
@@ -805,10 +863,6 @@ class DemoScene {
                 grassMesh.castShadow = true;
                 this.#grassMesh = grassMesh;
 
-                // initializes grid
-                const size = Math.max(this.#modelSize.x, this.#modelSize.z);
-                // const gridHelper = new THREE.GridHelper(size, size / this.#grid_scale, 0x000000, 0x097969);
-                // //scene.add(gridHelper);
                 resolve();
             }, undefined, (error) => {
                 reject(error);
@@ -821,7 +875,6 @@ class DemoScene {
      * The organization is based on the names of the objects. 
      * If an object has children, it recursively organizes the child objects.
      *
-     * @private
      * @param {Array<THREE.Object3D>} objects - The array of 3D objects to be organized.
      */
     #organizeObjects (objects) {
@@ -845,6 +898,10 @@ class DemoScene {
         });
     }
 
+    /**
+     * Adds correct textures and shadow maps to respective objects.
+     * Shades walls white and floor brownish.
+     */
     #addTextureToRoom() {
         this.#objects.walls.forEach( (wall) => {
             wall.children.forEach((child) => {
@@ -867,13 +924,19 @@ class DemoScene {
         })
     }
 
+    /**
+     * Add dimension CSS2D Labels to specified object. Currently intended just for walls as it
+     * picks the longest dimension to add a label. However, could be generalized in the future.
+     * @param {Object3D} obj 
+     */
     #addDimensionLabels (obj) {
+        obj.updateMatrixWorld(true)
         // get model dimensions
         let bbox = new THREE.Box3().setFromObject(obj);
         const size = bbox.getSize(new THREE.Vector3());
         // Create a box helper
+        
         const boxGeometry = new THREE.BoxGeometry(bbox.max.x - bbox.min.x, bbox.max.y - bbox.min.y, bbox.max.z - bbox.min.z);
-        this.resources.push(boxGeometry);
         if (size.x > 1) {
             // add label
             const text = document.createElement( 'div' );
@@ -896,7 +959,11 @@ class DemoScene {
     
             const label = new CSS2DObject( text );
             label.name = "xlabel";
-            label.position.set((bbox.min.x + bbox.max.x) / 2, bbox.min.y, bbox.min.z)
+            if (this.#rotated) {
+                label.position.set(-bbox.min.z, bbox.min.y, (bbox.min.x + bbox.max.x) / 2)
+            } else {
+                label.position.set((bbox.min.x + bbox.max.x) / 2, bbox.min.y, bbox.min.z)
+            }
             obj.add(label)
         } 
         if (size.z > 1) {
@@ -921,11 +988,20 @@ class DemoScene {
             
             const label = new CSS2DObject( text );
             label.name = "zlabel";
-            label.position.set(bbox.min.x, bbox.min.y, (bbox.min.z + bbox.max.z) / 2)
+            if (this.#rotated) {
+                label.position.set(-(bbox.min.z + bbox.max.z) / 2, bbox.min.y, bbox.min.x)
+            } else {
+                label.position.set(bbox.min.x, bbox.min.y, (bbox.min.z + bbox.max.z) / 2)
+            }
             obj.add(label)
         }
+        boxGeometry.dispose()
     }
 
+    /**
+     * Updates the UI time and date input elements based on the inputted date.
+     * @param {Date} date 
+     */
     updateDateTime(date) {
         let day = date.getDate(),
             month = date.getMonth() + 1,
@@ -944,6 +1020,7 @@ class DemoScene {
         document.getElementById('date-input').value = today;      
         document.getElementById("time-input").value = displayTime;
     }
+
     /**
      * Updates the scene based on the current control view and mode.
      * 
@@ -953,7 +1030,6 @@ class DemoScene {
      * 
      * If not in "measure" mode, it resets the measurement objects and the displayed distance.
      * 
-     * @private
      */
     #updateScene() {
         if (this.sunSim) {
@@ -1019,8 +1095,6 @@ class DemoScene {
      * 2. Updates the controls based on the current camera.
      * 3. Renders the scene using the current camera.
      * 4. Recursively calls itself to continue the animation loop.
-     *
-     * @private
      */
     #animate () {
         requestAnimationFrame(() => {
@@ -1028,13 +1102,12 @@ class DemoScene {
             this.#controls.updateControls(this.#camera);           
             this.#renderer.render(this.#scene, this.current_camera);
             this.#labelRenderer.render(this.#scene, this.current_camera);
-
             this.#animate();
         });
     }
     
     /**
-     * 
+     * Updates cameras correctly when window is resized.
      * @param {*} camera 
      */
     #onWindowResize(camera){            
@@ -1102,7 +1175,6 @@ class DemoScene {
         this.#guiControllers.objControls.children[3].enable().setValue(true);
         //disable dimension checkbox + set it to false
         this.#guiControllers.objControls.children[2].disable().setValue(false);
-        
         //enable sky conditions control panel
         this.#guiControllers.skyControls.children.forEach(child =>{
             child.enable();
@@ -1130,12 +1202,11 @@ class DemoScene {
         this.#scene.remove(this.#objects.ceiling);
         this.#scene.remove(this.#lights.room);
         
-        
         //enable show grass + set it to false at first
         this.#guiControllers.objControls.children[3].enable().setValue(false);
+        // console.log(this.gui.children[1].children[3]);
         //enable dimentsion + set it to true at first
         this.#guiControllers.objControls.children[2].enable().setValue(true);
-        // console.log(this.gui.children[1].children[3]);
         //disable inside control panel
         this.#guiControllers.insideControls.children.forEach(child =>{
             child.disable();
@@ -1145,6 +1216,7 @@ class DemoScene {
             child.enable();
         })
     }
+
     /**
      * Sets the scene view to ortho mode by updating camera, controls, and objects.
      */
@@ -1179,6 +1251,12 @@ class DemoScene {
         this.#guiControllers.objControls.children[2].enable().setValue(true);
     }
 
+    /**
+     * Toggles the visibility of any child that includes the target name.
+     * Intended for "bounding_box" and "label"
+     * @param {boolean} value 
+     * @param {String} target 
+     */
     toggleAllObjects (value, target) {
         const allObjects = this.#objects.furniture.concat(this.#objects.walls)
                                                   .concat(this.#objects.uploaded)
@@ -1196,6 +1274,10 @@ class DemoScene {
         }
     }
 
+    /**
+     * Updates all elements that rely on units based on the units input.
+     * @param {String} units "meter" or "feet"
+     */
     setUnits (units) {
         this.#units = units;
         const dimLabels = document.querySelectorAll(".dim-label");
@@ -1217,6 +1299,15 @@ class DemoScene {
         this.#controls.units = units;
     }
 
+/**
+ * Downloads the current 3D scene model as a GLB file.
+ * 
+ * This function uses the GLTFExporter to export the current scene's model to the GLB format.
+ * It sets the model's position to the origin, updates the world matrix, exports the model,
+ * creates a downloadable file, and triggers the download. After exporting, it resets the 
+ * model's position.
+ * @method downloadScene
+ */
     downloadScene() {
         const exporter = new GLTFExporter();
         this.#model.position.set(0,0,0);
@@ -1237,6 +1328,10 @@ class DemoScene {
         this.#model.updateMatrixWorld(true);
     }
 
+    /**
+     * This function removes all objects that were added into the 
+     * scene and resets the camera view.
+     */
     reset () {
         this.#objects.uploaded.forEach( (obj) => {
             obj.clear();
@@ -1250,6 +1345,20 @@ class DemoScene {
         }
     }
 
+/**
+ * Retrieves the data of the current 3D scene, including object positions and rotations, and the room ID.
+ * 
+ * This function iterates through the uploaded objects in the scene and collects their name, position, and
+ * rotation data into an array. It also checks for the room ID and includes it in the returned data.
+ * 
+ * @method getSceneData
+ * @returns {Object} An object containing:
+ *  - objectsData: {Array} An array of objects, each containing:
+ *      - name: {string} The name of the object.
+ *      - position: {Object} The position of the object with properties x, y, and z.
+ *      - rotation: {Object} The rotation of the object with properties x, y, and z.
+ *  - roomID: {string|null} The ID of the room if it exists, otherwise null.
+ */
     getSceneData() {
         const objectsData = []
         this.#objects.uploaded.forEach( (obj) => {
@@ -1282,13 +1391,9 @@ class DemoScene {
         return this.#renderer;
     }
 
-    clear() {
-        this.#objects.uploaded.forEach( (obj) => {
-            obj.clear();
-            this.#model.remove(obj);
-        });
-    }
-
+    /**
+     * Disposes all resources possible to free GPU memory.
+     */
     dispose () {
         console.log(this.resources)
         this.#scene.clear();
@@ -1320,118 +1425,7 @@ class DemoScene {
     }
 }
 
-function convertRange (val, oldMin, oldMax, newMin, newMax) {
-    return (((val - oldMin) * (newMax - newMin)) / (oldMax - oldMin)) + newMin;
-}
-  
-function generateFieldGeo(
-    PLANE_SIZE, 
-    BLADE_COUNT, 
-    BLADE_WIDTH, 
-    BLADE_HEIGHT, 
-    BLADE_HEIGHT_VARIATION,
-    NO_GRASS_RECT // New parameter: [xMin, xMax, zMin, zMax] for the rectangular area where no grass should be placed
-  ) {
-    console.log("GENERATRING FIELD")
-    const positions = [];
-    const uvs = [];
-    const indices = [];
-    const colors = [];
-  
-    for (let i = 0; i < BLADE_COUNT; i++) {
-      const VERTEX_COUNT = 5;
-      const surfaceMin = PLANE_SIZE / 2 * -1;
-      const surfaceMax = PLANE_SIZE / 2;
-  
-      let x = Math.random() * PLANE_SIZE - PLANE_SIZE / 2;
-      let z = Math.random() * PLANE_SIZE - PLANE_SIZE / 2;
-    
-      // Check if the blade position is inside the no-grass rectangle
-      if (x >= NO_GRASS_RECT[0] && x <= NO_GRASS_RECT[1] && z >= NO_GRASS_RECT[2] && z <= NO_GRASS_RECT[3]) {
-        if (x > 0) {
-            x = NO_GRASS_RECT[1] + Math.random() * (PLANE_SIZE / 2 - NO_GRASS_RECT[1])
-        } else {
-            x = NO_GRASS_RECT[0] - Math.random() * (PLANE_SIZE / 2 - NO_GRASS_RECT[1])
-        }
-        if (z > 0) {
-            z = NO_GRASS_RECT[3] + Math.random() * (PLANE_SIZE / 2 - NO_GRASS_RECT[4]);
-        } else {
-            z = NO_GRASS_RECT[2] - Math.random() * (PLANE_SIZE / 2 - NO_GRASS_RECT[4]);
-        }
-      }
-  
-      const pos = new THREE.Vector3(x, 0, z);
-      const uv = [convertRange(pos.x, surfaceMin, surfaceMax, 0, 1), convertRange(pos.z, surfaceMin, surfaceMax, 0, 1)];
-  
-      const blade = generateBlade(pos, i * VERTEX_COUNT, uv, BLADE_WIDTH, BLADE_HEIGHT, BLADE_HEIGHT_VARIATION);
-      blade.verts.forEach(vert => {
-        positions.push(...vert.pos);
-        uvs.push(...vert.uv);
-        colors.push(...vert.color);
-      });
-      blade.indices.forEach(indice => indices.push(indice));
-    }
-  
-    const geom = new THREE.BufferGeometry();
-    geom.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3));
-    geom.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), 2));
-    geom.setAttribute('color', new THREE.BufferAttribute(new Float32Array(colors), 3));
-    geom.setIndex(indices);
-    geom.computeVertexNormals();
-  
-    return geom;
-  }
-  
-  
-  function generateBlade (center, vArrOffset, uv, BLADE_WIDTH, BLADE_HEIGHT, BLADE_HEIGHT_VARIATION) {
-    const MID_WIDTH = BLADE_WIDTH * 0.5;
-    const TIP_OFFSET = 0.1;
-    const height = BLADE_HEIGHT + (Math.random() * BLADE_HEIGHT_VARIATION);
-  
-    const yaw = Math.random() * Math.PI * 2;
-    const yawUnitVec = new THREE.Vector3(Math.sin(yaw), 0, -Math.cos(yaw));
-    const tipBend = Math.random() * Math.PI * 2;
-    const tipBendUnitVec = new THREE.Vector3(Math.sin(tipBend), 0, -Math.cos(tipBend));
-  
-    // Find the Bottom Left, Bottom Right, Top Left, Top right, Top Center vertex positions
-    const bl = new THREE.Vector3().addVectors(center, new THREE.Vector3().copy(yawUnitVec).multiplyScalar((BLADE_WIDTH / 2) * 1));
-    const br = new THREE.Vector3().addVectors(center, new THREE.Vector3().copy(yawUnitVec).multiplyScalar((BLADE_WIDTH / 2) * -1));
-    const tl = new THREE.Vector3().addVectors(center, new THREE.Vector3().copy(yawUnitVec).multiplyScalar((MID_WIDTH / 2) * 1));
-    const tr = new THREE.Vector3().addVectors(center, new THREE.Vector3().copy(yawUnitVec).multiplyScalar((MID_WIDTH / 2) * -1));
-    const tc = new THREE.Vector3().addVectors(center, new THREE.Vector3().copy(tipBendUnitVec).multiplyScalar(TIP_OFFSET));
-  
-    tl.y += height / 2;
-    tr.y += height / 2;
-    tc.y += height;
-  
-    // Vertex Colors
-    const black = [0, 0, 0];
-    const gray = [0.5, 0.5, 0.5];
-    const white = [1.0, 1.0, 1.0];
-    
-  
-    const verts = [
-      { pos: bl.toArray(), uv: uv, color: black },
-      { pos: br.toArray(), uv: uv, color: black },
-      { pos: tr.toArray(), uv: uv, color: gray },
-      { pos: tl.toArray(), uv: uv, color: gray },
-      { pos: tc.toArray(), uv: uv, color: white }
-    ];
-  
-    const indices = [
-      vArrOffset,
-      vArrOffset + 1,
-      vArrOffset + 2,
-      vArrOffset + 2,
-      vArrOffset + 4,
-      vArrOffset + 3,
-      vArrOffset + 3,
-      vArrOffset,
-      vArrOffset + 2
-    ];
-  
-    return { verts, indices };
-  }
+
 
 export {DemoScene}
 
