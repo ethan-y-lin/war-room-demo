@@ -615,6 +615,7 @@ class DemoControls {
         if (this.#gumball == null) {
             return;
         }
+
         this.#getObjectLabel(this.#gumball.object).visible = true;
         this.#gumballState.mode = this.#gumball.getMode();
         this.#scene.remove(this.#gumball);
@@ -1349,7 +1350,6 @@ class DemoControls {
 
     dispose() {
         this.#reset();
-        this.#clearGumball();
     }
  }
 

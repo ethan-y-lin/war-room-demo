@@ -1384,7 +1384,7 @@ class DemoScene {
      * Disposes all resources possible to free GPU memory.
      */
     dispose () {
-        console.log(this.resources)
+        this.#controls.dispose();
         this.#scene.clear();
         const allObjects = this.#objects.furniture.concat(this.#objects.walls).concat(this.#objects.uploaded).concat(this.#objects.windows);
         allObjects.forEach( (obj) => {
@@ -1397,7 +1397,6 @@ class DemoScene {
             delete this.resources[i];
         }
         this.resources = [];
-        this.#controls.dispose();
         $('#inside-view').off('click');
         $('#outside-view').off('click');
         $('#ortho-view').off('click');
