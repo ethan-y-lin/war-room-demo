@@ -197,6 +197,7 @@ class DemoScene {
         this.#renderer.toneMappingExposure = 0.5;
         this.#renderer.domElement.id = "3js-scene"
         this.#renderer.domElement.style = "";
+        this.#renderer.physicallyCorrectLights = true;
         this.#canvas.appendChild( this.#renderer.domElement );
 
         this.current_camera = null;
@@ -617,18 +618,18 @@ class DemoScene {
         scene.add( this.#sky );
 
         // Add Sun 
-        this.#sun = new THREE.DirectionalLight(0xffffff, 10);
+        this.#sun = new THREE.DirectionalLight(0xfdfbd3);
         this.#sun.castShadow = true;
         this.#sun.shadow.mapSize.width = 2048;
         this.#sun.shadow.mapSize.height = 2048;
         this.#sun.shadow.bias = 0.0001;
         // Define the shadow camera's frustum size
-        this.#sun.shadow.camera.left = -20;
-        this.#sun.shadow.camera.right = 20;
-        this.#sun.shadow.camera.top = 20;
-        this.#sun.shadow.camera.bottom = -20;
-        this.#sun.shadow.camera.near = -10;
-        this.#sun.shadow.camera.far = 10;
+        this.#sun.shadow.camera.left = -45;
+        this.#sun.shadow.camera.right = 45;
+        this.#sun.shadow.camera.top = 45;
+        this.#sun.shadow.camera.bottom = -45;
+        this.#sun.shadow.camera.near = -30;
+        this.#sun.shadow.camera.far = 30;
         // scene.add(this.#sun);
         // const helper = new THREE.CameraHelper(this.#sun.shadow.camera);
         // scene.add(helper);
@@ -665,7 +666,7 @@ class DemoScene {
         if (phi > Math.PI / 2) {
             this.#sun.intensity = 0;
         } else {
-            this.#sun.intensity = this.#solar_intensity(this.#air_mass_kasten_young(sunPosition.altitude)) * 0.03;
+            this.#sun.intensity = this.#solar_intensity(this.#air_mass_kasten_young(sunPosition.altitude)) * 0.01;
         }
 
         const sun = new THREE.Vector3();
@@ -704,7 +705,7 @@ class DemoScene {
         this.#lights.hemi = hemiLight;
         scene.add(hemiLight);
 
-        const ambientLight = new THREE.AmbientLight(0x7c7c7c, 1);
+        const ambientLight = new THREE.AmbientLight(0x7c7c7c, 3);
         this.#lights.ambi = ambientLight;
         scene.add(ambientLight);
 
@@ -725,11 +726,11 @@ class DemoScene {
         
         // GRASS
         // Parameters
-        const PLANE_SIZE = 15;
-        const BLADE_COUNT = 80000;
-        const BLADE_WIDTH = 0.05;
-        const BLADE_HEIGHT = 0.15;
-        const BLADE_HEIGHT_VARIATION = 0.3;
+        const PLANE_SIZE = 30;
+        const BLADE_COUNT = 10000;
+        const BLADE_WIDTH = 0.1;
+        const BLADE_HEIGHT = 0.8;
+        const BLADE_HEIGHT_VARIATION = 0.6;
 
         // Grass Texture
         const grassTexture = new THREE.TextureLoader().load('../img/grass2.jpg');
@@ -754,31 +755,33 @@ class DemoScene {
         this.resources.push(grassMaterial);
 
         //ground
-        const groundGeo = new THREE.PlaneGeometry(300, 300);
+        const groundGeo = new THREE.PlaneGeometry(100, 100);
         this.resources.push(groundGeo);
         const groundMat1 = new THREE.MeshLambertMaterial({color: 0x1c150d});
 
         const groundTexture = new THREE.TextureLoader();
-        const groundAO = groundTexture.load("../img/patchy-meadow1_ao.png");
-        const groundColor = groundTexture.load("../img/patchy-meadow1_albedo.png");
+        const groundAO = groundTexture.load("../img/mixedmoss-ao2.png");
+        const groundColor = groundTexture.load("../img/mixedmoss-albedo2.png");
         groundColor.wrapS = groundColor.wrapT = THREE.RepeatWrapping;
         groundColor.offset.set(0, 0);
-        groundColor.repeat.set(12, 12);
-        const groundHeight = groundTexture.load("../img/patchy-meadow1_height.png");
+        groundColor.repeat.set(10, 10);
+        const groundHeight = groundTexture.load("../img/mixedmoss-height.png");
         groundHeight.wrapS = groundHeight.wrapT = THREE.RepeatWrapping;
         groundHeight.offset.set(0, 0);
-        groundHeight.repeat.set(12, 12);
-        const groundMetal = groundTexture.load("../img/patchy-meadow1_metallic.png");
+        groundHeight.repeat.set(10, 10);
+        const groundMetal = groundTexture.load("../img/mixedmoss-metalness.png");
         groundMetal.wrapS = groundMetal.wrapT = THREE.RepeatWrapping;
         groundMetal.offset.set(0, 0);
-        groundMetal.repeat.set(12, 12);
-        const groundNormal = groundTexture.load("../img/patchy-meadow1_normal-ogl.png");
+        groundMetal.repeat.set(10, 10);
+        const groundNormal = groundTexture.load("../img/mixedmoss-normal2.png");
         groundNormal.wrapS = groundNormal.wrapT = THREE.RepeatWrapping;
         groundNormal.offset.set(0, 0);
-        groundNormal.repeat.set(12, 12);
-        const groundRough = groundTexture.load("../img/patchy-meadow1_roughness.png");
+        groundNormal.repeat.set(10, 10);
+        const groundRough = groundTexture.load("../img/mixedmoss-roughness.png");
         groundRough.wrapS = groundRough.wrapT = THREE.RepeatWrapping;
         groundRough.offset.set(0, 0);
+        groundRough.repeat.set(10, 10);
+        
         groundRough.repeat.set(12, 12);
 
         const groundMat2 = new THREE.MeshStandardMaterial({
@@ -792,13 +795,15 @@ class DemoScene {
             displacementBias: -0.05,
 
             roughnessMap: groundRough,
+            roughness: 1,
+            
             roughness: 0.5,
 
             aoMap: groundAO,
             aoMapIntensity: 1,
 
             metalnessMap: groundMetal,
-            metalness: 0,
+            metalness: 1,
 
         })
         //ground.geometry.attributes.uv2 = ground.geometry.attributes.uv;
@@ -849,6 +854,7 @@ class DemoScene {
                 // color floor and walls
                 this.#addTextureToRoom();
 
+                // grass
                 const NO_GRASS_RECT = [-this.#modelSize.x / 2, this.#modelSize.x / 2, -this.#modelSize.z / 2, this.#modelSize.z / 2, ]
                 const grassGeo = generateFieldGeo(PLANE_SIZE, BLADE_COUNT, BLADE_WIDTH, BLADE_HEIGHT, BLADE_HEIGHT_VARIATION, NO_GRASS_RECT)
                 this.resources.push(grassGeo)
@@ -903,6 +909,7 @@ class DemoScene {
                     child.material.color.setHex(0xedeae5);
                     child.castShadow = true;
                     child.receiveShadow = true;
+                    child.material.dithering = true;
                 }
             });
         })
@@ -911,6 +918,7 @@ class DemoScene {
                 if (child.material) {
                     child.material.color.setHex(0x8b5a2b);
                     child.receiveShadow = true;
+                    child.material.dithering = true;
                 }
             });
         })
@@ -1149,11 +1157,14 @@ class DemoScene {
         this.#objects.ceiling = ceiling;
         this.#scene.add(ceiling);
 
-        const roomLight = new THREE.DirectionalLight(0xe0f1ff, 20);
-        roomLight.position.set(0, ceiling.position.y-0.1, 0);
-        roomLight.castShadow = true;
+        const roomLight = new THREE.PointLight(0xe0f1ff, 100, 0);
+        roomLight.position.set(1.5, ceiling.position.y, 0);
+        // roomLight.castShadow = true;
+        // roomLight.shadow.bias = 0.0001;
         this.#scene.add(roomLight);
         this.#lights.room = roomLight;
+        const roomLightHelper = new THREE.PointLightHelper(roomLight);
+        this.#scene.add(roomLightHelper);
         
         //enable inside control panel
         // console.log(this.gui.children[2]);
