@@ -13,7 +13,7 @@ const lineMaterial = new THREE.LineBasicMaterial({
 
 /**
  * This class contains the control logic for each of the views and modes. 
- * Using ThreeJS add-on controls, this class supports "drag controls" for 
+ * Using ThreeJS add-on controls, this class supports "transform controls" for 
  * orthographic view, "orbit controls" and "transform controls" for outside view,
  * and "pointer lock controls" for the inside view.
  */
@@ -42,8 +42,8 @@ class DemoControls {
     #scene;
     
     /**
-     * All of the objects in the scene that are not pass through.
-     * @type {Array.<Object3D>}
+     * A dictionary with objects in the scene separated into
+     * categories. Matches the #objects variable in demo.js
      * @private
      */
     #objects;
@@ -56,21 +56,6 @@ class DemoControls {
      * @private
      */
     #view;
-    /**
-     * All of the objects in the scene that are can pass through.
-     * Windows and doors.
-     * @type {Array.<Object3D>}
-     * @private
-     */
-    #pass_through_objects;
-
-    /**
-     * All of the objects in the scene that are can be dragged.
-     * Furniture and uploaded.
-     * @type {Array.<Object3D>}
-     * @private
-     */
-    #draggableObjects;
 
     /**
      * The size of the model.
@@ -78,13 +63,6 @@ class DemoControls {
      * @private
      */
     #modelSize;
-    
-    ///Hoping to change to constants
-    /**
-     * The control mode. Either: "regular" or "measure"
-     * @type {String}
-     */
-    #mode;
 
     /**
      * The measure points for "measure" mode in ortho view.
@@ -114,7 +92,6 @@ class DemoControls {
     /**
      * The last known state of the gumball.
      * Ex. {mode: 'rotate', }
-     * @type {?}
      * @private
      */
     #gumballState;
@@ -132,7 +109,6 @@ class DemoControls {
 
     /**
      * The time at the previous tick.
-     * @type {?}
      * @private
      */
     #prev_time;
@@ -174,6 +150,9 @@ class DemoControls {
      * @private
      */
     #wallBBs;
+    /**
+     * The Box3Helpers that are associated with bounding boxes in wallBBs
+     */
     #wallBBDisplays;
 
     /////// FOR DRAG CONTROLS (ORTHO VIEW) //////
@@ -184,23 +163,37 @@ class DemoControls {
      */
     #raycaster;
     
+    /**
+     * Group object that is the parent of the measurement dots and lines.
+     * @type {THREE.Group}
+     */
+    #measureGroup;
 
     /**
-     * The dragged object's position at the start of a drag.
-     * Necessary to revert the object's position if the drag 
-     * is unsuccessful.
-     * @type {THREE.Vector3}
-     * @private
+     * Inside pointer sphere for teleport and mobile controls.
+     * @type {THREE.Object3D}
      */
-    #dragOrigin;
-    
-    #measureGroup;
-    #floorObject;
     #insidePointer;
+
+    /**
+     * Map contain distance and velocity information for teleport and mobile controls.
+     * When a user clicks a valid location, this variable stores the distance and 
+     * current velocity so that moveForward can be called in an iterative fashion to get
+     * a relatively realistic animation.
+     */
     #moveToPoint;
+    /**
+     * Boolean storing whether or not the user is moving.
+     * @type {Boolean}
+     */
     #moving;
 
+    /**
+     * Mobile Controls Object
+     * @type {MobileControls}
+     */
     #mobile;
+
     ////// ////// ////// //////
 
 
@@ -260,12 +253,10 @@ class DemoControls {
         }
 
         this.#raycaster = new THREE.Raycaster();
-        this.#dragOrigin = new THREE.Vector3();
         this.#measureGroup = new THREE.Group();
         this.#scene.add(this.#measureGroup);
         this.switchControls("ortho");
         this.units;
-        this.#floorObject = null;
 
         const sphereGeometry = new THREE.SphereGeometry( 0.1, 32, 16 ); 
         const sphere = new THREE.Mesh( sphereGeometry, blackMaterial ); 
@@ -326,7 +317,6 @@ class DemoControls {
 
     setToMobile() {
         this.#reset();
-        console.log("mobile");
         this.#mobile = new MobileControls(this.#camera.inside, this.#canvas);
         this.#scene.add(this.#insidePointer);   
         this.#mobile.addEventListener('dblclick', this.#insideOnDblClick);
@@ -336,10 +326,7 @@ class DemoControls {
         this.#reset();
         if (this.insideMode == "teleport") {
             this.#scene.add(this.#insidePointer);   
-        } else {
-            const collisionObjects = this.#objects.walls;
         }
-        console.log("Set to Non Mobile")
         this.#pointerLock = new PointerLockControls(this.#camera.inside, this.#canvas);
         this.#pointerLock.enabled = true;
         const instructions = document.getElementById( 'instructions' );
@@ -439,11 +426,8 @@ class DemoControls {
 
                         if (firstObject.name.includes("floor")) {
                             this.#colorObject(this.#insidePointer, 0x00FF00);
-                            this.#floorObject = firstObject;
                         } else {
-                            if (this.#floorObject != null) {
-                                this.#colorObject(this.#insidePointer, 0xFF0000);
-                            }
+                            this.#colorObject(this.#insidePointer, 0xFF0000);
                         }
                     }
                 }
@@ -501,11 +485,8 @@ class DemoControls {
 
                             if (firstObject.name.includes("floor")) {
                                 this.#colorObject(this.#insidePointer, 0x00FF00);
-                                this.#floorObject = firstObject;
                             } else {
-                                if (this.#floorObject != null) {
-                                    this.#colorObject(this.#insidePointer, 0xFF0000);
-                                }
+                                this.#colorObject(this.#insidePointer, 0xFF0000);
                             }
                         }
                     }
@@ -615,6 +596,7 @@ class DemoControls {
         if (this.#gumball == null) {
             return;
         }
+
         this.#getObjectLabel(this.#gumball.object).visible = true;
         this.#gumballState.mode = this.#gumball.getMode();
         this.#scene.remove(this.#gumball);
@@ -969,18 +951,20 @@ class DemoControls {
                };
     }
 
+    /**
+     * Checks if a wall is "normal" or is just a single rectangle.
+     * The implemented is-wall condition is a little strange, but it 
+     * works with Polycam.
+     * @param {Object3D} wall
+     * @returns {boolean}
+     */
     #normalWall(wall) {
         let count = 0;
         wall.children.forEach( (child) => {
             if (child.name.includes("wall")) {
-                if (child.geometry.attributes.position.count != 4) {
-                    if (child.geometry.attributes.position.count == 8) {
-                        console.log(child.name)
-                        console.log(child.geometry.attributes.position.count)
-                    } else {
-                        return false;
-                    }
-
+                if (child.geometry.attributes.position.count != 4 && 
+                    child.geometry.attributes.position.count != 8) {
+                    return false;
                 }
                 count += 1
             }
@@ -988,17 +972,11 @@ class DemoControls {
         return count == 4;
     }
     /**
-     * Computes and returns an array of bounding boxes for the given objects.
-     * 
-     * Creates a bounding box for each object in the provided array `objects`.
-     * Each bounding box encapsulates the spatial dimensions of its respective object.
-     * The resulting array contains objects with properties `box`, `name`, and `index`,
-     * where `box` is the bounding box (`THREE.Box3`), `name` is the object's name,
-     * and `index` is the index of the object in the original array.
-     * 
+     * Generates two arrays from this.#objects.walls. The first stores the bounding box information of all the 
+     * walls (which takes into account doors and windows). The second stores the Box3Helper
+     * objects associated with the bounding boxes so that they can be displayed. 
      * @private
-     * @param {THREE.Object3D[]} objects - The array of objects for which bounding boxes are computed.
-     * @returns {Array<{ box: THREE.Box3, name: string, index: number }>} Array of objects containing bounding boxes, object names, and indices.
+     * @returns {{ boxes: Array<THREE.Box3>, displays: Array<THREE.Box3Helper}} 
      */
     #getWallBB () {
         let boxes = [];
@@ -1010,7 +988,6 @@ class DemoControls {
                 this.#scene.add(boundingBoxHelper);
                 boxes.push(boundingBox)  
                 displays.push(boundingBoxHelper)
-
             } else {
                 const split = this.#splitWall(this.#objects.walls[i]);
                 boxes.push(split.top);
@@ -1020,43 +997,7 @@ class DemoControls {
                 displays = displays.concat(split.displays);
             }
         }
-
         return {boxes: boxes, displays: displays};
-        // let boxes = [];
-        // for (let i = 0; i < objects.length; i++) {
-        //     // if (objects.name.includes("wall"))
-        //     if (objects[i].name.includes("wall")) {
-                
-        //         if (objects[i].geometry.attributes.position.count > 4) {
-
-        //             const splitBoundingBoxes = this.#splitWallVertices(objects[i], objects[i].name.includes("11_4"));
-        //             for (let i = 0; i < splitBoundingBoxes.length ; i++) {
-        //                 if (objects[i].name.includes("11_4")) {
-        //                     const boxHelper1 = new THREE.Box3Helper(splitBoundingBoxes[i]);
-        //                     this.#scene.add(boxHelper1);
-        //                 }
-
-        //                 boxes.push({box: splitBoundingBoxes[i], name: objects[i].name, index: i})
-        //             }
-        //         }else{
-        //             const boundingBox = objects[i].geometry.boundingBox.clone();
-        //             boundingBox.min.y += (this.#modelSize.y / 2);
-        //             boundingBox.max.y += (this.#modelSize.y / 2);
-        //             if (objects[i].name.includes("11_4")) {
-        //                 const boxHelper1 = new THREE.Box3Helper(boundingBox);
-        //                 this.#scene.add(boxHelper1);
-        //             }
-        //             boxes.push({box: boundingBox, name: objects[i].name, index: i});
-        //         }
-
-                
-        //     } else {
-        //         const boundingBox = new THREE.Box3().setFromObject( objects[i] );
-        //         boxes.push({box: boundingBox, name: objects[i].name, index: i})
-        //     }
-    
-        // }
-        // return boxes;
     }
 
     toggleWallBB(){
@@ -1064,19 +1005,7 @@ class DemoControls {
             wallBB.visible = !wallBB.visible
         });
     }
-    /**
-     * Checks for collisions between a given bounding box and an array of bounding boxes.
-     * 
-     * Iterates through the array of `boundingBoxes` and checks if `box` intersects with any of them.
-     * If a collision is detected, returns an object indicating collision status and the collided bounding box.
-     * If no collisions are detected, returns an object indicating no collision.
-     * 
-     * @private
-     * @param {THREE.Box3} box - The bounding box to check for collisions.
-     * @param {Array<{ box: THREE.Box3, name: string, index: number }>} boundingBoxes - Array of bounding boxes to check against.
-     * @returns {{ hasCollision: boolean, collidedBox: { box: THREE.Box3, name: string, index: number } }} 
-     * Object indicating collision status and details of the collided bounding box.
-     */
+
     #checkWallCollisions(box, boundingBoxes){
         for (let i = 0; i < boundingBoxes.length; i++) {
             if (box.intersectsBox(boundingBoxes[i])) {
@@ -1106,9 +1035,6 @@ class DemoControls {
             const obb2 = new OBB();
             obb2.fromBox3(new THREE.Box3().setFromObject(objects[i], true));
             if (obb.intersectsOBB(obb2)) {
-                console.log(object.position)
-                console.log('Object OBB:', obb);
-                console.log('Comparing with:', obb2);
                 return true;
             }
         }
@@ -1210,8 +1136,6 @@ class DemoControls {
      * @param {MouseEvent} event - The mouse click event object.
      */
     #orthoOnClick = (event) => {
-        // event.preventDefault();
-        console.log("ortho click")
         const rect = this.#canvas.getBoundingClientRect();
         const mouse = new THREE.Vector2();
         mouse.x = ( event.clientX - rect.left ) / rect.width * 2 - 1;
@@ -1349,7 +1273,6 @@ class DemoControls {
 
     dispose() {
         this.#reset();
-        this.#clearGumball();
     }
  }
 
