@@ -705,7 +705,7 @@ class DemoScene {
         this.#lights.hemi = hemiLight;
         scene.add(hemiLight);
 
-        const ambientLight = new THREE.AmbientLight(0x7c7c7c, 3);
+        const ambientLight = new THREE.AmbientLight(0x7c7c7c, 5);
         this.#lights.ambi = ambientLight;
         scene.add(ambientLight);
 
@@ -860,7 +860,7 @@ class DemoScene {
                 this.resources.push(grassGeo)
                 const grassMesh = new THREE.Mesh(grassGeo, grassMaterial);
                 grassMesh.receiveShadow = true;
-                grassMesh.castShadow = true;
+                // grassMesh.castShadow = true;
                 this.#grassMesh = grassMesh;
 
                 resolve();
@@ -909,7 +909,7 @@ class DemoScene {
                     child.material.color.setHex(0xedeae5);
                     child.castShadow = true;
                     child.receiveShadow = true;
-                    child.material.dithering = true;
+                    // child.material.dithering = true;
                 }
             });
         })
@@ -918,7 +918,7 @@ class DemoScene {
                 if (child.material) {
                     child.material.color.setHex(0x8b5a2b);
                     child.receiveShadow = true;
-                    child.material.dithering = true;
+                    // child.material.dithering = true;
                 }
             });
         })
@@ -1157,10 +1157,11 @@ class DemoScene {
         this.#objects.ceiling = ceiling;
         this.#scene.add(ceiling);
 
-        const roomLight = new THREE.PointLight(0xe0f1ff, 100, 0);
+        const roomLight = new THREE.PointLight(0xe0f1ff, 300, 0);
         roomLight.position.set(1.5, ceiling.position.y, 0);
-        // roomLight.castShadow = true;
-        // roomLight.shadow.bias = 0.0001;
+        roomLight.castShadow = true;
+        roomLight.shadow.bias = 0.0001;
+        // roomLight.shadowCameraVisible = true;
         this.#scene.add(roomLight);
         this.#lights.room = roomLight;
         const roomLightHelper = new THREE.PointLightHelper(roomLight);
